@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
 
-from Src.Nodes import Node, node_link
+from Src.Nodes import Node, node_link, logger
 
 
 class NodeEditor:
@@ -62,7 +62,7 @@ class NodeEditor:
             sender: str | int - зачастую является окном редакторивания графа (dpg.node_editor)
             app_data: str | int - элемент, который перетащили.
         '''
-        print(sender, app_data, dpg.get_item_user_data(app_data))
+        logger.debug(f"На вход пришло {sender}, {app_data}, {dpg.get_item_user_data(app_data)}")
 
         # Реализовать создание нода, через обычные координаты мыши не получится
         # потому что координаты в node_editor отличаются от координат мыши
@@ -77,7 +77,7 @@ class NodeEditor:
         pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
         pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
 
-        print(pos)
+        logger.info(f"Рассчитанная позиция - {pos}")
 
         # Заменить на метод из node_builder
         node_tag = "node_"+str(dpg.generate_uuid())
@@ -99,18 +99,18 @@ class NodeEditor:
             sender: int | str - зачастую является окном редакторивания графа (dpg.node_editor)
             app_data: tuple(str | int, str | int) - исходящий и приходящий нод.
         '''
-        print(app_data)
+        logger.debug(f"На вход пришло {app_data}")
 
         node_out: Node = dpg.get_item_user_data(dpg.get_item_parent(app_data[0]))
         node_in: Node = dpg.get_item_user_data(dpg.get_item_parent(app_data[1]))
 
         dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=node_link(node_out, node_in))
 
-        print(node_out,node_in)
+        logger.debug(f"Связи до: {node_out} {node_in}")
 
         node_out.add_link(node_in)
 
-        print(node_out, node_in)
+        logger.debug(f"Связи после: {node_out} {node_in}")
 
         # Для дебага
         # Node.print_tree(dpg.get_item_user_data("node_input"))
@@ -126,11 +126,11 @@ class NodeEditor:
         '''
         link: node_link = dpg.get_item_user_data(app_data)
 
-        print(link.outcoming, link.incoming)
+        logger.debug(f"Связи до: {link.outcoming} {link.incoming}")
 
         link.outcoming.remove_link(link.incoming)
 
-        print(link.outcoming, link.incoming)
+        logger.debug(f"Связи после: {link.outcoming} {link.incoming}")
 
         dpg.delete_item(app_data)
 

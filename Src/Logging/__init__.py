@@ -1,0 +1,1 @@
+from Src.Logging.logger import Logger, logger
