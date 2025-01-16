@@ -17,6 +17,7 @@ log_factory = Logger_factory(config)
 node_editor = NodeEditor(minimap=True, minimap_location=dpg.mvNodeMiniMap_Location_TopRight)
 main_logger = log_factory("main")
 
+
 with dpg.font_registry():
     with dpg.font("notomono-regular.ttf", 13, default_font=True, tag="Default font") as f:
         dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)

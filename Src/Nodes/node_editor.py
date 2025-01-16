@@ -2,7 +2,7 @@ import json
 
 import dearpygui.dearpygui as dpg
 
-from Src.Nodes import Node, node_link
+from Src.Nodes import Node, node_link, NodeBuilder, layers_list
 from Src.Logging import Logger_factory, Logger
 
 
@@ -14,6 +14,7 @@ class NodeEditor:
         logger: Logger - логировщик
     '''
     logger: Logger
+    builder: NodeBuilder
     __stage_tag: str | int
     __group_tag: str | int
 
@@ -30,28 +31,15 @@ class NodeEditor:
             config = json.load(f)
 
         self.logger = Logger_factory.from_instance()("nodes", config)
+        self.builder = NodeBuilder(layers_list)
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
 
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
-            with dpg.group(horizontal=True, tag=self.__group_tag):
+            with dpg.group(horizontal=True, tag=self.__group_tag) as group:
 
-                # Rail справа, в котором находяться блоки
-                with dpg.group(tag="nodes_group"):
-
-                    # Выпадающий список, в дальнейшем тут будет заменено на метод из node_builder
-                    with dpg.tree_node(label="Convoluion Layers", tag="tree_node_conv"):
-                        dpg.add_button(label="Layer1", tag="Layer1", user_data={"sss":"ss"})
-                        dpg.add_button(label="Layer2", tag="Layer2")
-
-                        # Добавляем возможность Drag (перетягивать элемент)
-                        with dpg.drag_payload(parent="Layer1", drag_data="Layer1"):
-                            dpg.add_text("popup drag")
-
-                        with dpg.drag_payload(parent="Layer2", drag_data="Layer2"):
-                            dpg.add_text("popup drag")
-
+                self.builder.build_list(parent=group)
 
                 # Именно в группу задаём drop_callback, который создаёт ноду по перетягиванию её с окна справа
                 with dpg.group(tag="editor_group", drop_callback=self.drop_callback):
@@ -60,12 +48,7 @@ class NodeEditor:
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
                                         delink_callback=self.delink_callback, *args, **kwargs):
 
-                        # Заменить на метод из node_builder
-                        node_tag = "node_input"
-                        with dpg.node(label="Input Layer", pos=(0, 0), draggable=False,
-                                    tag=node_tag, user_data=Node(node_tag)):
-                            with dpg.node_attribute(label="INPUT_DUMMY", attribute_type=dpg.mvNode_Attr_Output):
-                                dpg.add_text("INPUT")
+                        self.builder.build_input("node_editor", shape=(100, 100, 100))
 
 
     def drop_callback(self, sender: str | int, app_data: str | int):
@@ -93,16 +76,9 @@ class NodeEditor:
 
         self.logger.info(f"Рассчитанная позиция - {pos}")
 
-        # Заменить на метод из node_builder
-        node_tag = "node_"+str(dpg.generate_uuid())
-        
-        with dpg.node(label=app_data, pos=pos, parent="node_editor", 
-                      tag=node_tag, user_data=Node(node_tag)):
-            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Input):
-                dpg.add_text("Input")
-            with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
-                dpg.add_text("Output")
-                dpg.add_button(label="Delete", callback=lambda: self.delete_node(node_tag))
+        node: Node = dpg.get_item_user_data(app_data)
+        node_id = self.builder.build_node(node, parent="node_editor")
+        dpg.set_item_pos(node_id, pos)
 
 
     def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
@@ -117,6 +93,8 @@ class NodeEditor:
 
         node_out: Node = dpg.get_item_user_data(dpg.get_item_parent(app_data[0]))
         node_in: Node = dpg.get_item_user_data(dpg.get_item_parent(app_data[1]))
+
+        self.logger.debug(f"Node_out - {dpg.get_item_label(dpg.get_item_parent(app_data[0]))}")
 
         dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=node_link(node_out, node_in))
 

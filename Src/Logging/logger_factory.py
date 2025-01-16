@@ -21,6 +21,7 @@ class Logger_factory(object):
     __stage_tag: str | int
     __layout_tag: str | int
     _instance = None
+    _loggers = {}
 
 
     @classmethod
@@ -66,7 +67,11 @@ class Logger_factory(object):
             Logger - экземпляр логировщика
         '''
         config = self.config | config
-        logger = Logger(logger_name, layout_tag=self.__console_tag)
+        if logger_name in Logger_factory._loggers: logger = Logger_factory._loggers[logger_name]
+        else:
+            logger = Logger(logger_name, layout_tag=self.__console_tag)
+            Logger_factory._loggers[logger_name] = logger
+            
         logger.propagate = False
         handler = None
         if 'filename' in config and config['filename'] == 'stream':
@@ -82,7 +87,7 @@ class Logger_factory(object):
         if 'level' in config: 
             logger.setLevel(config['level'])
             
-        return logger
+        return logger        
     
 
     def show(self, parent: str | int):
@@ -100,6 +105,7 @@ class Logger_factory(object):
         with dpg.item_handler_registry() as handler:
             dpg.add_item_resize_handler(callback=self.resize)
         dpg.bind_item_handler_registry(self.__console_tag, handler)
+        # конец костыля
 
 
     def hide(self):
