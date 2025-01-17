@@ -1,3 +1,4 @@
+from Src.Nodes.layer import Layer
 from Src.Nodes.node import Node, node_link
 from Src.Nodes.layers_list import layers_list
 from Src.Nodes.inputs_factory import InputsFactory

@@ -2,7 +2,7 @@ import json
 
 import dearpygui.dearpygui as dpg
 
-from Src.Nodes import Node, node_link, NodeBuilder, layers_list
+from Src.Nodes import Node, node_link, NodeBuilder, layers_list, Layer
 from Src.Logging import Logger_factory, Logger
 
 
@@ -76,7 +76,7 @@ class NodeEditor:
 
         self.logger.info(f"Рассчитанная позиция - {pos}")
 
-        node: Node = dpg.get_item_user_data(app_data)
+        node: Layer = dpg.get_item_user_data(app_data)
         node_id = self.builder.build_node(node, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
 
