@@ -64,6 +64,10 @@ class Node:
         return f"{self.node_tag} {dict(incoming=self.incoming, outcoming=self.outcoming)}"
     
 
+    def __hash__(self):
+        return self.node_tag
+    
+
     def add_link(self, in_node: "Node") -> bool:
         '''
         Добавить связь с другой нодой. Текущая нода будет исходящая.

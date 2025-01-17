@@ -48,7 +48,9 @@ class NodeEditor:
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
                                         delink_callback=self.delink_callback, *args, **kwargs):
 
-                        self.builder.build_input("node_editor", shape=(100, 100, 100))
+                        input_id = self.builder.build_input("node_editor", shape=(28, 28, 1))
+
+                    dpg.add_button(label="Собрать модель", callback=lambda: self.builder.build_model(dpg.get_item_user_data(input_id)))
 
 
     def drop_callback(self, sender: str | int, app_data: str | int):

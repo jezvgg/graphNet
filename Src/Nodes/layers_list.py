@@ -14,15 +14,15 @@ layers_list = {
         Layer(layers.Conv2D, annotations={
             "filters": int,
             "kernel_size": int,
-            "striders": int,
-            "padding": int,
+            "strides": int,
+            "padding": str,
             "activation": str,
             "use_bias": bool 
         }),
         Layer(layers.MaxPooling2D, annotations={
             "pool_size": (int, int),
             "strides": int,
-            "padding": int
+            "padding": str
         })
     ],
     "Etc": [

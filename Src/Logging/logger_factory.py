@@ -66,11 +66,14 @@ class Logger_factory(object):
         Returns:
             Logger - экземпляр логировщика
         '''
-        config = self.config | config
-        if logger_name in Logger_factory._loggers: logger = Logger_factory._loggers[logger_name]
+        if logger_name in Logger_factory._loggers: 
+            logger = Logger_factory._loggers[logger_name]
+            if not config: return logger
         else:
             logger = Logger(logger_name, layout_tag=self.__console_tag)
             Logger_factory._loggers[logger_name] = logger
+
+        config = self.config | config
             
         logger.propagate = False
         handler = None
