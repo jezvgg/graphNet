@@ -11,6 +11,8 @@ from Src.Logging import Logger
 
 class Logger_factory(object):
     '''
+    Хоть тут и используется show и hide, но это не страница. А окно. Т.к. оно в единственном экземпляре, то базового класса пока нет.
+
     Класс для логирования, синглтон.
 
     Attributes:

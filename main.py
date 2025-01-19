@@ -3,7 +3,7 @@ import json
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger_factory
-from Src.Nodes import NodeEditor
+from Src.page_controller import PageController
 
 
 dpg.create_context()
@@ -14,7 +14,7 @@ with open("Src/Logging/logger_config.json") as f:
     config = json.load(f)
 
 log_factory = Logger_factory(config)
-node_editor = NodeEditor(minimap=True, minimap_location=dpg.mvNodeMiniMap_Location_TopRight)
+controller = PageController()
 main_logger = log_factory("main")
 
 
@@ -24,7 +24,7 @@ with dpg.font_registry():
 dpg.bind_font("Default font")
 
 with dpg.window(tag="Prime"):
-    node_editor.show("Prime")
+    controller.start_polling("Prime")
     log_factory.show("Prime")
     main_logger.warning("НАЧАЛИ")
 

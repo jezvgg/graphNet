@@ -2,12 +2,15 @@ import json
 
 import dearpygui.dearpygui as dpg
 
-from Src.Nodes import Node, node_link, NodeBuilder, layers_list, Layer
+from Src.page import Page
 from Src.Logging import Logger_factory, Logger
+from Src.Nodes import Node, node_link, NodeBuilder, layers_list, Layer
 
 
-class NodeEditor:
+class NodeEditor(Page):
     '''
+    Является страницей, конструктором графа неронной сети.
+
     Класс реализующий логику управления нодами.
 
     Attributes:
@@ -15,8 +18,6 @@ class NodeEditor:
     '''
     logger: Logger
     builder: NodeBuilder
-    __stage_tag: str | int
-    __group_tag: str | int
 
 
     def __init__(self, *args, **kwargs):
@@ -26,18 +27,17 @@ class NodeEditor:
         Args:
             *args, **kwargs - передаются в dpg.node_editor
         '''
+        super().__init__()
 
         with open("Src/Logging/logger_config_debug.json") as f:
             config = json.load(f)
 
         self.logger = Logger_factory.from_instance()("nodes", config)
         self.builder = NodeBuilder(layers_list)
-        self.__stage_tag = dpg.generate_uuid()
-        self.__group_tag = dpg.generate_uuid()
 
-        with dpg.stage(tag=self.__stage_tag):
+        with dpg.stage(tag=self.stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
-            with dpg.group(horizontal=True, tag=self.__group_tag) as group:
+            with dpg.group(horizontal=True, tag=self.page_tag) as group:
 
                 self.builder.build_list(parent=group)
 
@@ -141,20 +141,3 @@ class NodeEditor:
         node_data.delete()
 
         dpg.delete_item(node_id)
-
-
-    def show(self, parent: str | int):
-        '''
-        Отобразить элемент.
-
-        Args:
-            parent: str | int - родительское окно в котором отобразить.
-        '''
-        dpg.move_item(self.__group_tag, parent=parent)
-
-
-    def hide(self):
-        '''
-        Спрятать элемент
-        '''
-        dpg.move_item(self.__group_tag, parent=self.__stage_tag)
