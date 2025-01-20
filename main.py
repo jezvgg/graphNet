@@ -3,7 +3,7 @@ import json
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger_factory
-from Src.Nodes import NodeEditor
+from Src.node_editor import NodeEditor
 
 
 dpg.create_context()
