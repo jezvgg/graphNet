@@ -2,7 +2,8 @@ import json
 
 import dearpygui.dearpygui as dpg
 
-from Src.Nodes import Node, node_link, NodeBuilder, layers_list, Layer
+from Src.Nodes import Node, node_link, node_list, listNode
+from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
 
 
@@ -31,7 +32,7 @@ class NodeEditor:
             config = json.load(f)
 
         self.logger = Logger_factory.from_instance()("nodes", config)
-        self.builder = NodeBuilder(layers_list)
+        self.builder = NodeBuilder(node_list)
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
 
@@ -50,7 +51,7 @@ class NodeEditor:
 
                         input_id = self.builder.build_input("node_editor", shape=(28, 28, 1))
 
-                    dpg.add_button(label="Собрать модель", callback=lambda: self.builder.build_model(dpg.get_item_user_data(input_id)))
+                    dpg.add_button(label="Собрать модель", callback=lambda: self.builder.compile_graph(dpg.get_item_user_data(input_id)))
 
 
     def drop_callback(self, sender: str | int, app_data: str | int):
@@ -78,8 +79,8 @@ class NodeEditor:
 
         self.logger.info(f"Рассчитанная позиция - {pos}")
 
-        node: Layer = dpg.get_item_user_data(app_data)
-        node_id = self.builder.build_node(node, parent="node_editor")
+        node_data: listNode = dpg.get_item_user_data(app_data)
+        node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
 
 
@@ -102,7 +103,8 @@ class NodeEditor:
 
         self.logger.debug(f"Связи до: {node_out} {node_in}")
 
-        node_out.add_link(node_in)
+        node_out.outcoming.append(node_in)
+        node_in.incoming.append(node_out)
 
         self.logger.debug(f"Связи после: {node_out} {node_in}")
 
@@ -122,7 +124,8 @@ class NodeEditor:
 
         self.logger.debug(f"Связи до: {link.outcoming} {link.incoming}")
 
-        link.outcoming.remove_link(link.incoming)
+        link.outcoming.outcoming.remove(link.incoming)
+        link.incoming.incoming.remove(link.outcoming)
 
         self.logger.debug(f"Связи после: {link.outcoming} {link.incoming}")
 

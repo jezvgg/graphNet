@@ -10,7 +10,7 @@ class InputsFactory:
     '''
     Фабрика, реализующая инпуты, в зависимости от переданных в неё типов.
     '''
-    map: dict[type: Callable]
+    map: dict[type, Callable]
     logger: Logger
 
 
