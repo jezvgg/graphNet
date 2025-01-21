@@ -3,7 +3,7 @@ from keras import layers, models, utils
 
 from Src.Logging import Logger_factory, Logger
 from Src.Utils import AttributesFactory
-from Src.Nodes import Node, listNode, InputLayerNode
+from Src.Nodes import AbstractNode, listNode, InputLayerNode, LayerNode
 
 
 
@@ -13,17 +13,17 @@ class NodeBuilder:
 
     Attributes:
         factory: InputsFactory - фабрика конвертации аннотаций в инпуты
-        layers_list: dict[str: Node] - список слоёв с параметрами, которые использовать в конструкторе
+        layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
     factory: AttributesFactory
     node_list: dict[str, dict[str, list[listNode]]]
     logger: Logger
 
 
-    def __init__(self, node_list: dict[str: Node]):
+    def __init__(self, node_list: dict[str: AbstractNode]):
         '''
         Args:
-            layers_list: dict[str: Node] - список слоёв с параметрами, которые использовать в конструкторе
+            layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
         '''
         self.logger = Logger_factory.from_instance()("nodes")
         self.factory = AttributesFactory()
@@ -58,17 +58,17 @@ class NodeBuilder:
 
     def build_node(self, node_data: listNode, parent: str | int) -> str | int:
         '''
-        Построение dpg.node из класса Node. Используется, для создания новых нодов в редакторе. Ноды берутся из user_data в списке слева.
+        Построение dpg.node из класса AbstractNode. Используется, для создания новых нодов в редакторе. Ноды берутся из user_data в списке слева.
 
         Args:
-            node: Node - нода из которой создать dpg.node
+            node: AbstractNode - нода из которой создать dpg.node
             parent: str | int - родитель, внутри которого создать ноду. Чаще всего это dpg.node_editor.
 
         Returns:
             str | int - индетификатор новой dpg.node.
         '''
         node_id = dpg.generate_uuid()
-        node: Node = node_data.node_type(node_id, **node_data.kwargs)
+        node: AbstractNode = node_data.node_type(node_id, **node_data.kwargs)
 
         with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
             if node.input:
@@ -92,7 +92,7 @@ class NodeBuilder:
         return node_id
     
 
-    def build_input(self, parent: str | int, shape: tuple[int]) -> Node:
+    def build_input(self, parent: str | int, shape: tuple[int]) -> AbstractNode:
         '''
         Особенный метод, реализующий построение слоя входа.
 
@@ -127,10 +127,12 @@ class NodeBuilder:
         return node_id
     
 
-    def compile_graph(self, node: Node):
+    def compile_graph(self, node: LayerNode):
+        '''
+        Компиляция графа, от его концов. Работает через обход в ширину. Вызывает метод compile у нода, если все ноды, пришедшие к нему уже скомпилированы. Начинает с нодов, у которых нет входов.
+        '''
         visited = set()
         queue = [node]
-        layer = 0
         last_layer = None
         self.logger.info("Началась сборка модели.")
 
@@ -143,7 +145,7 @@ class NodeBuilder:
                 self.logger.debug("Нода подошла.")
 
                 layer = current_node.compile()
-                dpg.set_item_user_data(current_node.node_tag, layer)
+                print(layer)
                 last_layer = layer
 
                 for neightbor in current_node.outcoming:
@@ -152,9 +154,7 @@ class NodeBuilder:
 
                 visited.add(current_node)
 
-                layer+=1
-
-        model = models.Model(inputs=[dpg.get_item_user_data(node.node_tag)], outputs=[last_layer])
+        model = models.Model(inputs=[node.layer], outputs=[last_layer])
 
         # * Для супер жёсткого дебага
         utils.plot_model(model)

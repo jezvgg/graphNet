@@ -1,11 +1,12 @@
 
 from typing import NamedTuple
 from keras import layers
-from Src.Nodes import LayerNode, InputLayerNode, Node
+from Src.Nodes import LayerNode, InputLayerNode, AbstractNode
 
 
-listNode = NamedTuple('listNode', [("label", str), ("node_type", Node), ("kwargs", dict)])
+listNode = NamedTuple('listNode', [("label", str), ("node_type", AbstractNode), ("kwargs", dict)])
 
+# TODO Перевести в нормальные модели, фабрику и JSON
 
 node_list = {
     "Neural Network Layers":

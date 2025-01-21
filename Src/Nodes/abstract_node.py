@@ -7,7 +7,7 @@ import dearpygui.dearpygui as dpg
 
 
 
-class Node(ABC):
+class AbstractNode(ABC):
     '''
     Нода (узел графа), класс который используется для сохранения связей в графе, а также информации о ноде. 
 
@@ -17,8 +17,8 @@ class Node(ABC):
         outcoming: list[Node] - связи с нодами, к которым подключенна эта нода. (Уходящие)
     '''
     node_tag: str | int
-    incoming: list["Node"]
-    outcoming: list["Node"]
+    incoming: list["AbstractNode"]
+    outcoming: list["AbstractNode"]
     annotations: dict[str: type]
     logic: Callable
     docs: str
@@ -27,7 +27,7 @@ class Node(ABC):
 
 
     @staticmethod
-    def print_tree(node: "Node"):
+    def print_tree(node: "AbstractNode"):
         '''
         Метод для дебага.
         Выводит дерево зависимостей по входящим нодам.
@@ -40,7 +40,7 @@ class Node(ABC):
             return
 
         print(node, "->", end=' ')
-        Node.print_tree(node.outcoming[0])
+        AbstractNode.print_tree(node.outcoming[0])
 
 
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \
@@ -93,6 +93,9 @@ class Node(ABC):
 
 
     def compile(self):
+        '''
+        Основной метод нодов, содержащий логику их работы. Тут создаются слои нейронной сети, проходит обучение и т.д. В зависимости от ноды, будет разная логика.
+        '''
         attributes = dpg.get_item_children(self.node_tag)
         arguments = dpg.get_item_children(attributes[1][2])[1]
 
@@ -116,5 +119,5 @@ class node_link:
     '''
     Класс для dpg.add_node_link, указывает какие ноды связываются.
     '''
-    outcoming: Node
-    incoming: Node
+    outcoming: AbstractNode
+    incoming: AbstractNode
