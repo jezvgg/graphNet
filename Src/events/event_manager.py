@@ -1,81 +1,77 @@
-from typing import Callable, Optional
+from typing import Callable
 
 
 
 
 class Event_manager:
     """
-    Менеджер кастомных событий (Синглтон).
-    
-    Attributes:
-        events: dict[str, list[Callable]] - словарь событий и их обработчиков
+    Класс-наблюдатель для управления пользовательскими событиями.
+
+    Class Attributes:
+        _events: dict[str, list[Callable]] - словарь событий и их обработчиков
     """
     
-    _instance = None
-    
-
-    def __new__(cls):
-        """Создание единственного экземпляра класса"""
-        if cls._instance is None:
-            cls._instance = super(Event_manager, cls).__new__(cls)
-            cls._instance._events = {}
-        return cls._instance
+    _events: dict[str, list[Callable]] = {}
 
 
-    def add_event(self, event_name: str, handler: list[Callable]) -> None:
+    @classmethod
+    def add_custom_event(cls, event_name: str, handlers: list[Callable]) -> None:
         """
-        Подписка на событие.
-        
+        Добавление пользовательского события и его обработчиков.
+
         Args:
             event_name: str - название события
-            handler: list[Callable] - функции-обработчики события
+            handlers: list[Callable] - список функций-обработчиков события
         """
-        if event_name not in self.events:
-            self.events[event_name] = []
-        
-        for event in handler:
-            self.events[event_name].append(event)
+        if event_name not in cls._events:
+            cls._events[event_name] = []
+
+        cls._events[event_name]+=handlers
 
 
-    def remove(self, event_name: Optional[str] = None, handler: Optional[Callable] = None) -> None:
+    @classmethod
+    def remove_custom_event(cls, event_name: str = None, handler: Callable = None) -> None:
         """
         Отписка от события, или очистка обработчика события или всех событий.
         
         Args:
-            event_name: str - название события, None - очистка всех событий
-            handler: Callable - функция-обработчик для удаления
+            event_name: str, optional - название события. Если None, очищаются все события
+            handler: Callable, optional - функция-обработчик для удаления
         """
-
-        if event_name in self.events and handler in self.events[event_name]:
-            self.events[event_name].remove(handler)
-        elif event_name and handler is None:
-            self.events[event_name].clear()
-            del self.events[event_name]
+        # Если не указано имя события, очищаем все события
+        if not event_name:
+            cls._events.clear()
+            return
+        # Если указан конкретный обработчик, удаляем только его
+        if handler and handler in cls._events[event_name]:
+            cls._events[event_name].remove(handler)
         else:
-            self.events.clear()
-        
-            
-    def call_event(self, event_name: str, *args, **kwargs) -> None:
+            # Иначе удаляем все обработчики события
+            del cls._events[event_name]
+
+
+    @classmethod
+    def trigger_custom_event(cls, event_name: str, *args, **kwargs) -> None:
         """
-        Вызов события.
-        
+        Вызов пользовательского события.
+
         Args:
             event_name: str - название события
-            *args, **kwargs - аргументы передаваемые обработчикам
+            *args, **kwargs - аргументы, передаваемые обработчикам
         """
-        if event_name not in self.events:
-            raise ValueError(f"Event '{event_name}' is not defined")
-            
-        for handler in self.events[event_name]:
-            handler(*args, **kwargs)
+        if event_name in cls._events:
+            for handler in cls._events[event_name]:
+                handler(*args, **kwargs)
+        else:
+            raise ValueError(f"Событие '{event_name}' не определено")
 
 
-    @property        
-    def events(self) -> dict[str, list[Callable]]:
+    @classmethod
+    def get_events(cls) -> dict[str, list[Callable]]:
         """
-        Свойство для доступа к словарю событий.
-        
+        Метод для доступа к словарю событий.
+
         Returns:
             dict[str, list[Callable]] - словарь событий и их обработчиков
         """
-        return self._events
+        return cls._events
