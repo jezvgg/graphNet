@@ -1,24 +1,27 @@
 from keras import layers
-import dearpygui.dearpygui as dpg
+from typing import Optional
 
-from Src.Nodes import Node
+from Src.Nodes import AbstractNode
 
 
 
-class LayerNode(Node):
+class LayerNode(AbstractNode):
     '''
     Класс хранящий данные, для связи нода с слоём нейроной сети.
     '''
-    logic: layers.Layer
+    # TODO Сделать геттер на layer, с проверкой что он заполнен и варнингом
+    layer: Optional[layers.Layer]
+    incoming: list["LayerNode"]
+    outcoming: list["LayerNode"]
 
 
     def compile(self):
-        layer: layers.Layer = super().compile()
+        self.layer: layers.Layer = super().compile()
 
-        input_layers = [dpg.get_item_user_data(node.node_tag) for node in self.incoming]
+        input_layers = [node.layer for node in self.incoming]
         if len(input_layers) == 1: input_layers = input_layers[0]
 
-        return layer(input_layers)
+        return self.layer(input_layers)
 
 
 

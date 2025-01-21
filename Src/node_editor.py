@@ -2,7 +2,7 @@ import json
 
 import dearpygui.dearpygui as dpg
 
-from Src.Nodes import Node, node_link, node_list, listNode
+from Src.Nodes import AbstractNode, node_link, node_list, listNode
 from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
 
@@ -94,14 +94,16 @@ class NodeEditor:
         '''
         self.logger.debug(f"На вход пришло {app_data}")
 
-        node_out: Node = dpg.get_item_user_data(dpg.get_item_parent(app_data[0]))
-        node_in: Node = dpg.get_item_user_data(dpg.get_item_parent(app_data[1]))
+        node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(app_data[0]))
+        node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(app_data[1]))
 
         self.logger.debug(f"Node_out - {dpg.get_item_label(dpg.get_item_parent(app_data[0]))}")
 
         dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=node_link(node_out, node_in))
 
         self.logger.debug(f"Связи до: {node_out} {node_in}")
+
+        # TODO Реализовать логику, хранения связей в атрибутах, чтоб связывать ноды как инпуты
 
         node_out.outcoming.append(node_in)
         node_in.incoming.append(node_out)
@@ -139,7 +141,7 @@ class NodeEditor:
         Args:
             node_id: str | int - индетификатор нода, которого нужно удалить (dpg.node)
         '''
-        node_data: Node = dpg.get_item_user_data(node_id)
+        node_data: AbstractNode = dpg.get_item_user_data(node_id)
         
         node_data.delete()
 
