@@ -1,7 +1,8 @@
 
 from typing import NamedTuple
 from keras import layers
-from Src.Nodes import LayerNode, InputLayerNode, AbstractNode
+import keras
+from Src.Nodes import *
 
 
 listNode = NamedTuple('listNode', [("label", str), ("node_type", AbstractNode), ("kwargs", dict)])
@@ -79,6 +80,40 @@ node_list = {
                 kwargs = {
                     "logic": layers.Add,
                     "annotations": {}
+                }
+            )
+        ]
+    },
+    "Training": {
+        "Train": [
+            listNode(
+                label="Compile model",
+                node_type= CompileNode,
+                kwargs= {
+                    "logic": keras.models.Model.compile,
+                    "annotations": {}
+                }
+            )
+        ],
+        "Utils": [
+            listNode(
+                label="Save model",
+                node_type= UtilsNode,
+                kwargs= {
+                    "logic": keras.saving.save_model,
+                    "annotations": {
+                        "model": ParameterNode,
+                    }
+                }
+            ),
+            listNode(
+                label="Plot model",
+                node_type= UtilsNode,
+                kwargs= {
+                    "logic": keras.utils.plot_model,
+                    "annotations": {
+                        "model": ParameterNode,
+                    }
                 }
             )
         ]

@@ -101,11 +101,22 @@ class AbstractNode(ABC):
 
         kwargs = {}
 
+        # ? Вынести куда-нибудь эту функцию?
+        print(arguments)
         for argument in arguments:
             name = dpg.get_item_label(argument)
+            if name in self.annotations: print(self.annotations[name])
+            print(self.__class__)
+            print(name)
             if name in self.annotations:
+                print(self.annotations[name])
+                print(self.__class__)
                 if isinstance(self.annotations[name], tuple):
                     kwargs[name] = tuple(dpg.get_values(dpg.get_item_children(argument)[1])[:len(self.annotations[name])])
+                    continue
+                elif issubclass(self.annotations[name], AbstractNode):
+                    parent = dpg.get_item_parent(argument)
+                    kwargs[name] = getattr(dpg.get_item_user_data(parent)[0], 'data')
                     continue
                         
                 kwargs[name] = dpg.get_value(argument)

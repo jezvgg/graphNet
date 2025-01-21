@@ -21,7 +21,9 @@ class LayerNode(AbstractNode):
         input_layers = [node.layer for node in self.incoming]
         if len(input_layers) == 1: input_layers = input_layers[0]
 
-        return self.layer(input_layers)
+        self.layer = self.layer(input_layers)
+
+        return self.layer
 
 
 

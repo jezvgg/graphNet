@@ -2,9 +2,10 @@ import json
 
 import dearpygui.dearpygui as dpg
 
-from Src.Nodes import AbstractNode, node_link, node_list, listNode
+from Src.Nodes import AbstractNode, node_link
 from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
+from Src.Nodes.node_list import node_list, listNode
 
 
 class NodeEditor:
@@ -103,7 +104,10 @@ class NodeEditor:
 
         self.logger.debug(f"Связи до: {node_out} {node_in}")
 
-        # TODO Реализовать логику, хранения связей в атрибутах, чтоб связывать ноды как инпуты
+        data = dpg.get_item_user_data(app_data[1])
+        if not data: data = []
+        data.append(node_out)
+        dpg.set_item_user_data(app_data[1], data)
 
         node_out.outcoming.append(node_in)
         node_in.incoming.append(node_out)

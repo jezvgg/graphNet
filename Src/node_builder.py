@@ -3,7 +3,8 @@ from keras import layers, models, utils
 
 from Src.Logging import Logger_factory, Logger
 from Src.Utils import AttributesFactory
-from Src.Nodes import AbstractNode, listNode, InputLayerNode, LayerNode
+from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
+from Src.Nodes.node_list import listNode
 
 
 
@@ -133,7 +134,6 @@ class NodeBuilder:
         '''
         visited = set()
         queue = [node]
-        last_layer = None
         self.logger.info("Началась сборка модели.")
 
         while queue:
@@ -146,19 +146,12 @@ class NodeBuilder:
 
                 layer = current_node.compile()
                 print(layer)
-                last_layer = layer
 
                 for neightbor in current_node.outcoming:
                     if neightbor not in queue:
                         queue = [neightbor] + queue
 
                 visited.add(current_node)
-
-        model = models.Model(inputs=[node.layer], outputs=[last_layer])
-
-        # * Для супер жёсткого дебага
-        utils.plot_model(model)
-        print(model.summary())
 
         
 
