@@ -1,4 +1,5 @@
 __pycache__
 Src/Logging/logger_config_debug.json
 Logs/*
-model.png
+*.png
+*.dat
