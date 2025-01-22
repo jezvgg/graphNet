@@ -3,7 +3,7 @@ from typing import Callable
 import dearpygui.dearpygui as dpg
 
 from Src.Utils import InputsFactory
-from Src.Nodes import ParameterNode
+from Src.Nodes import ParameterNode, OptimizerNode, LossNode
 
 
 
@@ -20,6 +20,7 @@ class AttributesFactory:
         self.map = {
             ParameterNode: self.build_object
         }
+        self.map |= {subclass: self.build_object for subclass in ParameterNode.__subclasses__()}
 
 
     def build(self, hint, parent: str | int, *args, **kwargs):

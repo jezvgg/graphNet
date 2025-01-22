@@ -85,13 +85,119 @@ node_list = {
         ]
     },
     "Training": {
-        "Train": [
+        "General": [
             listNode(
                 label="Compile model",
                 node_type= CompileNode,
                 kwargs= {
                     "logic": keras.models.Model.compile,
-                    "annotations": {}
+                    "annotations": {
+                        "optimizer": OptimizerNode,
+                        "loss": LossNode,
+                        # "metrics": MetricNode
+                    }
+                }
+            ),
+            listNode(
+                label="Fit model",
+                node_type= FitNode,
+                kwargs= {
+                    "logic": keras.models.Model.fit,
+                    "annotations": {
+                        "self": CompileNode,
+                        "epochs": int
+                    }
+                }
+            )
+        ],
+        "Optimizers": [
+            listNode(
+                label="Adam",
+                node_type= OptimizerNode,
+                kwargs={
+                    "logic": keras.optimizers.Adam,
+                    "annotations": {
+                        "learning_rate": float,
+                        # "beta_1": float,
+                        # "beta_2": float,
+                        # "epsilon": float
+                    },
+                    "input": False
+                }
+            ),
+            listNode(
+                label="Stochastic Gradient Descent",
+                node_type= OptimizerNode,
+                kwargs= {
+                    "logic": keras.optimizers.SGD,
+                    "annotations": {
+                        "learning_rate": float,
+                        "momentum": float,
+                        "nesterov": bool
+                    },
+                    "input": False
+                }
+            ),
+            listNode(
+                label="RMSprop",
+                node_type= OptimizerNode,
+                kwargs= {
+                    "logic": keras.optimizers.RMSprop,
+                    "annotations": {
+                        "learning_rate": float,
+                        "momentum": float
+                    },
+                    "input": False
+                }
+            )
+        ],
+        "Losses": [
+            listNode(
+                label="Binary cross-entropy",
+                node_type= LossNode,
+                kwargs= {
+                    "logic": keras.losses.BinaryCrossentropy,
+                    "annotations": {},
+                    "input": False
+                },
+                
+            ),
+            listNode(
+                label="Mean Squared Error",
+                node_type= LossNode,
+                kwargs= {
+                    "logic": keras.losses.MeanSquaredError,
+                    "annotations": {},
+                    "input": False
+                }
+            )
+        ],
+        "Metrics": [
+            listNode(
+                label="Accuracy",
+                node_type= ParameterNode,
+                kwargs= {
+                    "logic": keras.metrics.Accuracy,
+                    "annotations": {},
+                    "input": False
+                }
+            ),
+            listNode(
+                label="F1 score",
+                node_type= ParameterNode,
+                kwargs= {
+                    "logic": keras.metrics.F1Score,
+                    "annotations": {},
+                    "input": False
+                }
+            ),
+            listNode(
+                label="Mean Squared Error",
+                node_type= ParameterNode,
+                kwargs= {
+                    "logic": keras.metrics.MeanSquaredError,
+                    "annotations": {},
+                    "input": False
                 }
             )
         ],
@@ -102,8 +208,11 @@ node_list = {
                 kwargs= {
                     "logic": keras.saving.save_model,
                     "annotations": {
-                        "model": ParameterNode,
-                    }
+                        "model": CompileNode,
+                        "filepath": str
+                    },
+                    "input": False,
+                    "output": False
                 }
             ),
             listNode(
@@ -112,8 +221,14 @@ node_list = {
                 kwargs= {
                     "logic": keras.utils.plot_model,
                     "annotations": {
-                        "model": ParameterNode,
-                    }
+                        "model": CompileNode,
+                        "to_file": str,
+                        "show_shapes": bool,
+                        "show_layer_names": bool,
+                        "show_layer_activations": bool
+                    },
+                    "input": False,
+                    "output": False
                 }
             )
         ]

@@ -50,9 +50,9 @@ class NodeEditor:
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
                                         delink_callback=self.delink_callback, *args, **kwargs):
 
-                        input_id = self.builder.build_input("node_editor", shape=(28, 28, 1))
+                        input_id = self.builder.build_input("node_editor", shape=(2, ))
 
-                    dpg.add_button(label="Собрать модель", callback=lambda: self.builder.compile_graph(dpg.get_item_user_data(input_id)))
+                    dpg.add_button(label="Собрать модель", callback= self.builder.compile_graph)
 
 
     def drop_callback(self, sender: str | int, app_data: str | int):
@@ -104,7 +104,7 @@ class NodeEditor:
 
         self.logger.debug(f"Связи до: {node_out} {node_in}")
 
-        data = dpg.get_item_user_data(app_data[1])
+        data: list | None = dpg.get_item_user_data(app_data[1])
         if not data: data = []
         data.append(node_out)
         dpg.set_item_user_data(app_data[1], data)

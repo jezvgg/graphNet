@@ -128,13 +128,33 @@ class NodeBuilder:
         return node_id
     
 
-    def compile_graph(self, node: LayerNode):
+    def compile_graph(self):
         '''
         Компиляция графа, от его концов. Работает через обход в ширину. Вызывает метод compile у нода, если все ноды, пришедшие к нему уже скомпилированы. Начинает с нодов, у которых нет входов.
         '''
+
+        ref_node: AbstractNode = dpg.get_item_user_data(dpg.get_item_children("node_editor", slot=1)[-1])
+        queue: list[AbstractNode] = [ref_node]
         visited = set()
-        queue = [node]
-        self.logger.info("Началась сборка модели.")
+        starting_nodes: list[AbstractNode] = []
+
+        # * Двустороний обход в ширину, чтоб найти стартовые ноды
+        while queue:
+            current_node = queue.pop()
+
+            if current_node in visited: continue
+
+            if len(current_node.incoming) == 0: starting_nodes.append(current_node)
+            
+            for neightbor in current_node.incoming + current_node.outcoming:
+                    if neightbor not in queue:
+                        queue = [neightbor] + queue
+
+            visited.add(current_node)
+
+        visited = set()
+        queue = starting_nodes[:]
+        self.logger.info("Началась сборка графа.")
 
         while queue:
             current_node = queue.pop()
@@ -152,7 +172,4 @@ class NodeBuilder:
                         queue = [neightbor] + queue
 
                 visited.add(current_node)
-
-        
-
 

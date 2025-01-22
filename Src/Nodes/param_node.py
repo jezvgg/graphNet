@@ -8,6 +8,6 @@ class ParameterNode(AbstractNode):
     data: any
     
 
-    def compile(self):
-        self.data = super().compile()
+    def compile(self, kwargs = {}):
+        self.data = super().compile(kwargs)
         return self.data

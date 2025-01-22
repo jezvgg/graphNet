@@ -13,6 +13,7 @@ class CompileNode(ParameterNode):
 
 
     def compile(self):
+        self.logger.debug("Модель начала компиляцию")
         queue = self.incoming[:]
         input_nodes: list[InputLayerNode] = []
 
@@ -29,32 +30,14 @@ class CompileNode(ParameterNode):
 
 
         inputs = [node.layer for node in input_nodes]
-        outputs = [node.layer for node in self.incoming]
+        outputs = [node.layer for node in dpg.get_item_user_data(dpg.get_item_children(self.node_tag)[1][0])]
 
-        self.data = keras.models.Model(inputs=inputs, outputs=outputs)
+        model = keras.models.Model(inputs=inputs, outputs=outputs)
 
-        attributes = dpg.get_item_children(self.node_tag)
-        arguments = dpg.get_item_children(attributes[1][2])[1]
+        super().compile({"self": model})
+        self.logger.info("Модель скомпилирована")
 
-        kwargs = {}
-
-        kwargs['self'] = self.data
-
-        # ? Вынести вот эту функцию куда-нибудь?
-        for argument in arguments:
-            name = dpg.get_item_label(argument)
-            if name in self.annotations:
-                if isinstance(self.annotations[name], tuple):
-                    kwargs[name] = tuple(dpg.get_values(dpg.get_item_children(argument)[1])[:len(self.annotations[name])])
-                    continue
-                elif isinstance(self.annotations[name], self.__class__):
-                    kwargs[name] = getattr(argument, 'data')
-                    continue
-                        
-                kwargs[name] = dpg.get_value(argument)
-            
-        self.logic(**kwargs)
-
+        self.data = model
         return self.data
 
 

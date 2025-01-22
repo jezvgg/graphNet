@@ -5,6 +5,8 @@ import inspect
 
 import dearpygui.dearpygui as dpg
 
+from Src.Logging import Logger_factory, Logger
+
 
 
 class AbstractNode(ABC):
@@ -24,6 +26,7 @@ class AbstractNode(ABC):
     docs: str
     input: bool
     output: bool
+    logger: Logger
 
 
     @staticmethod
@@ -65,6 +68,8 @@ class AbstractNode(ABC):
         if not docs: docs = inspect.getdoc(self.logic)
         self.docs = docs
 
+        self.logger = Logger_factory.from_instance()("nodes")
+
 
     def __repr__(self) -> str:
         return f"{self.node_tag}"
@@ -92,34 +97,33 @@ class AbstractNode(ABC):
         dpg.delete_item(self.node_tag)
 
 
-    def compile(self):
+    def compile(self, kwargs = None):
         '''
         Основной метод нодов, содержащий логику их работы. Тут создаются слои нейронной сети, проходит обучение и т.д. В зависимости от ноды, будет разная логика.
         '''
+        if not kwargs: kwargs = {}
         attributes = dpg.get_item_children(self.node_tag)
-        arguments = dpg.get_item_children(attributes[1][2])[1]
-
-        kwargs = {}
+        arguments = [dpg.get_item_children(attribute)[1][0] for attribute in attributes[1]]
 
         # ? Вынести куда-нибудь эту функцию?
-        print(arguments)
+        self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
+        self.logger.debug(f"Аргументы ноды - {arguments}")
         for argument in arguments:
             name = dpg.get_item_label(argument)
-            if name in self.annotations: print(self.annotations[name])
-            print(self.__class__)
-            print(name)
-            if name in self.annotations:
-                print(self.annotations[name])
-                print(self.__class__)
-                if isinstance(self.annotations[name], tuple):
-                    kwargs[name] = tuple(dpg.get_values(dpg.get_item_children(argument)[1])[:len(self.annotations[name])])
-                    continue
-                elif issubclass(self.annotations[name], AbstractNode):
-                    parent = dpg.get_item_parent(argument)
-                    kwargs[name] = getattr(dpg.get_item_user_data(parent)[0], 'data')
-                    continue
+
+            if name not in self.annotations: continue
+
+            if isinstance(self.annotations[name], tuple):
+                kwargs[name] = tuple(dpg.get_values(dpg.get_item_children(argument)[1])[:len(self.annotations[name])])
+                continue
+            elif issubclass(self.annotations[name], AbstractNode):
+                parent = dpg.get_item_parent(argument)
+                user_data = dpg.get_item_user_data(parent)
+                if len(user_data) == 1: kwargs[name] = getattr(user_data[0], 'data')
+                else: kwargs[name] = [getattr(node, 'data') for node in user_data]
+                continue
                         
-                kwargs[name] = dpg.get_value(argument)
+            kwargs[name] = dpg.get_value(argument)
             
         return self.logic(**kwargs)
     
