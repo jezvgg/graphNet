@@ -1,5 +1,7 @@
 from typing import Callable
 
+from Src.Logging import Logger_factory, Logger
+
 
 
 
@@ -9,9 +11,11 @@ class Event_manager:
 
     Class Attributes:
         _events: dict[str, list[Callable]] - словарь событий и их обработчиков
+        logger: Logger - экземпляр логгера
     """
-    
+
     _events: dict[str, list[Callable]] = {}
+    logger: Logger = Logger_factory.from_instance()('events')
 
 
     @classmethod
@@ -59,11 +63,13 @@ class Event_manager:
             event_name: str - название события
             *args, **kwargs - аргументы, передаваемые обработчикам
         """
-        if event_name in cls._events:
-            for handler in cls._events[event_name]:
-                handler(*args, **kwargs)
-        else:
-            raise ValueError(f"Событие '{event_name}' не определено")
+        if event_name not in cls._events:
+            cls.logger.error(f"Событие '{event_name}' не определено")
+            return
+
+        for handler in cls._events[event_name]:
+            handler(*args, **kwargs)
+
 
 
     @classmethod
