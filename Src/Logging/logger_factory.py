@@ -37,7 +37,7 @@ class Logger_factory(object):
             config: dict - конфигурация для создания логгеров.
         '''
         if 'filename' in config: 
-            config['filename'] = config['filename'].format(curdata=datetime.now().minute)
+            config['filename'] = config['filename'].format(curdata=datetime.now().strftime(config['datefmt']))
 
         self.config = config
         logging.basicConfig(**self.config)
@@ -80,7 +80,7 @@ class Logger_factory(object):
         if 'filename' in config and config['filename'] == 'stream':
             handler = logging.StreamHandler(sys.stdout)
         elif 'filename' in config: 
-            handler = logging.FileHandler(config['filename'].format(curdata=f"{logger_name}_{datetime.now().minute}"))
+            handler = logging.FileHandler(config['filename'].format(curdata=f"{logger_name}_{datetime.now().strftime(config['datefmt'])}"))
 
         if 'format' in config and handler:
             handler.setFormatter(logging.Formatter(config['format']))
