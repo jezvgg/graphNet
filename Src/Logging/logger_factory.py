@@ -123,7 +123,6 @@ class Logger_factory(object):
         Переместить консоль в верхний правый угол
         '''
         dpg.set_item_pos(self.__console_tag, (dpg.get_viewport_width()-dpg.get_item_width(self.__console_tag), 0))
-        print(datetime.now())
 
 
     
