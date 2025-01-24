@@ -3,3 +3,4 @@ Src/Logging/logger_config_debug.json
 Logs/*
 *.png
 *.dat
+*.txt

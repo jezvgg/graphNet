@@ -4,6 +4,7 @@ from functools import singledispatchmethod
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger_factory, Logger
+from Src.Models import File
 
 
 class InputsFactory:
@@ -40,7 +41,7 @@ class InputsFactory:
         '''
         if hint not in self.map:
             self.logger.error(f"Отсутствует обработчик для {hint}")
-            pass
+            return
 
         func = self.map[hint]
         tkwargs = {}
@@ -61,5 +62,24 @@ class InputsFactory:
                     self.build(hint_, parent=item)
                 if 'label' in kwargs:
                     dpg.add_text(kwargs['label'])
+        return item
+    
+
+    @build.register
+    def build_file(self, hint: File, *args, **kwargs):
+        '''
+        Если передан File, то создаётся группа из файлового выбора и их просмотра.
+        '''
+        browser_id = dpg.generate_uuid()
+        group_id = dpg.generate_uuid()
+
+        with dpg.file_dialog(directory_selector=False, show=False, modal=True, \
+                              width=1400 ,height=800, tag=browser_id, 
+                              callback=lambda _, appdata: dpg.set_item_user_data(group_id,  appdata)):
+            dpg.add_file_extension(".*")
+
+        with dpg.group(*args, **kwargs, tag=group_id) as item:
+            dpg.add_button(label="Choose file...", callback=lambda: dpg.show_item(browser_id))
+
         return item
     

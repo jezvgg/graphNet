@@ -1,8 +1,11 @@
 
 from typing import NamedTuple
+
 from keras import layers
 import keras
+
 from Src.Nodes import *
+from Src.Models import file
 
 
 listNode = NamedTuple('listNode', [("label", str), ("node_type", AbstractNode), ("kwargs", dict)])
@@ -10,6 +13,36 @@ listNode = NamedTuple('listNode', [("label", str), ("node_type", AbstractNode), 
 # TODO Перевести в нормальные модели, фабрику и JSON
 
 node_list = {
+    "Data & Preprocessing":
+    {
+        "Import data": [
+            listNode(
+                label="Tables data",
+                node_type= TableDataNode,
+                kwargs= {
+                    "logic": TableDataNode.open_data,
+                    "annotations": {
+                        "files": file,
+                        "skip_header": bool,
+                        "skip_footer": bool
+                    }
+                }
+            )
+        ],
+        "Preprocessing Utils": [
+            listNode(
+                label="to categorical",
+                node_type= PipelineNode,
+                kwargs= {
+                    "logic": keras.utils.to_categorical,
+                    "annotations": {
+                        "x": DataNode,
+                        "num_classes": int
+                    }
+                }
+            )
+        ]
+    },
     "Neural Network Layers":
     {
         "Full":
@@ -105,6 +138,8 @@ node_list = {
                     "logic": keras.models.Model.fit,
                     "annotations": {
                         "self": CompileNode,
+                        "x": DataNode,
+                        "y": DataNode,
                         "epochs": int
                     }
                 }

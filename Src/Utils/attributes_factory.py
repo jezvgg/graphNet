@@ -3,7 +3,7 @@ from typing import Callable
 import dearpygui.dearpygui as dpg
 
 from Src.Utils import InputsFactory
-from Src.Nodes import ParameterNode, OptimizerNode, LossNode
+from Src.Nodes import ParameterNode
 
 
 

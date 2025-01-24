@@ -6,6 +6,7 @@ import inspect
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger_factory, Logger
+from Src.Models import File
 
 
 
@@ -115,15 +116,17 @@ class AbstractNode(ABC):
 
             if isinstance(self.annotations[name], tuple):
                 kwargs[name] = tuple(dpg.get_values(dpg.get_item_children(argument)[1])[:len(self.annotations[name])])
-                continue
+
+            elif isinstance(self.annotations[name], File):
+                kwargs[name] = dpg.get_item_user_data(argument)
+            
             elif issubclass(self.annotations[name], AbstractNode):
                 parent = dpg.get_item_parent(argument)
                 user_data = dpg.get_item_user_data(parent)
                 if len(user_data) == 1: kwargs[name] = getattr(user_data[0], 'data')
                 else: kwargs[name] = [getattr(node, 'data') for node in user_data]
-                continue
-                        
-            kwargs[name] = dpg.get_value(argument)
+            
+            else: kwargs[name] = dpg.get_value(argument)
             
         return self.logic(**kwargs)
     
