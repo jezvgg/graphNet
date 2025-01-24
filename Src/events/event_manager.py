@@ -1,6 +1,6 @@
 from typing import Callable
 
-from Src.Logging import Logger_factory, Logger
+from Src.Logging import Logger_factory,Logger
 
 
 
@@ -55,7 +55,7 @@ class Event_manager:
 
 
     @classmethod
-    def trigger_custom_event(cls, event_name: str, *args, **kwargs) -> None:
+    def trigger_custom_event(cls, event_name: str) -> None:
         """
         Вызов пользовательского события.
 
@@ -68,7 +68,7 @@ class Event_manager:
             return
 
         for handler in cls._events[event_name]:
-            handler(*args, **kwargs)
+            handler()
 
 
 

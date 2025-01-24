@@ -37,7 +37,7 @@ class Logger_factory(object):
             config: dict - конфигурация для создания логгеров.
         '''
         if 'filename' in config: 
-            config['filename'] = config['filename'].format(curdata=datetime.now().strftime(config['datefmt']))
+            config['filename'] = config['filename'].format(curdata=datetime.now().minute)
 
         self.config = config
         logging.basicConfig(**self.config)
@@ -80,7 +80,7 @@ class Logger_factory(object):
         if 'filename' in config and config['filename'] == 'stream':
             handler = logging.StreamHandler(sys.stdout)
         elif 'filename' in config: 
-            handler = logging.FileHandler(config['filename'].format(curdata=f"{logger_name}_{datetime.now().strftime(config['datefmt'])}"))
+            handler = logging.FileHandler(config['filename'].format(curdata=f"{logger_name}_{datetime.now().minute}"))
 
         if 'format' in config and handler:
             handler.setFormatter(logging.Formatter(config['format']))
@@ -100,15 +100,15 @@ class Logger_factory(object):
         Args:
             parent_window: str | int - индетификатор родительского окна
         '''
+        from Src.events.callbacks import DPGCallback
+
         dpg.show_item(self.__console_tag)
-        
-        # Костыль
-        dpg.set_viewport_resize_callback(callback=self.resize)
-        
-        with dpg.item_handler_registry() as handler:
-            dpg.add_item_resize_handler(callback=self.resize)
-        dpg.bind_item_handler_registry(self.__console_tag, handler)
-        # конец костыля
+
+        resize_callback = DPGCallback(parent)
+        resize_callback.add_state_callback("rect_size", self.resize)
+
+        with dpg.handler_registry():
+            dpg.add_mouse_move_handler(callback=resize_callback.check)
 
 
     def hide(self):
@@ -123,5 +123,7 @@ class Logger_factory(object):
         Переместить консоль в верхний правый угол
         '''
         dpg.set_item_pos(self.__console_tag, (dpg.get_viewport_width()-dpg.get_item_width(self.__console_tag), 0))
+        print(datetime.now())
+
 
     
