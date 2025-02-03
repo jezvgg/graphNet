@@ -47,11 +47,15 @@ class NodeEditor:
                 with dpg.group(tag="editor_group", drop_callback=self.drop_callback):
                     
                     # Используем редактор нодов из DearPyGUI
-                    with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
+                    with dpg.node_editor(tag="node_editor", height = viewport_height*0.88, callback=self.link_callback, \
                                         delink_callback=self.delink_callback, *args, **kwargs):
 
                         input_id = self.builder.build_input("node_editor", shape=(2, ))
 
+                    with dpg.handler_registry():
+                        dpg.add_mouse_wheel_handler(callback=self.handle_scaling)
+                        dpg.add_key_press_handler(key=dpg.mvKey_Delete,callback=self.deleting)
+                    
                     dpg.add_button(label="Собрать модель", callback= self.builder.compile_graph)
 
 
@@ -149,7 +153,19 @@ class NodeEditor:
         
         node_data.delete()
 
-        dpg.delete_item(node_id)
+        'Закомментировано удаление id нода по причине возникновения ощибки, видимо, при удалении node_data так же удаляется и node_id'
+        # dpg.delete_item(node_id)
+
+
+    def deleting(self):
+        '''
+        Функция для удаления выделенных нодов
+        '''
+
+        nodes = dpg.get_selected_nodes('node_editor')
+
+        for node in nodes:
+            self.delete_node(node)
 
 
     def show(self, parent: str | int):
