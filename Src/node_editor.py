@@ -37,6 +37,13 @@ class NodeEditor:
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
 
+        # Масштабирование глобального интерфейса
+        self.font_scale = 2.0
+        self.min_font_scale = 0.5
+        self.max_font_scale = 2.0
+
+        self.scale_speed = 0.1
+
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
             with dpg.group(horizontal=True, tag=self.__group_tag) as group:
@@ -166,6 +173,25 @@ class NodeEditor:
 
         for node in nodes:
             self.delete_node(node)
+
+
+    def handle_scaling(self, sender: int|str, app_data: int):
+        '''
+        Обработать масштабирование колесиком мыши
+        '''
+        if not dpg.is_key_down(dpg.mvKey_LShift):
+            return
+
+        scroll_delta = app_data
+        scale_factor = self.scale_speed if scroll_delta > 0 else -self.scale_speed
+
+
+        new_scale = self.font_scale + scale_factor
+        new_scale = max(self.min_font_scale, min(new_scale, self.max_font_scale))
+
+        if new_scale != self.font_scale:
+            self.font_scale = new_scale
+            dpg.set_global_font_scale(self.font_scale)
 
 
     def show(self, parent: str | int):
