@@ -81,7 +81,8 @@ class NodeBuilder:
                     dpg.add_text(node.docs)
 
             for label, hint in node.annotations.items():
-                self.factory.build(hint, label=label, parent=node_id, width=256)
+                width = self.calculate_input_width(hint)
+                self.factory.build(hint, label=label, parent=node_id, width=width)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(label="Delete", callback=node.delete)
@@ -173,3 +174,29 @@ class NodeBuilder:
 
                 visited.add(current_node)
 
+
+    def calculate_input_width(self, annotation_type) -> int:
+        '''
+        Вычисляет ширину инпута в зависимости от типа аннотации.
+
+        Args:
+            annotation_type: тип аннотации для определения количества инпутов
+
+        Returns:
+            int: рекомендуемая ширина для каждого инпута
+        '''
+        BASE_WIDTH = 256
+        MIN_WIDTH = 48
+
+        if isinstance(annotation_type, tuple):
+            num_inputs = len(annotation_type)
+            if num_inputs <= 1:
+                return BASE_WIDTH
+
+            reduction_factor = 1 / num_inputs
+
+            width = int(BASE_WIDTH * reduction_factor)
+
+            return max(width, MIN_WIDTH)
+
+        return BASE_WIDTH
