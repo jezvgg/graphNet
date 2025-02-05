@@ -11,4 +11,5 @@ from Src.Nodes.metric_node import MetricNode
 from Src.Nodes.fit_node import FitNode
 from Src.Nodes.data_node import DataNode
 from Src.Nodes.table_data_node import TableDataNode
+from Src.Nodes.image_data_node import ImageDataNode
 from Src.Nodes.pipeline_node import PipelineNode

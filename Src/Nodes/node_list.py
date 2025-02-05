@@ -5,7 +5,7 @@ from keras import layers
 import keras
 
 from Src.Nodes import *
-from Src.Models import file
+from Src.Models import File
 
 
 listNode = NamedTuple('listNode', [("label", str), ("node_type", AbstractNode), ("kwargs", dict)])
@@ -22,9 +22,20 @@ node_list = {
                 kwargs= {
                     "logic": TableDataNode.open_data,
                     "annotations": {
-                        "files": file,
+                        "files": File,
                         "skip_header": bool,
                         "skip_footer": bool
+                    }
+                }
+            ),
+            listNode(
+                label="Images data",
+                node_type= ImageDataNode,
+                kwargs= {
+                    "logic": ImageDataNode.open_data,
+                    "annotations": {
+                        "files": File,
+                        "color_mode": str
                     }
                 }
             )
@@ -205,7 +216,16 @@ node_list = {
                     "annotations": {},
                     "input": False
                 }
-            )
+            ),
+            listNode(
+                label="Cross-entropy",
+                node_type= LossNode,
+                kwargs= {
+                    "logic": keras.losses.CategoricalCrossentropy,
+                    "annotations": {},
+                    "input": False
+                }
+            ),
         ],
         "Metrics": [
             listNode(

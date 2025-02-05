@@ -8,5 +8,9 @@ class DataNode(ParameterNode):
     '''
     Нода, которая содержит в себе данные. (файлы или табличные)
     '''
-    pass
+    
+
+    @staticmethod
+    def open_data(files: dict, *args, **kwargs):
+        pass
     

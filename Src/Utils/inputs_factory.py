@@ -23,7 +23,8 @@ class InputsFactory:
             int: dpg.add_input_int,
             str: dpg.add_input_text,
             float: dpg.add_input_float,
-            bool: dpg.add_checkbox
+            bool: dpg.add_checkbox,
+            File: self.build_file
         }
         self.logger = Logger_factory.from_instance()('nodes')
 
@@ -65,8 +66,7 @@ class InputsFactory:
         return item
     
 
-    @build.register
-    def build_file(self, hint: File, *args, **kwargs):
+    def build_file(self, label: str = 'files', *args, **kwargs):
         '''
         Если передан File, то создаётся группа из файлового выбора и их просмотра.
         '''
@@ -78,7 +78,7 @@ class InputsFactory:
                               callback=lambda _, appdata: dpg.set_item_user_data(group_id,  appdata)):
             dpg.add_file_extension(".*")
 
-        with dpg.group(*args, **kwargs, tag=group_id) as item:
+        with dpg.group(*args, **kwargs, tag=group_id, label=label) as item:
             dpg.add_button(label="Choose file...", callback=lambda: dpg.show_item(browser_id))
 
         return item

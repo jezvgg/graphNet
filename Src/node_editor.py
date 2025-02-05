@@ -50,7 +50,7 @@ class NodeEditor:
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
                                         delink_callback=self.delink_callback, *args, **kwargs):
 
-                        input_id = self.builder.build_input("node_editor", shape=(2, ))
+                        input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
 
                     dpg.add_button(label="Собрать модель", callback= self.builder.compile_graph)
 

@@ -117,7 +117,7 @@ class AbstractNode(ABC):
             if isinstance(self.annotations[name], tuple):
                 kwargs[name] = tuple(dpg.get_values(dpg.get_item_children(argument)[1])[:len(self.annotations[name])])
 
-            elif isinstance(self.annotations[name], File):
+            elif issubclass(self.annotations[name], File):
                 kwargs[name] = dpg.get_item_user_data(argument)
             
             elif issubclass(self.annotations[name], AbstractNode):
