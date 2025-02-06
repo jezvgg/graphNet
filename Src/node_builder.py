@@ -1,9 +1,9 @@
 import dearpygui.dearpygui as dpg
-from keras import layers, models, utils
+from keras import layers
 
 from Src.Logging import Logger_factory, Logger
 from Src.Utils import AttributesFactory
-from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
+from Src.Nodes import AbstractNode, InputLayerNode
 from Src.Nodes.node_list import listNode
 
 

@@ -13,6 +13,7 @@ class InputLayerNode(LayerNode):
 
 
     def compile(self):
+        # TODO Какого хуя тут логику get_value? Убрать её нахер
         attributes = dpg.get_item_children(self.node_tag)
         arguments = dpg.get_item_children(attributes[1][2])[1]
 

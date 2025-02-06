@@ -8,7 +8,6 @@ from Src.Nodes import ParameterNode, LayerNode, InputLayerNode
 class CompileNode(ParameterNode):
     logic: keras.models.Model.compile
     incoming: list[LayerNode]
-    # TODO Сделать геттер на модель
     data: keras.models.Model
 
 

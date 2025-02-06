@@ -30,6 +30,7 @@ class AbstractNode(ABC):
     logger: Logger
 
 
+    # TODO Убрать это говно
     @staticmethod
     def print_tree(node: "AbstractNode"):
         '''
@@ -107,6 +108,7 @@ class AbstractNode(ABC):
         arguments = [dpg.get_item_children(attribute)[1][0] for attribute in attributes[1]]
 
         # ? Вынести куда-нибудь эту функцию?
+        # TODO Вынести куда-нибудь нахер этот код
         self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
         self.logger.debug(f"Аргументы ноды - {arguments}")
         for argument in arguments:

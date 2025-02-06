@@ -1,5 +1,4 @@
 from keras import layers
-from typing import Optional
 
 from Src.Nodes import AbstractNode
 
@@ -9,8 +8,6 @@ class LayerNode(AbstractNode):
     '''
     Класс хранящий данные, для связи нода с слоём нейроной сети.
     '''
-    # TODO Сделать геттер на layer, с проверкой что он заполнен и варнингом
-    layer: Optional[layers.Layer]
     incoming: list["LayerNode"]
     outcoming: list["LayerNode"]
 

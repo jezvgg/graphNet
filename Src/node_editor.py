@@ -147,6 +147,7 @@ class NodeEditor:
         '''
         node_data: AbstractNode = dpg.get_item_user_data(node_id)
         
+        # TODO Вынести логику из AbstractNode
         node_data.delete()
 
         dpg.delete_item(node_id)
