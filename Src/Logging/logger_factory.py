@@ -100,15 +100,15 @@ class Logger_factory(object):
         Args:
             parent_window: str | int - индетификатор родительского окна
         '''
+        from Src.Events.callbacks import DPGCallback
+
         dpg.show_item(self.__console_tag)
-        
-        # Костыль
-        dpg.set_viewport_resize_callback(callback=self.resize)
-        
-        with dpg.item_handler_registry() as handler:
-            dpg.add_item_resize_handler(callback=self.resize)
-        dpg.bind_item_handler_registry(self.__console_tag, handler)
-        # конец костыля
+
+        resize_callback = DPGCallback(parent)
+        resize_callback.add_state_callback("rect_size", self.resize)
+
+        with dpg.handler_registry():
+            dpg.add_mouse_move_handler(callback=resize_callback.check)
 
 
     def hide(self):
@@ -123,5 +123,6 @@ class Logger_factory(object):
         Переместить консоль в верхний правый угол
         '''
         dpg.set_item_pos(self.__console_tag, (dpg.get_viewport_width()-dpg.get_item_width(self.__console_tag), 0))
+
 
     
