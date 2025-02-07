@@ -1,72 +1,47 @@
-from typing import Callable
-from functools import singledispatchmethod
+from functools import wraps
+from typing import Hashable
 
 import dearpygui.dearpygui as dpg
 
-from Src.Logging import Logger_factory, Logger
+from Src.Utils import ItemsFactory, TypesFactory
 from Src.Models import File
 
 
-class InputsFactory:
-    '''
-    Фабрика, реализующая инпуты, в зависимости от переданных в неё типов.
-    '''
-    map: dict[type, Callable]
-    logger: Logger
 
+class InputsFactory(TypesFactory, ItemsFactory):
 
     def __init__(self):
-        '''
-        Фабрика, реализующая инпуты, в зависимости от переданных в неё типов.
-        '''
-        self.map = {
-            int: dpg.add_input_int,
-            str: dpg.add_input_text,
-            float: dpg.add_input_float,
-            bool: dpg.add_checkbox,
-            File: self.build_file
-        }
-        self.logger = Logger_factory.from_instance()('nodes')
+        ItemsFactory.__init__(self)
+        TypesFactory.__init__(self)
+        self.mapping(int, dpg.add_input_int)
+        self.mapping(str, dpg.add_input_text)
+        self.mapping(float, dpg.add_input_float)
+        self.mapping(bool, dpg.add_checkbox)
+        self.mapping_type(tuple, self.build_tuple)
+        self.mapping(File, self.build_file)
 
 
-    @singledispatchmethod
-    def build(self, hint, *args, **kwargs):
-        '''
-        # ! Опасный метод
+    def build(self, value: type | Hashable ,*args, **kwargs):
+        return super().build(value, *args, **kwargs) or \
+                self.build_by_type(value, *args, **kwargs)
 
-        Реализует проверку, через рефлексию, подходят ли kwargs переданому типу. Может вызвать непредвиденные ошибки, если в self.map неправильная фцнкция.
 
-        Args:
-            hint: type | tuple - аннотация, по которой строить инпут.
-            *args, **kwargs - аргументы передающиеся в инпут, для его создания.
-        '''
-        if hint not in self.map:
-            self.logger.error(f"Отсутствует обработчик для {hint}")
-            return
-
-        func = self.map[hint]
-        tkwargs = {}
-
-        for key in kwargs.keys():
-            if key in func.__code__.co_varnames:
-                tkwargs[key] = kwargs[key]
-        return func(*args, **tkwargs)
-    
-
-    @build.register
-    def build_tuple(self, hint: tuple, *args, **kwargs):
+    @wraps(dpg.group, assigned=())
+    def build_tuple(self, shape: tuple, *args, **kwargs):
         '''
         Если передан tuple, то создаётся группа инпутов.
         '''
         with dpg.group(horizontal=True, *args, **kwargs) as item:
-                for hint_ in hint:
-                    self.build(hint_, parent=item)
-                if 'label' in kwargs:
-                    dpg.add_text(kwargs['label'])
+            for hint in shape:
+                self.build(hint, parent=item)
+
+            # Если отсутсвует label, то создаст пустой текст
+            dpg.add_text(kwargs.get('label') or '')
         return item
     
 
-    def build_file(self, label: str = 'files', *args, **kwargs):
+    @wraps(dpg.group, assigned=())
+    def build_file(self, *args, **kwargs):
         '''
         Если передан File, то создаётся группа из файлового выбора и их просмотра.
         '''
@@ -78,7 +53,7 @@ class InputsFactory:
                               callback=lambda _, appdata: dpg.set_item_user_data(group_id,  appdata)):
             dpg.add_file_extension(".*")
 
-        with dpg.group(*args, **kwargs, tag=group_id, label=label) as item:
+        with dpg.group(*args, **kwargs, tag=group_id) as item:
             dpg.add_button(label="Choose file...", callback=lambda: dpg.show_item(browser_id))
 
         return item

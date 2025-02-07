@@ -117,6 +117,8 @@ class NodeBuilder:
         node_id = self.build_node(layer, parent=parent)
 
         attributes = dpg.get_item_children(node_id)[1]
+        print(attributes)
+        print([dpg.get_item_children(argument) for argument in attributes])
 
         arguments = [dpg.get_item_children(argument)[1][0] for argument in attributes]
 

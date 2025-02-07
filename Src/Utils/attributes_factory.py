@@ -1,13 +1,14 @@
 from typing import Callable 
+from functools import wraps
 
 import dearpygui.dearpygui as dpg
 
-from Src.Utils import InputsFactory
+from Src.Utils import InputsFactory, TypesFactory
 from Src.Nodes import ParameterNode
 
 
 
-class AttributesFactory:
+class AttributesFactory(TypesFactory):
     '''
     Фабрика, реализующая создание аттрибутов нода в зависимости от переданных параметров.
     '''
@@ -17,31 +18,25 @@ class AttributesFactory:
 
     def __init__(self):
         self.inputs = InputsFactory()
-        self.map = {
-            ParameterNode: self.build_object
-        }
-        self.map |= {subclass: self.build_object for subclass in ParameterNode.__subclasses__()}
+        super().__init__()
+
+        self.mapping_subclasses(ParameterNode, self.build_object)
 
 
-    def build(self, hint, parent: str | int, *args, **kwargs):
-        '''
-        Создать аттрибут
-
-        Args:
-            hint: type | tuple | AbstractNode - тип, по которому будет создаваться аттрибут.
-            parent: str | int - родительский элемент в котором размещать
-            *args, **kwargs - параметры для инпутов
-        '''
-        if hint in self.map:
-            return self.map[hint](hint, parent=parent, *args, **kwargs)
-        return self.build_other(hint, parent, *args, **kwargs)
+    def build(self, value: type, parent: str | int, *args, **kwargs):
+        if value in self.type_map:
+            return self.build(value, *args, **kwargs)
+        return self.build_other(value, *args, **kwargs)
 
 
-    def build_other(self, hint, parent: str | int, *args, **kwargs):
-        with dpg.node_attribute(parent=parent, attribute_type=dpg.mvNode_Attr_Static) as attr:
-            self.inputs.build(hint, parent=attr, *args, **kwargs)
+    def build_other(self, value: type, *args, **kwargs):
+        with dpg.node_attribute(parent=kwargs.get('parent') or 0, attribute_type=dpg.mvNode_Attr_Static) as attr:
+            self.inputs.build(value, shape=value, parent=attr, *args, **kwargs)
+        return attr
     
 
-    def build_object(self, hint: ParameterNode, parent: str | int, *args, **kwargs):
-        with dpg.node_attribute(parent=parent, attribute_type=dpg.mvNode_Attr_Input, user_data=[]):
+    @wraps(dpg.node_attribute, assigned=())
+    def build_object(self, *args, **kwargs):
+        with dpg.node_attribute(*args, **kwargs, attribute_type=dpg.mvNode_Attr_Input, user_data=[]) as attr:
             dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
+        return attr
