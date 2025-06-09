@@ -48,7 +48,7 @@ class NodeEditor:
                     
                     # Используем редактор нодов из DearPyGUI
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
-                                        delink_callback=self.delink_callback, *args, **kwargs):
+                                        delink_callback=self.delink_callback, height=dpg.get_viewport_height()*0.90, *args, **kwargs):
 
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
 
