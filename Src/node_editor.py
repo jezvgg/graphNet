@@ -37,6 +37,8 @@ class NodeEditor:
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
 
+        dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
+
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
             with dpg.group(horizontal=True, tag=self.__group_tag) as group:
@@ -48,11 +50,19 @@ class NodeEditor:
                     
                     # Используем редактор нодов из DearPyGUI
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
-                                        delink_callback=self.delink_callback, height=dpg.get_viewport_height()*0.90, *args, **kwargs):
+                                        delink_callback=self.delink_callback, *args, **kwargs):
 
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
 
                     dpg.add_button(label="Собрать модель", callback= self.builder.compile_graph)
+
+
+    def on_viewport_resize_callback(self,sender, app_data):
+        '''
+        Callback для изменения размера node_editor'a
+        '''
+        if dpg.does_item_exist('node_editor'):
+            dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
 
 
     def drop_callback(self, sender: str | int, app_data: str | int):
