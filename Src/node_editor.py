@@ -20,10 +20,13 @@ class NodeEditor:
     __stage_tag: str | int
     __group_tag: str | int
 
+    max_font_scale = 2.5
+    min_font_scale = 0.5
+    scale_increment = 0.1
 
     def __init__(self, *args, **kwargs):
         '''
-        Вызвать окно, для создания графа. 
+        Вызвать окно, для создания графа.
 
         Args:
             *args, **kwargs - передаются в dpg.node_editor
@@ -32,27 +35,77 @@ class NodeEditor:
         with open("Src/Logging/logger_config_debug.json") as f:
             config = json.load(f)
 
+        self.current_font_scale = 1.0
+
         self.logger = Logger_factory.from_instance()("nodes", config)
         self.builder = NodeBuilder(node_list)
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
 
+        with dpg.handler_registry():
+            dpg.add_mouse_wheel_handler(callback=self.mouse_wheel_zoom_callback)
+
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
             with dpg.group(horizontal=True, tag=self.__group_tag) as group:
-
                 self.builder.build_list(parent=group)
 
                 # Именно в группу задаём drop_callback, который создаёт ноду по перетягиванию её с окна справа
                 with dpg.group(tag="editor_group", drop_callback=self.drop_callback):
-                    
                     # Используем редактор нодов из DearPyGUI
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
-                                        delink_callback=self.delink_callback, *args, **kwargs):
-
+                                         delink_callback=self.delink_callback, *args, **kwargs):
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
 
-                    dpg.add_button(label="Собрать модель", callback= self.builder.compile_graph)
+                    dpg.add_button(label="Собрать модель", callback=self.builder.compile_graph)
+
+
+    def zoom_global(self, zoom_delta: float):
+        """
+        Функция для глобального масштабирования интерфейса (изменение размера шрифтов)
+
+        Args:
+            zoom_delta: float - изменение масштаба (положительное увеличивает, отрицательное уменьшает)
+        """
+        self.current_font_scale += zoom_delta * self.scale_increment
+
+        self.current_font_scale = max(self.min_font_scale,
+                                      min(self.max_font_scale, self.current_font_scale))
+
+        dpg.set_global_font_scale(self.current_font_scale)
+
+        self.logger.info(f'Размер шрифта в приложении: {self.current_font_scale}')
+
+
+    def zoom_node_editor(self, zoom_delta: float):
+        '''
+        Функция для масштабирования редактора нодов
+        '''
+        # На данный момент реализуется класс менеджера шрифтов, через который будет сделано масштабирование редактора нодов
+        pass
+
+
+    def mouse_wheel_zoom_callback(self, sender, app_data):
+        """
+        Улучшенная функция для масштабирования окна с поддержкой разных режимов
+
+        Args:
+            sender: str|int - отправитель события
+            app_data: float - направление и сила прокрутки колеса мыши
+        """
+        mouse_pos = dpg.get_mouse_pos(local=False)
+
+        editor_rect_min = dpg.get_item_rect_min('editor_group')
+        editor_rect_max = dpg.get_item_rect_max('editor_group')
+
+        is_over_editor = (editor_rect_min[0] <= mouse_pos[0] <= editor_rect_max[0] and
+                          editor_rect_min[1] <= mouse_pos[1] <= editor_rect_max[1])
+
+        if dpg.is_key_down(dpg.mvKey_LShift):
+            if is_over_editor:
+                self.zoom_node_editor(app_data)
+            else:
+                self.zoom_global(app_data)
 
 
     def drop_callback(self, sender: str | int, app_data: str | int):
@@ -146,7 +199,7 @@ class NodeEditor:
             node_id: str | int - индетификатор нода, которого нужно удалить (dpg.node)
         '''
         node_data: AbstractNode = dpg.get_item_user_data(node_id)
-        
+
         # TODO Вынести логику из AbstractNode
         node_data.delete()
 
