@@ -32,6 +32,5 @@ with dpg.window(tag="Prime"):
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.set_primary_window("Prime", True)
-dpg.set_global_font_scale(2)
 dpg.start_dearpygui()
 dpg.destroy_context()
