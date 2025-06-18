@@ -177,7 +177,7 @@ class NodeBuilder:
                 visited.add(current_node)
 
 
-        def calculate_width(self, annotation_type) -> int:
+    def calculate_width(self, annotation_type) -> int:
         '''
         Вычисляет ширину нода в зависимости от типа аннотации.
 
@@ -191,15 +191,9 @@ class NodeBuilder:
         base_width = 256
         min_width = 48
 
-        if isinstance(annotation_type, tuple):
-            num_inputs = len(annotation_type)
-            if num_inputs <= 1:
-                return base_width
+        if not isinstance(annotation_type, tuple) or len(annotation_type) <= 1: return base_width
 
-            reduction_factor = 1 / num_inputs
+        width = int(base_width * 1 / len(annotation_type))
 
-            width = int(base_width * reduction_factor)
+        return max(width, min_width)
 
-            return max(width, min_width)
-
-        return base_width
