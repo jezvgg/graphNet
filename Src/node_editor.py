@@ -166,6 +166,14 @@ class NodeEditor:
             dpg.configure_item('node_editor', height=dpg.get_viewport_height() * 0.9)
 
 
+    def on_viewport_resize_callback(self,sender, app_data):
+        '''
+        Callback для изменения размера node_editor'a
+        '''
+        if dpg.does_item_exist('node_editor'):
+            dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
+
+
     def drop_callback(self, sender: str | int, app_data: str | int):
         '''
         Функция, которая выполняется, при перетягивания блока в окно редакторования графа. Создаём новую ноду в окне.
