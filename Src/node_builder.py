@@ -16,7 +16,6 @@ class NodeBuilder:
         factory: InputsFactory - фабрика конвертации аннотаций в инпуты
         layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
-    factory: AttributesFactory
     node_list: dict[str, dict[str, list[listNode]]]
     logger: Logger
 
@@ -27,7 +26,6 @@ class NodeBuilder:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
         '''
         self.logger = Logger_factory.from_instance()("nodes")
-        self.factory = AttributesFactory()
         self.node_list = node_list
 
 
@@ -82,7 +80,7 @@ class NodeBuilder:
 
             for label, hint in node.annotations.items():
                 width = self.calculate_width(hint)
-                self.factory.build(hint, label=label, parent=node_id, width=width)
+                AttributesFactory.build(hint, label=label, parent=node_id, width=width)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(label="Delete", callback=node.delete)
