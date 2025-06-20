@@ -39,6 +39,8 @@ class Logger_factory(object):
         if 'filename' in config: 
             config['filename'] = config['filename'].format(curdata=datetime.now().strftime(config['datefmt']))
 
+        os.makedirs(os.path.dirname(config['filename']), exist_ok=True)
+
         self.config = config
         logging.basicConfig(**self.config)
 
