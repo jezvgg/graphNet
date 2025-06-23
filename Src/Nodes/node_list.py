@@ -4,6 +4,7 @@ from typing import NamedTuple
 from keras import layers
 import keras
 
+from Src.Enums import Activations, Losses, Metrics
 from Src.Nodes import *
 from Src.Models import File
 
@@ -65,7 +66,7 @@ node_list = {
                     "logic": layers.Dense,
                     "annotations": {
                         "units": int,
-                        "activation": str,
+                        "activation": Activations,
                         "use_bias": bool
                     }
                 }
@@ -83,7 +84,7 @@ node_list = {
                         "kernel_size": int,
                         "strides": int,
                         "padding": str,
-                        "activation": str,
+                        "activation": Activations,
                         "use_bias": bool 
                     }
                 }   
@@ -137,8 +138,8 @@ node_list = {
                     "logic": keras.models.Model.compile,
                     "annotations": {
                         "optimizer": OptimizerNode,
-                        "loss": LossNode,
-                        # "metrics": MetricNode
+                        "loss": Losses,
+                        "metrics": Metrics
                     }
                 }
             ),
