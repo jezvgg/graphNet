@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import logging
 import sys
+from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
@@ -38,6 +39,8 @@ class Logger_factory(object):
         '''
         if 'filename' in config: 
             config['filename'] = config['filename'].format(curdata=datetime.now().strftime(config['datefmt']))
+
+        Path.mkdir(Path(config['filename']).parent, exist_ok=True)
 
         self.config = config
         logging.basicConfig(**self.config)
