@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from abc import ABC
 from typing import Callable
 import inspect
+from enum import Enum
 
 import dearpygui.dearpygui as dpg
 
@@ -127,6 +128,10 @@ class AbstractNode(ABC):
                 user_data = dpg.get_item_user_data(parent)
                 if len(user_data) == 1: kwargs[name] = getattr(user_data[0], 'data')
                 else: kwargs[name] = [getattr(node, 'data') for node in user_data]
+
+            elif issubclass(self.annotations[name], Enum):
+                enum_member = self.annotations[name][dpg.get_value(argument)]
+                kwargs[name] = enum_member.value
             
             else: kwargs[name] = dpg.get_value(argument)
             
