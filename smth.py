@@ -1,10 +1,15 @@
 class A:
-    pass
+    _smth: int
 
-class B(A):
-    pass
+    def __init__(self):
+        self._smth = 5
 
-class C(B):
-    pass
+    @property
+    def smth(self):
+        return self._smth
+    
 
-print(A.__subclasses__())
+
+print(A.smth)
+obj = A()
+print(A.smth.__get__(obj))

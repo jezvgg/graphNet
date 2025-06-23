@@ -125,9 +125,16 @@ class AbstractNode(ABC):
             elif issubclass(self.annotations[name], AbstractNode):
                 parent = dpg.get_item_parent(argument)
                 user_data = dpg.get_item_user_data(parent)
-                if len(user_data) == 1: kwargs[name] = getattr(user_data[0], 'data')
-                else: kwargs[name] = [getattr(node, 'data') for node in user_data]
-            
+
+                node_in: list[tuple[str, AbstractNode]] = [('data' if dpg.get_item_alias(attribute) == 'OUTPUT' 
+                                                            else dpg.get_item_alias(attribute),
+                                                            dpg.get_item_user_data(dpg.get_item_parent(attribute))) 
+                                                            for attribute in user_data]
+
+                if len(node_in) == 1: kwargs[name] = getattr(node_in[0][1], node_in[0][0])
+                else: kwargs[name] = [getattr(node, field) for field, node in node_in]
+                self.logger.info(kwargs[name])
+          
             else: kwargs[name] = dpg.get_value(argument)
             
         return self.logic(**kwargs)
