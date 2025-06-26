@@ -6,6 +6,7 @@ from Src.Nodes import AbstractNode, node_link
 from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
 from Src.Nodes.node_list import node_list, listNode
+from Src.size_manager import SizeManager
 
 
 class NodeEditor:
@@ -14,20 +15,28 @@ class NodeEditor:
 
     Attributes:
         logger: Logger - логировщик
+        builder: NodeBuilder - построитель узлов
+        size_manager: SizeManager - менеджер размеров и шрифтов
     '''
     logger: Logger
     builder: NodeBuilder
     __stage_tag: str | int
     __group_tag: str | int
 
+    size_manager: SizeManager
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self,
+                 size_manager: SizeManager,
+                 *args, **kwargs):
         '''
-        Вызвать окно, для создания графа. 
+        Инициализирует редактор узлов.
 
         Args:
-            *args, **kwargs - передаются в dpg.node_editor
+            size_manager (SizeManager): Менеджер размеров и шрифтов.
+            *args, **kwargs: Аргументы, передаваемые в dpg.node_editor.
         '''
+
+        self.size_manager = size_manager
 
         with open("Src/Logging/logger_config_debug.json") as f:
             config = json.load(f)
@@ -38,32 +47,58 @@ class NodeEditor:
         self.__group_tag = dpg.generate_uuid()
 
         dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
+        with dpg.handler_registry():
+            dpg.add_mouse_wheel_handler(callback=self.mouse_wheel_zoom_callback)
 
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
             with dpg.group(horizontal=True, tag=self.__group_tag) as group:
-
                 self.builder.build_list(parent=group)
 
                 # Именно в группу задаём drop_callback, который создаёт ноду по перетягиванию её с окна справа
                 with dpg.group(tag="editor_group", drop_callback=self.drop_callback):
-                    
                     # Используем редактор нодов из DearPyGUI
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
-                                        delink_callback=self.delink_callback, *args, **kwargs):
-
+                                         delink_callback=self.delink_callback, *args, **kwargs) as self.node_editor:
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
+                        # Применяем начальный шрифт к input_node через size_manager
+                        dpg.bind_item_font(input_id, self.size_manager.node_font)
 
-                    dpg.add_button(label="Собрать модель", callback= self.builder.compile_graph)
+                    dpg.add_button(label="Собрать модель", callback=self.builder.compile_graph)
 
+    def mouse_wheel_zoom_callback(self, sender: str | int, app_data: float):
+        '''
+        Callback для масштабирования с помощью колеса мыши.
+        Масштабирует редактор узлов, если зажат Shift и курсор над редактором ('editor_group').
+        В противном случае масштабирует всё приложение, если зажат Shift.
 
-    def on_viewport_resize_callback(self,sender, app_data):
+        Args:
+            sender: Идентификатор отправителя события (handler_registry).
+            app_data: Данные события (значение прокрутки колеса мыши, float).
+        '''
+
+        if dpg.is_key_down(dpg.mvKey_LShift):
+            item_processed_for_zoom = False
+            for item in dpg.get_all_items():
+                item_state = dpg.get_item_state(item)
+                if 'hovered' in item_state and item_state['hovered']:
+                    item_type = dpg.get_item_type(item)
+                    if item_type == 'mvAppItemType::mvNode':
+                        self.size_manager.resize_object(item, app_data)
+                        item_processed_for_zoom = True
+                    elif item_type == 'mvAppItemType::mvWindowAppItem':
+                        self.size_manager.resize_global(app_data)
+                        item_processed_for_zoom = True
+
+            if not item_processed_for_zoom:
+                self.size_manager.resize_node_editor(self.node_editor,app_data)
+
+    def on_viewport_resize_callback(self, sender, app_data):
         '''
         Callback для изменения размера node_editor'a
         '''
         if dpg.does_item_exist('node_editor'):
-            dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
-
+            dpg.configure_item('node_editor', height=dpg.get_viewport_height() * 0.9)
 
     def drop_callback(self, sender: str | int, app_data: str | int):
         '''
@@ -93,6 +128,8 @@ class NodeEditor:
         node_data: listNode = dpg.get_item_user_data(app_data)
         node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
+
+        dpg.bind_item_font(node_id, self.size_manager.node_font)
 
 
     def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
@@ -156,7 +193,7 @@ class NodeEditor:
             node_id: str | int - индетификатор нода, которого нужно удалить (dpg.node)
         '''
         node_data: AbstractNode = dpg.get_item_user_data(node_id)
-        
+
         # TODO Вынести логику из AbstractNode
         node_data.delete()
 
