@@ -1,9 +1,10 @@
-from functools import wraps, update_wrapper, singledispatchmethod
+from functools import wraps, update_wrapper
 from typing import Callable, Hashable, Iterable
 from collections import defaultdict
 
 
 
+# TODO: Сделать более стабильно работащим
 class factorymethod:
     '''
     Декоратор - диспатчеризатор для реализации фабрик

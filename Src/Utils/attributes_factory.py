@@ -3,12 +3,14 @@ from functools import singledispatch
 
 import dearpygui.dearpygui as dpg
 
+from Src.Enums.attr_type import AttrType
 from Src.Models import File
 from Src.Utils import factorymethod
-from Src.Nodes import ParameterNode, DataNode
+from Src.Nodes import DataNode, ParameterNode
 
 
 
+# TODO: Внести логику в Parameter
 class AttributesFactory:
     '''
     Фабрика, реализующая создание аттрибутов нода в зависимости от переданных параметров.
@@ -18,15 +20,32 @@ class AttributesFactory:
         annotations = func.__annotations__ | getattr(getattr(func, '__wrapped__', None), '__annotations__', {})
         union_annotations = dict([(key, kwargs[key]) for key in kwargs if key in annotations])
         return union_annotations
+    
+
+    @factorymethod
+    def build(attr: AttrType, hint, *args, **kwargs):
+        pass
+
+
+    build.register(AttrType.INPUT)(lambda attr, hint, *a, **k: AttributesFactory.build_attr_input(hint, *a, **k))
+
+
+    @build.register(AttrType.OUTPUT)
+    def build_attr_output(value, *args, **kwargs):
+        with dpg.node_attribute(parent=kwargs.get('parent'), attribute_type=dpg.mvNode_Attr_Output) as attr:
+            kwargs['parent'] = attr
+            dpg.add_text(kwargs.get('label'), **AttributesFactory.check_kwargs(dpg.add_text, kwargs))
+
+        return attr
 
 
     @singledispatch
     @staticmethod
-    def build(value, *args, **kwargs):
+    def build_attr_input(value, *args, **kwargs):
         raise Exception("Не получилась диспатчеризация для построения узла")
     
 
-    @build.register(tuple)
+    @build_attr_input.register(tuple)
     @staticmethod
     def build_tuple(shape: tuple, *args, **kwargs):
         '''
@@ -44,7 +63,7 @@ class AttributesFactory:
             return item
 
 
-    @build.register(type)
+    @build_attr_input.register(type)
     @factorymethod
     def build_attribute(value: type, *args, **kwargs):
         raise Exception("Не получилось диспатчеризация типа")

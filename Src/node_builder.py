@@ -1,10 +1,10 @@
 import dearpygui.dearpygui as dpg
 from keras import layers
 
+from Src.Enums.attr_type import AttrType
 from Src.Logging import Logger_factory, Logger
-from Src.Utils import AttributesFactory
-from Src.Nodes import AbstractNode, InputLayerNode
-from Src.Nodes.node_list import listNode
+from Src.Nodes import AbstractNode, InputLayerNode, DataNode
+from Src.Config.node_list import NodeAnnotation, Parameter
 
 
 
@@ -16,7 +16,7 @@ class NodeBuilder:
         factory: InputsFactory - фабрика конвертации аннотаций в инпуты
         layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
-    node_list: dict[str, dict[str, list[listNode]]]
+    node_list: dict[str, dict[str, list[NodeAnnotation]]]
     logger: Logger
 
 
@@ -55,7 +55,7 @@ class NodeBuilder:
         return list
 
 
-    def build_node(self, node_data: listNode, parent: str | int) -> str | int:
+    def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
         Построение dpg.node из класса AbstractNode. Используется, для создания новых нодов в редакторе. Ноды берутся из user_data в списке слева.
 
@@ -78,9 +78,9 @@ class NodeBuilder:
                 with dpg.tree_node(label="Docs"):
                     dpg.add_text(node.docs)
 
-            for label, hint in node.annotations.items():
-                width = self.calculate_width(hint)
-                AttributesFactory.build(hint, label=label, parent=node_id, width=width)
+            for label, attribute in node.annotations.items():
+                width = self.calculate_width(attribute.hint)
+                attribute.build(label=label, parent=node_id, width=width)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(label="Delete", callback=node.delete)
@@ -103,21 +103,18 @@ class NodeBuilder:
         Returns:
             str | int - индетификатор новой ноды
         '''
-        layer = listNode(
+        layer = NodeAnnotation(
             label="Input",
             node_type=InputLayerNode, 
-            kwargs={
-                "logic": layers.Input,
-                "annotations": {
-                    "shape": (int, ) * len(shape)
+            logic = layers.Input,
+            annotations = {
+                    "shape": Parameter(AttrType.INPUT, DataNode),
                 }
-            })
+            )
 
         node_id = self.build_node(layer, parent=parent)
 
         attributes = dpg.get_item_children(node_id)[1]
-        print(attributes)
-        print([dpg.get_item_children(argument) for argument in attributes])
 
         arguments = [dpg.get_item_children(argument)[1][0] for argument in attributes]
 

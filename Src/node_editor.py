@@ -5,7 +5,8 @@ import dearpygui.dearpygui as dpg
 from Src.Nodes import AbstractNode, node_link
 from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
-from Src.Nodes.node_list import node_list, listNode
+from Src.Config.node_list import node_list, NodeAnnotation
+
 
 
 class NodeEditor:
@@ -90,7 +91,7 @@ class NodeEditor:
 
         self.logger.info(f"Рассчитанная позиция - {pos}")
 
-        node_data: listNode = dpg.get_item_user_data(app_data)
+        node_data: NodeAnnotation = dpg.get_item_user_data(app_data)
         node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
 
