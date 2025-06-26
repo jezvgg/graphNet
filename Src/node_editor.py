@@ -6,7 +6,7 @@ from Src.Nodes import AbstractNode, node_link
 from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
 from Src.Nodes.node_list import node_list, listNode
-from Src.font_manager import FontManager
+from Src.size_manager import SizeManager
 
 
 class NodeEditor:
@@ -16,49 +16,27 @@ class NodeEditor:
     Attributes:
         logger: Logger - логировщик
         builder: NodeBuilder - построитель узлов
-        font_manager: FontManager - менеджер шрифтов
+        size_manager: SizeManager - менеджер размеров и шрифтов
     '''
     logger: Logger
     builder: NodeBuilder
     __stage_tag: str | int
     __group_tag: str | int
 
-    font_manager: FontManager
-    current_node_font_size: int
-    min_node_font_size_limit: int
-    max_node_font_size_limit: int
-
-    max_font_scale: float = 2.0
-    min_font_scale: float = 0.5
-    font_scale_increment: float = 0.1
-    current_app_font_scale: float = 1.0
-
+    size_manager: SizeManager
 
     def __init__(self,
-                 font_manager: FontManager,
-                 initial_node_font_size: int,
-                 min_node_font_size_limit: int = 8,
-                 max_node_font_size_limit: int = 28,
+                 size_manager: SizeManager,
                  *args, **kwargs):
         '''
         Инициализирует редактор узлов.
 
         Args:
-            font_manager (FontManager): Менеджер шрифтов для управления шрифтами узлов.
-            initial_node_font_size (int): Начальный размер шрифта для узлов.
-            min_node_font_size_limit (int, optional): Минимальный допустимый размер шрифта для узлов. По умолчанию 8.
-            max_node_font_size_limit (int, optional): Максимальный допустимый размер шрифта для узлов. По умолчанию 28.
+            size_manager (SizeManager): Менеджер размеров и шрифтов.
             *args, **kwargs: Аргументы, передаваемые в dpg.node_editor.
         '''
 
-        self.font_manager = font_manager
-        self.min_node_font_size_limit = min_node_font_size_limit
-        self.max_node_font_size_limit = max_node_font_size_limit
-
-        self.current_node_font_size = max(
-            self.min_node_font_size_limit,
-            min(self.max_node_font_size_limit, initial_node_font_size)
-        )
+        self.size_manager = size_manager
 
         with open("Src/Logging/logger_config_debug.json") as f:
             config = json.load(f)
@@ -75,62 +53,18 @@ class NodeEditor:
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
             with dpg.group(horizontal=True, tag=self.__group_tag) as group:
-
                 self.builder.build_list(parent=group)
 
                 # Именно в группу задаём drop_callback, который создаёт ноду по перетягиванию её с окна справа
                 with dpg.group(tag="editor_group", drop_callback=self.drop_callback):
-
                     # Используем редактор нодов из DearPyGUI
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
-                                         delink_callback=self.delink_callback, *args, **kwargs):
-
+                                         delink_callback=self.delink_callback, *args, **kwargs) as self.node_editor:
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
+                        # Применяем начальный шрифт к input_node через size_manager
+                        dpg.bind_item_font(input_id, self.size_manager.node_font)
 
                     dpg.add_button(label="Собрать модель", callback=self.builder.compile_graph)
-
-
-    def zoom_global(self, zoom_delta: float):
-        '''
-        Изменяет глобальный масштаб шрифта приложения.
-
-        Args:
-            zoom_delta (float): Значение изменения масштаба. Положительное для увеличения, отрицательное для уменьшения.
-                                Обычно это значение от app_data при событии колеса мыши.
-        '''
-        self.current_app_font_scale += zoom_delta * self.font_scale_increment
-        self.current_app_font_scale = max(self.min_font_scale,
-                                          min(self.max_font_scale, self.current_app_font_scale))
-        dpg.set_global_font_scale(self.current_app_font_scale)
-        self.logger.info(f'Глобальный масштаб шрифта в приложении: {self.current_app_font_scale:.2f}')
-
-
-    def zoom_node_editor(self, zoom: int):
-        '''
-        Изменяет размер шрифта для всех узлов в редакторе узлов.
-
-        Args:
-            zoom (int): Значение изменения размера шрифта. Положительное для увеличения, отрицательное для уменьшения.
-                        Обычно это значение от app_data при событии колеса мыши.
-        '''
-        self.current_node_font_size += zoom
-        self.current_node_font_size = max(self.min_node_font_size_limit,
-                                          min(self.max_node_font_size_limit, self.current_node_font_size))
-
-        node_ids = dpg.get_item_children('node_editor', slot=1)
-        node_font = self.font_manager.get_node_font_by_size(self.current_node_font_size)
-
-        if not node_font:
-            self.logger.warning(
-                f"Не удалось получить шрифт узла для размера {self.current_node_font_size}. Масштабирование шрифта узлов не будет применено.")
-            return
-
-        for node_id in node_ids:
-            if dpg.does_item_exist(node_id) and dpg.get_item_info(node_id)['type'] == "mvAppItemType::mvNode":
-                dpg.bind_item_font(node_id, node_font)
-
-        self.logger.info(f'Размер шрифта редактора узлов изменен на: {self.current_node_font_size}')
-
 
     def mouse_wheel_zoom_callback(self, sender: str | int, app_data: float):
         '''
@@ -142,21 +76,22 @@ class NodeEditor:
             sender: Идентификатор отправителя события (handler_registry).
             app_data: Данные события (значение прокрутки колеса мыши, float).
         '''
-        mouse_pos = dpg.get_mouse_pos(local=False)
-        is_over_editor = False
-
-        editor_rect_min = dpg.get_item_rect_min('editor_group')
-        editor_rect_max = dpg.get_item_rect_max('editor_group')
-        if editor_rect_min and editor_rect_max:
-            is_over_editor = (editor_rect_min[0] <= mouse_pos[0] <= editor_rect_max[0] and
-                              editor_rect_min[1] <= mouse_pos[1] <= editor_rect_max[1])
 
         if dpg.is_key_down(dpg.mvKey_LShift):
-            if is_over_editor:
-                self.zoom_node_editor(int(app_data))
-            else:
-                self.zoom_global(app_data)
+            item_processed_for_zoom = False
+            for item in dpg.get_all_items():
+                item_state = dpg.get_item_state(item)
+                if 'hovered' in item_state and item_state['hovered']:
+                    item_type = dpg.get_item_type(item)
+                    if item_type == 'mvAppItemType::mvNode':
+                        self.size_manager.resize_object(item, app_data)
+                        item_processed_for_zoom = True
+                    elif item_type == 'mvAppItemType::mvWindowAppItem':
+                        self.size_manager.resize_global(app_data)
+                        item_processed_for_zoom = True
 
+            if not item_processed_for_zoom:
+                self.size_manager.resize_node_editor(self.node_editor,app_data)
 
     def on_viewport_resize_callback(self, sender, app_data):
         '''
@@ -164,15 +99,6 @@ class NodeEditor:
         '''
         if dpg.does_item_exist('node_editor'):
             dpg.configure_item('node_editor', height=dpg.get_viewport_height() * 0.9)
-
-
-    def on_viewport_resize_callback(self,sender, app_data):
-        '''
-        Callback для изменения размера node_editor'a
-        '''
-        if dpg.does_item_exist('node_editor'):
-            dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
-
 
     def drop_callback(self, sender: str | int, app_data: str | int):
         '''
@@ -203,8 +129,7 @@ class NodeEditor:
         node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
 
-        current_node_font_tag = self.font_manager.get_node_font_by_size(self.current_node_font_size)
-        dpg.bind_item_font(node_id, current_node_font_tag)
+        dpg.bind_item_font(node_id, self.size_manager.node_font)
 
 
     def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
