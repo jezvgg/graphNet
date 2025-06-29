@@ -4,7 +4,7 @@ from keras import layers
 from Src.Enums.attr_type import AttrType
 from Src.Logging import Logger_factory, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, DataNode
-from Src.Config.node_list import NodeAnnotation, Parameter
+from Src.Config.node_list import NodeAnnotation, Parameter, ANode
 
 
 
@@ -108,7 +108,7 @@ class NodeBuilder:
             node_type=InputLayerNode, 
             logic = layers.Input,
             annotations = {
-                    "shape": Parameter(AttrType.INPUT, DataNode),
+                    "shape": Parameter(AttrType.INPUT, ANode),
                 }
             )
 

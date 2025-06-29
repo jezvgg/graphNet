@@ -6,8 +6,7 @@ import inspect
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger_factory, Logger
-from Src.Config.parameter import Parameter
-from Src.Models import File
+from Src.Config.parameter import Parameter, AttrType
 
 
 class AbstractNode(ABC):
@@ -113,7 +112,8 @@ class AbstractNode(ABC):
         for argument in arguments:
             name = dpg.get_item_label(argument)
 
-            if name not in self.annotations: continue
+            if name not in self.annotations or \
+            self.annotations[name].attr_type == AttrType.OUTPUT: continue
 
             kwargs[name] = self.annotations[name].get_value(argument)
 

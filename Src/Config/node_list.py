@@ -6,6 +6,7 @@ from Src.Nodes import *
 from Src.Models import File
 from Src.Config.parameter import Parameter
 from Src.Config.node_annotation import NodeAnnotation
+from Src.Config.Annotations import *
 
 
 # TODO Перевести в нормальные модели, фабрику и JSON
@@ -18,10 +19,10 @@ node_list = {
                 node_type = TableDataNode,
                 logic = TableDataNode.open_data,
                 annotations = {
-                        "files": Parameter(AttrType.INPUT, File),
-                        "skip_header": Parameter(AttrType.INPUT, bool),
-                        "skip_footer": Parameter(AttrType.INPUT, bool),
-                        "shape": Parameter(AttrType.OUTPUT, (int, int, int))  
+                        "files": Parameter(AttrType.INPUT, AFile),
+                        "skip_header": Parameter(AttrType.INPUT, ABoolean),
+                        "skip_footer": Parameter(AttrType.INPUT, ABoolean),
+                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])  
                     }
             ),
             NodeAnnotation(
@@ -29,9 +30,9 @@ node_list = {
                 node_type= ImageDataNode,
                 logic = ImageDataNode.open_data,
                 annotations = {
-                        "files": Parameter(AttrType.INPUT, File),
-                        "color_mode": Parameter(AttrType.INPUT, str),
-                        "shape": Parameter(AttrType.OUTPUT, (int, int, int, int)) 
+                        "files": Parameter(AttrType.INPUT, AFile),
+                        "color_mode": Parameter(AttrType.INPUT, AString),
+                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger]) 
                         }
             )
         ],
@@ -41,8 +42,8 @@ node_list = {
                 node_type= PipelineNode,
                 logic = keras.utils.to_categorical,
                 annotations = {
-                        "x": Parameter(AttrType.INPUT, DataNode),
-                        "num_classes": Parameter(AttrType.INPUT, int)
+                        "x": Parameter(AttrType.INPUT, ANode),
+                        "num_classes": Parameter(AttrType.INPUT, AInteger)
                     }
             )
         ]
@@ -56,9 +57,9 @@ node_list = {
                 node_type= LayerNode,
                 logic = layers.Dense,
                 annotations = {
-                        "units": Parameter(AttrType.INPUT, int),
-                        "activation": Parameter(AttrType.INPUT, str),
-                        "use_bias": Parameter(AttrType.INPUT, bool)
+                        "units": Parameter(AttrType.INPUT, AInteger),
+                        "activation": Parameter(AttrType.INPUT, AString),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean)
                     }
             )
         ],
@@ -69,12 +70,12 @@ node_list = {
                 node_type= LayerNode,
                 logic = layers.Conv2D,
                 annotations = {
-                        "filters": Parameter(AttrType.INPUT, int),
-                        "kernel_size": Parameter(AttrType.INPUT, int),
-                        "strides": Parameter(AttrType.INPUT, int),
-                        "padding": Parameter(AttrType.INPUT, str),
-                        "activation": Parameter(AttrType.INPUT, str),
-                        "use_bias": Parameter(AttrType.INPUT, bool),
+                        "filters": Parameter(AttrType.INPUT, AInteger),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger),
+                        "strides": Parameter(AttrType.INPUT, AInteger),
+                        "padding": Parameter(AttrType.INPUT, AString),
+                        "activation": Parameter(AttrType.INPUT, AString),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean),
                     } 
             ),
             NodeAnnotation(
@@ -82,9 +83,9 @@ node_list = {
                 node_type= LayerNode,
                 logic = layers.MaxPooling2D,
                 annotations = {
-                        "pool_size": Parameter(AttrType.INPUT, (int, int)),
-                        "strides": Parameter(AttrType.INPUT, int),
-                        "padding": Parameter(AttrType.INPUT, str),
+                        "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger]),
+                        "strides": Parameter(AttrType.INPUT, AInteger),
+                        "padding": Parameter(AttrType.INPUT, AString),
                     }
             )
         ],
@@ -113,8 +114,8 @@ node_list = {
                 node_type= CompileNode,
                 logic = keras.models.Model.compile,
                 annotations = {
-                        "optimizer": Parameter(AttrType.INPUT, OptimizerNode),
-                        "loss": Parameter(AttrType.INPUT, LossNode),
+                        "optimizer": Parameter(AttrType.INPUT, ANode),
+                        "loss": Parameter(AttrType.INPUT, ANode),
                         # "metrics": MetricNode
                     }
             ),
@@ -123,10 +124,10 @@ node_list = {
                 node_type= FitNode,
                 logic = keras.models.Model.fit,
                 annotations = {
-                        "self": Parameter(AttrType.INPUT, CompileNode),
-                        "x": Parameter(AttrType.INPUT, DataNode),
-                        "y": Parameter(AttrType.INPUT, DataNode),
-                        "epochs": Parameter(AttrType.INPUT, int)
+                        "self": Parameter(AttrType.INPUT, ANode),
+                        "x": Parameter(AttrType.INPUT, ANode),
+                        "y": Parameter(AttrType.INPUT, ANode),
+                        "epochs": Parameter(AttrType.INPUT, AInteger)
                     }
             )
         ],
@@ -136,7 +137,7 @@ node_list = {
                 node_type= OptimizerNode,
                 logic = keras.optimizers.Adam,
                 annotations = {
-                        "learning_rate": Parameter(AttrType.INPUT, float),
+                        "learning_rate": Parameter(AttrType.INPUT, AFloat),
                         # "beta_1": float,
                         # "beta_2": float,
                         # "epsilon": float
@@ -148,9 +149,9 @@ node_list = {
                 node_type= OptimizerNode,
                 logic = keras.optimizers.SGD,
                 annotations = {
-                        "learning_rate": Parameter(AttrType.INPUT, float),
-                        "momentum": Parameter(AttrType.INPUT, float),
-                        "nesterov": Parameter(AttrType.INPUT, bool)
+                        "learning_rate": Parameter(AttrType.INPUT, AFloat),
+                        "momentum": Parameter(AttrType.INPUT, AFloat),
+                        "nesterov": Parameter(AttrType.INPUT, ABoolean)
                     },
                 input = False
             ),
@@ -159,8 +160,8 @@ node_list = {
                 node_type= OptimizerNode,
                 logic = keras.optimizers.RMSprop,
                 annotations =  {
-                        "learning_rate": Parameter(AttrType.INPUT, float),
-                        "momentum": Parameter(AttrType.INPUT, float)
+                        "learning_rate": Parameter(AttrType.INPUT, AFloat),
+                        "momentum": Parameter(AttrType.INPUT, AFloat)
                     },
                 input =  False
             )
@@ -211,8 +212,8 @@ node_list = {
                 node_type= UtilsNode,
                 logic = keras.saving.save_model,
                 annotations = {
-                        "model": Parameter(AttrType.INPUT, CompileNode),
-                        "filepath": Parameter(AttrType.INPUT, str)
+                        "model": Parameter(AttrType.INPUT, ANode),
+                        "filepath": Parameter(AttrType.INPUT, AString)
                     },
                 input = False,
                 output = False
@@ -222,11 +223,11 @@ node_list = {
                 node_type= UtilsNode,
                 logic = keras.utils.plot_model,
                 annotations = {
-                        "model": Parameter(AttrType.INPUT, CompileNode),
-                        "to_file": Parameter(AttrType.INPUT, str),
-                        "show_shapes": Parameter(AttrType.INPUT, bool),
-                        "show_layer_names": Parameter(AttrType.INPUT, bool),
-                        "show_layer_activations": Parameter(AttrType.INPUT, bool)
+                        "model": Parameter(AttrType.INPUT, ANode),
+                        "to_file": Parameter(AttrType.INPUT, AString),
+                        "show_shapes": Parameter(AttrType.INPUT, ABoolean),
+                        "show_layer_names": Parameter(AttrType.INPUT, ABoolean),
+                        "show_layer_activations": Parameter(AttrType.INPUT, ABoolean)
                     },
                 input = False,
                 output = False
