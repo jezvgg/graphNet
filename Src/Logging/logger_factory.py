@@ -7,6 +7,7 @@ import sys
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger
+from Src.Events import EventManager
 
 
 class Logger_factory(object):
@@ -100,15 +101,10 @@ class Logger_factory(object):
         Args:
             parent_window: str | int - индетификатор родительского окна
         '''
-        from Src.Events.callbacks import DPGCallback
 
         dpg.show_item(self.__console_tag)
 
-        resize_callback = DPGCallback(parent)
-        resize_callback.add_state_callback("rect_size", self.resize)
-
-        with dpg.handler_registry():
-            dpg.add_mouse_move_handler(callback=resize_callback.check)
+        EventManager.add('visible', parent, lambda sender, app_data, user_data: self.resize())
 
 
     def hide(self):
