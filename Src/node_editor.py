@@ -7,6 +7,7 @@ from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
 from Src.Nodes.node_list import node_list, listNode
 from Src.size_manager import SizeManager
+from Src.Events import EventManager
 
 
 class NodeEditor:
@@ -46,6 +47,8 @@ class NodeEditor:
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
 
+        self.hovered_item = None
+
         dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
         with dpg.handler_registry():
             dpg.add_mouse_wheel_handler(callback=self.mouse_wheel_zoom_callback)
@@ -59,10 +62,13 @@ class NodeEditor:
                 with dpg.group(tag="editor_group", drop_callback=self.drop_callback):
                     # Используем редактор нодов из DearPyGUI
                     with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
-                                         delink_callback=self.delink_callback, *args, **kwargs) as self.node_editor:
+                                         delink_callback=self.delink_callback, *args, **kwargs):
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
                         # Применяем начальный шрифт к input_node через size_manager
                         dpg.bind_item_font(input_id, self.size_manager.node_font)
+
+                    input = dpg.get_item_children("node_editor", slot=1)[0]
+                    EventManager.add('hover', input, self.hover, user_data = input)
 
                     dpg.add_button(label="Собрать модель", callback=self.builder.compile_graph)
 
@@ -76,22 +82,19 @@ class NodeEditor:
             sender: Идентификатор отправителя события (handler_registry).
             app_data: Данные события (значение прокрутки колеса мыши, float).
         '''
+        if not dpg.is_key_down(dpg.mvKey_LShift):
+            return
 
-        if dpg.is_key_down(dpg.mvKey_LShift):
-            item_processed_for_zoom = False
-            for item in dpg.get_all_items():
-                item_state = dpg.get_item_state(item)
-                if 'hovered' in item_state and item_state['hovered']:
-                    item_type = dpg.get_item_type(item)
-                    if item_type == 'mvAppItemType::mvNode':
-                        self.size_manager.resize_object(item, app_data)
-                        item_processed_for_zoom = True
-                    elif item_type == 'mvAppItemType::mvWindowAppItem':
-                        self.size_manager.resize_global(app_data)
-                        item_processed_for_zoom = True
+        if dpg.does_item_exist(self.hovered_item) and dpg.is_item_hovered(self.hovered_item):
+            self.size_manager.resize_object(self.hovered_item,app_data)
+            return
 
-            if not item_processed_for_zoom:
-                self.size_manager.resize_node_editor(self.node_editor,app_data)
+        elif dpg.is_item_hovered('node_editor'):
+            self.size_manager.resize_node_editor('node_editor', app_data)
+            return
+
+        self.size_manager.resize_global(app_data)
+
 
     def on_viewport_resize_callback(self, sender, app_data):
         '''
@@ -130,6 +133,8 @@ class NodeEditor:
         dpg.set_item_pos(node_id, pos)
 
         dpg.bind_item_font(node_id, self.size_manager.node_font)
+
+        EventManager.add('hover', node_id, self.hover, user_data = node_id)
 
 
     def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
@@ -215,3 +220,8 @@ class NodeEditor:
         Спрятать элемент
         '''
         dpg.move_item(self.__group_tag, parent=self.__stage_tag)
+
+
+    def hover(self,  sender: str | int, app_data: any, user_data: str | int):
+        """Обновляет текущий элемент под курсором."""
+        self.hovered_item = user_data
