@@ -23,7 +23,8 @@ node_list = {
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),
                         "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])  
-                    }
+                    },
+                input=False
             ),
             NodeAnnotation(
                 label="Images data",
