@@ -1,83 +1,87 @@
 from typing import Callable
 
-from Src.Logging import Logger_factory,Logger
+import dearpygui.dearpygui as dpg
+
+from Src.Enums import EventType
 
 
 
 
-class Event_manager:
+class EventManager:
     """
-    Класс-наблюдатель для управления пользовательскими событиями.
-
-    Class Attributes:
-        _events: dict[str, list[Callable]] - словарь событий и их обработчиков
-        logger: Logger - экземпляр логгера
+    Менеджер событий для DearPyGui.
+        Использует ItemHandlerRegistry для событий (click, hover и т.д.).
     """
-
-    _events: dict[str, list[Callable]] = {}
-    logger: Logger = Logger_factory.from_instance()('events')
+    _logger = None
 
 
     @classmethod
-    def add_custom_event(cls, event_name: str, handlers: list[Callable]) -> None:
+    def set_logger(cls, logger):
         """
-        Добавление пользовательского события и его обработчиков.
-
-        Args:
-            event_name: str - название события
-            handlers: list[Callable] - список функций-обработчиков события
+        Устанавливает экземпляр логгера для класса.
         """
-        if event_name not in cls._events:
-            cls._events[event_name] = []
-
-        cls._events[event_name]+=handlers
+        cls._logger = logger
+        if cls._logger:
+            cls._logger.info("Logger установлен для EventManager")
 
 
     @classmethod
-    def remove_custom_event(cls, event_name: str = None, handler: Callable = None) -> None:
+    def add(cls, event_type: EventType, item_id, handler: Callable, *, user_data=None):
         """
-        Отписка от события, или очистка обработчика события или всех событий.
-        
-        Args:
-            event_name: str, optional - название события. Если None, очищаются все события
-            handler: Callable, optional - функция-обработчик для удаления
-        """
-        # Если не указано имя события, очищаем все события
-        if not event_name:
-            cls._events.clear()
-            return
-        # Если указан конкретный обработчик, удаляем только его
-        if handler and handler in cls._events[event_name]:
-            cls._events[event_name].remove(handler)
-        else:
-            # Иначе удаляем все обработчики события
-            del cls._events[event_name]
-
-
-    @classmethod
-    def trigger_custom_event(cls, event_name: str,*args,**kwargs) -> None:
-        """
-        Вызов пользовательского события.
+        Регистрирует обработчик на событие для указанного элемента DPG.
 
         Args:
-            event_name: str - название события
-            *args, **kwargs - аргументы, передаваемые обработчикам
+            event_type (EventType): Тип события из перечисления EventType.
+            item_id (int or str): ID элемента DPG.
+            handler (callable): Функция-обработчик (sender, app_data, user_data).
+            user_data (any, optional): Пользовательские данные для передачи в обработчик.
         """
-        if event_name not in cls._events:
-            cls.logger.error(f"Событие '{event_name}' не определено")
+        if not dpg.does_item_exist(item_id):
+            cls._log('warning', f"Элемент {item_id} не существует. Регистрация '{event_type}' прервана.")
             return
 
-        for handler in cls._events[event_name]:
-            handler(*args,**kwargs)
+        registry_id = dpg.get_item_info(item_id).get("handlers")
+        if not registry_id:
+            registry_id = dpg.add_item_handler_registry()
+            dpg.bind_item_handler_registry(item_id, registry_id)
+            cls._log('debug', f"Создан новый ItemHandlerRegistry ({registry_id}) для элемента {item_id}.")
 
+        event_type(parent=registry_id, callback=handler, user_data=user_data)
+        cls._log('info', f"Обработчик для '{event_type}' успешно добавлен к элементу {item_id}.")
 
 
     @classmethod
-    def get_events(cls) -> dict[str, list[Callable]]:
+    def add_value_changed(cls, item_id, handler: Callable, *, user_data=None):
         """
-        Метод для доступа к словарю событий.
+        Регистрирует обработчик на изменение значения элемента.
+        """
+        if not dpg.does_item_exist(item_id):
+            cls._log('warning', f"Элемент {item_id} не существует. Регистрация 'value_changed' прервана.")
+            return
 
-        Returns:
-            dict[str, list[Callable]] - словарь событий и их обработчиков
+        dpg.configure_item(item_id, callback=handler, user_data=user_data)
+        cls._log('info', f"Обработчик 'value_changed' установлен для элемента {item_id}.")
+
+
+    @classmethod
+    def clear(cls, item_id):
         """
-        return cls._events
+        Удаляет все обработчики, привязанные к элементу.
+        """
+        if not dpg.does_item_exist(item_id):
+            cls._log('warning', f"Попытка очистить обработчики для несуществующего элемента {item_id}.")
+            return
+
+        dpg.configure_item(item_id, callback=None, user_data=None)
+
+        registry_id = dpg.get_item_info(item_id).get("handlers")
+        if registry_id:
+            dpg.delete_item(registry_id)
+
+        cls._log('info', f"Все обработчики для элемента {item_id} были очищены.")
+
+
+    @classmethod
+    def _log(cls, level: str, message: str):
+        if cls._logger and hasattr(cls._logger, level):
+            getattr(cls._logger, level)(message)
