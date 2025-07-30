@@ -7,7 +7,6 @@ from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
 from Src.Nodes.node_list import node_list, listNode
 from Src.size_manager import SizeManager
-from Src.Events import EventManager
 
 
 class NodeEditor:
@@ -25,6 +24,7 @@ class NodeEditor:
     __group_tag: str | int
 
     size_manager: SizeManager
+
 
     def __init__(self,
                  size_manager: SizeManager,
@@ -47,12 +47,6 @@ class NodeEditor:
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
 
-        self.hovered_item = None
-
-        dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
-        with dpg.handler_registry():
-            dpg.add_mouse_wheel_handler(callback=self.mouse_wheel_zoom_callback)
-
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
             with dpg.group(horizontal=True, tag=self.__group_tag) as group:
@@ -65,43 +59,10 @@ class NodeEditor:
                                          delink_callback=self.delink_callback, *args, **kwargs):
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
                         # Применяем начальный шрифт к input_node через size_manager
-                        dpg.bind_item_font(input_id, self.size_manager.node_font)
-
-                    input = dpg.get_item_children("node_editor", slot=1)[0]
-                    EventManager.add('hover', input, self.hover, user_data = input)
+                        dpg.bind_item_font(input_id, self.size_manager.object_font)
 
                     dpg.add_button(label="Собрать модель", callback=self.builder.compile_graph)
 
-    def mouse_wheel_zoom_callback(self, sender: str | int, app_data: float):
-        '''
-        Callback для масштабирования с помощью колеса мыши.
-        Масштабирует редактор узлов, если зажат Shift и курсор над редактором ('editor_group').
-        В противном случае масштабирует всё приложение, если зажат Shift.
-
-        Args:
-            sender: Идентификатор отправителя события (handler_registry).
-            app_data: Данные события (значение прокрутки колеса мыши, float).
-        '''
-        if not dpg.is_key_down(dpg.mvKey_LShift):
-            return
-
-        if dpg.does_item_exist(self.hovered_item) and dpg.is_item_hovered(self.hovered_item):
-            self.size_manager.resize_object(self.hovered_item,app_data)
-            return
-
-        elif dpg.is_item_hovered('node_editor'):
-            self.size_manager.resize_node_editor('node_editor', app_data)
-            return
-
-        self.size_manager.resize_global(app_data)
-
-
-    def on_viewport_resize_callback(self, sender, app_data):
-        '''
-        Callback для изменения размера node_editor'a
-        '''
-        if dpg.does_item_exist('node_editor'):
-            dpg.configure_item('node_editor', height=dpg.get_viewport_height() * 0.9)
 
     def drop_callback(self, sender: str | int, app_data: str | int):
         '''
@@ -132,9 +93,7 @@ class NodeEditor:
         node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
 
-        dpg.bind_item_font(node_id, self.size_manager.node_font)
-
-        EventManager.add('hover', node_id, self.hover, user_data = node_id)
+        dpg.bind_item_font(node_id, self.size_manager.object_font)
 
 
     def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
@@ -220,8 +179,3 @@ class NodeEditor:
         Спрятать элемент
         '''
         dpg.move_item(self.__group_tag, parent=self.__stage_tag)
-
-
-    def hover(self,  sender: str | int, app_data: any, user_data: str | int):
-        """Обновляет текущий элемент под курсором."""
-        self.hovered_item = user_data

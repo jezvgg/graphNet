@@ -1,22 +1,22 @@
-import re
-
 import dearpygui.dearpygui as dpg
+
+
 
 
 class SizeManager:
     """
     Универсальный менеджер размеров и шрифтов для Dear PyGui.
-    Управляет глобальным масштабом приложения, размерами шрифтов для узлов,
-    и загружает шрифты на основе предоставленных конфигураций.
+    Управляет глобальным масштабом приложения и размерами шрифтов для узлов.
     """
 
     default_font: str | int | None = None  # DPG шрифт по умолчанию для приложения
-    node_font_size_limits: list[int]  # [min_size, max_size] для шрифтов узлов
-    current_node_font_size: int  # Текущий размер шрифта для новых узлов или при общем изменении
+    font_limits: list[int]  # [min_size, max_size] для шрифтов узлов
+    current_objects_font_size: int  # Текущий размер шрифта для новых узлов
 
     current_global_scale: float  # Текущий глобальный масштаб приложения
     global_scale_limits: list[float]  # [min_scale, max_scale] для глобального масштаба
     global_scale_step: float = 0.1  # Шаг изменения глобального масштаба
+
 
     def __init__(self,
                  font_limits: list[int],
@@ -27,54 +27,40 @@ class SizeManager:
         Инициализация менеджера размеров и шрифтов.
 
         Args:
-            node_font_size_limits (list[int]): Границы [min, max] для размеров шрифтов узлов.
+            font_limits (list[int]): Границы [min, max] для размеров шрифтов узлов.
             initial_node_font_size (int): Начальный размер шрифта для узлов.
             initial_global_scale (float, optional): Начальный глобальный масштаб приложения. По умолчанию 1.0.
             global_scale_limits (list[float], optional): Границы [min, max] для глобального масштаба.
-                                                        По умолчанию [0.5, 2.0].
         """
         self.font_limits = font_limits
         self.global_scale_limits = global_scale_limits
 
-        self.current_node_font_size = max(
-            self.font_limits[0],
-            min(self.font_limits[1], initial_node_font_size)
+        self.current_objects_font_size = self._clamp_value(
+            initial_node_font_size, self.font_limits
         )
-        self.current_global_scale = max(
-            self.global_scale_limits[0],
-            min(self.global_scale_limits[1], initial_global_scale)
+        self.current_global_scale = self._clamp_value(
+            initial_global_scale, self.global_scale_limits
         )
 
 
-    def resize_global(self,size_delta:float):
-        self.current_global_scale+=size_delta*self.global_scale_step
-        self.current_global_scale = max(self.global_scale_limits[0],min(self.global_scale_limits[1],self.current_global_scale))
+    def _clamp_value(self, value: float, limits: list[float]) -> float:
+        """Ограничивает значение в заданных пределах"""
+        return max(limits[0], min(limits[1], value))
+
+
+    def resize_global(self, size_delta: float):
+        """Изменение глобального масштаба приложения"""
+        self.current_global_scale += size_delta * self.global_scale_step
+        self.current_global_scale = self._clamp_value(self.current_global_scale, self.global_scale_limits)
         dpg.set_global_font_scale(self.current_global_scale)
 
 
-    def resize_node_editor(self,node_editor:int|str,size_delta:float):
-        self.current_node_font_size+=size_delta
-        self.current_node_font_size = max(
-            self.font_limits[0],
-            min(self.font_limits[1], self.current_node_font_size)
-        )
-        for item in dpg.get_item_children(node_editor,1):
-            self.resize_object(item,size_delta)
-
-
-    def resize_object(self, item: int|None, size_delta: float):
-        """
-        Изменение размера объекта, находящегося под курсором мыши
-
-        args:
-            item:int|None - id объекта для изменения
-            size_delta:float - показатель изменения размера объекта
-        """
-        font = dpg.get_item_alias(dpg.get_item_font(item))
-        font_size = int(re.findall("\d+", font)[0])
-        font_size+=size_delta
-        font_size = max(self.font_limits[0],min(self.font_limits[1],font_size))
-        dpg.bind_item_font(item,f'font_{font_size}')
+    def resize_node_editor(self, node_editor: int | str, size_delta: float):
+        """Изменение размера всех нодов в редакторе"""
+        self.current_objects_font_size += size_delta
+        self.current_objects_font_size = self._clamp_value(self.current_objects_font_size, self.font_limits)
+        for item in dpg.get_item_children(node_editor, 1):
+            dpg.bind_item_font(item, f'font_{int(self.current_objects_font_size)}')
 
 
     def load_fonts(self, font_configs: list[dict[str, any]]) -> None:
@@ -105,6 +91,7 @@ class SizeManager:
                 if dpg.does_item_exist(self.default_font):
                     dpg.bind_font(self.default_font)
 
+
     @property
-    def node_font(self):
-        return f'font_{self.current_node_font_size}'
+    def object_font(self):
+        return f'font_{self.current_objects_font_size}'

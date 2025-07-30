@@ -16,7 +16,7 @@ class App:
     создание UI и запуск главного цикла DearPyGui.
     """
 
-  
+
     def __init__(
             self,
             title: str,
@@ -53,14 +53,14 @@ class App:
         self._setup_sizing_and_fonts()
         self._create_ui()
 
-  
+
     def _setup_dpg(self):
         """Настраивает контекст и вьюпорт DearPyGui."""
         dpg.create_context()
         dpg.create_viewport(title=self.title)
         dpg.setup_dearpygui()
 
-  
+
     def _setup_logging(self):
         """Настраивает систему логирования."""
         with open(self.logger_config_path) as f:
@@ -70,7 +70,7 @@ class App:
         self.main_logger = self.logger_factory("main")
         self.main_logger.info("Система логирования инициализирована.")
 
-  
+
     def _setup_sizing_and_fonts(self):
         """Инициализирует менеджер размеров и загружает шрифты."""
         self.size_manager = SizeManager(
@@ -86,7 +86,11 @@ class App:
             self.size_manager.load_fonts(fonts_to_load)
         self.main_logger.info("Шрифты загружены.")
 
-  
+        dpg.set_viewport_resize_callback(callback=self._on_viewport_resize_callback)
+        with dpg.handler_registry():
+            dpg.add_mouse_wheel_handler(callback=self._mouse_wheel_zoom_callback)
+
+
     def _build_font_list(self) -> list:
         """Собирает список шрифтов для загрузки на основе конфигурации."""
         fonts = [
@@ -106,7 +110,7 @@ class App:
             })
         return fonts
 
-  
+
     def _create_ui(self):
         """Создает основной интерфейс приложения."""
         self.node_editor = NodeEditor(
@@ -122,11 +126,31 @@ class App:
         dpg.set_primary_window("Prime", True)
         self.main_logger.info("UI создан.")
 
-  
+
+    def _mouse_wheel_zoom_callback(self, sender: str | int, app_data: float):
+        """
+        Callback для масштабирования с помощью колеса мыши.
+        Масштабирует редактор узлов, если курсор над редактором и зажат Shift.
+        В противном случае масштабирует всё приложение, если зажат Shift.
+        """
+        if not dpg.is_key_down(dpg.mvKey_LShift):
+            return
+
+        if dpg.is_item_hovered('node_editor'):
+            self.size_manager.resize_node_editor('node_editor', app_data)
+        else:
+            self.size_manager.resize_global(app_data)
+
+
+    def _on_viewport_resize_callback(self, sender, app_data):
+        """Callback для изменения размера node_editor'a"""
+        if dpg.does_item_exist('node_editor'):
+            dpg.configure_item('node_editor', height=dpg.get_viewport_height() * 0.9)
+
+
     def run(self):
         """Запускает главный цикл приложения."""
         dpg.show_viewport()
         self.main_logger.warning("Приложение запущено.")
         dpg.start_dearpygui()
-        self.main_logger.info("Приложение завершает работу.")
         dpg.destroy_context()
