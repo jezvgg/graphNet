@@ -5,7 +5,8 @@ import dearpygui.dearpygui as dpg
 from Src.Nodes import AbstractNode, node_link
 from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
-from Src.Nodes.node_list import node_list, listNode
+from Src.Config.node_list import node_list, NodeAnnotation
+
 
 
 class NodeEditor:
@@ -90,7 +91,7 @@ class NodeEditor:
 
         self.logger.info(f"Рассчитанная позиция - {pos}")
 
-        node_data: listNode = dpg.get_item_user_data(app_data)
+        node_data: NodeAnnotation = dpg.get_item_user_data(app_data)
         node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
 
@@ -101,7 +102,7 @@ class NodeEditor:
 
         Args:
             sender: int | str - зачастую является окном редакторивания графа (dpg.node_editor)
-            app_data: tuple(str | int, str | int) - исходящий и приходящий нод.
+            app_data: tuple(str | int, str | int) - исходящие и приходящие атрибуты нодов.
         '''
         self.logger.debug(f"На вход пришло {app_data}")
 
@@ -114,10 +115,15 @@ class NodeEditor:
 
         self.logger.debug(f"Связи до: {node_out} {node_in}")
 
-        data: list | None = dpg.get_item_user_data(app_data[1])
-        if not data: data = []
-        data.append(node_out)
-        dpg.set_item_user_data(app_data[1], data)
+        data_in: list | None = dpg.get_item_user_data(app_data[1])
+        if not data_in: data_in = []
+        data_in.append(app_data[0])
+        dpg.set_item_user_data(app_data[1], data_in)
+
+        data_out: list | None = dpg.get_item_user_data(app_data[0])
+        if not data_out: data_out = []
+        data_out.append(app_data[1])
+        dpg.set_item_user_data(app_data[0], data_out)
 
         node_out.outcoming.append(node_in)
         node_in.incoming.append(node_out)

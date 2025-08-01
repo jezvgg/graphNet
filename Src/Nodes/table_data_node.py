@@ -5,8 +5,6 @@ from Src.Nodes import DataNode
 
 
 class TableDataNode(DataNode):
-    data: np.ndarray 
-    
 
     @staticmethod
     def open_data(files: dict, *args, **kwargs):

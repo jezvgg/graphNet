@@ -6,8 +6,6 @@ from Src.Nodes import DataNode
 
 
 class ImageDataNode(DataNode):
-    data: np.ndarray
-
 
     @staticmethod
     def open_data(files: dict, *args, **kwargs):
