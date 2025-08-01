@@ -33,13 +33,21 @@ class ASequence(Annotation):
         return item
 
 
-    @staticmethod
-    def get(input_field: int | str):
+    def get(self, input_field: int | str):
         result = []
         for input_id in dpg.get_item_children(input_field)[1][:-1]:
             result.append(dpg.get_value(input_id))
         return result
     
 
-    @staticmethod
-    def set(input_id: str| int): pass
+    def set(self, input_id: str| int, value: tuple) -> bool:
+        if not isinstance(value, tuple) or len(value) != len(self.shape): 
+            return False
+        
+        for input_field, annotation, field_value in \
+            zip(dpg.get_item_children(input_id)[1][:-1], self.shape, value):
+
+            if not annotation.set(input_field, field_value):
+                return False
+
+        return True

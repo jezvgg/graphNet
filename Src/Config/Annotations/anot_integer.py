@@ -18,4 +18,7 @@ class AInteger(Annotation):
     
 
     @staticmethod
-    def set(input_id: str| int): pass
+    def set(input_id: str| int, value: int) -> bool:
+        if not isinstance(value, int): return False
+        dpg.set_value(input_id, value)
+        return True 

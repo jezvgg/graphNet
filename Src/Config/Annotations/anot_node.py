@@ -53,4 +53,5 @@ class ANode(Annotation):
     
 
     @staticmethod
-    def set(input_id: str| int): pass
+    def set(input_id: str| int, value) -> bool:
+        return False 

@@ -9,7 +9,7 @@ from Tests.DPG_test import DPGUnitTest
 class test_annotations(DPGUnitTest):
 
     def test_Parameter(self):
-        param = Parameter(AttrType.INPUT, AInteger)
+        param = Parameter(AttrType.INPUT, AInteger, default=5)
 
         with dpg.node_editor(parent = self.parent):
             with dpg.node() as node_id:
@@ -20,5 +20,10 @@ class test_annotations(DPGUnitTest):
 
         value = param.get_value(attr_id)
 
-        assert value == 0
+        assert value == 5
+
+        result = param.set_value(attr_id, 1)
+
+        assert param.get_value(attr_id) == 1
+        assert result == True
             

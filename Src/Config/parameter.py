@@ -16,7 +16,7 @@ class Parameter:
     default: object = None
 
 
-    def build(self, parent: int | str, *args, **kwargs):
+    def build(self, parent: int | str, *args, **kwargs) -> str | int:
         if (dpg.get_item_type(parent) != 'mvAppItemType::mvNode'):
             raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNode")
         
@@ -29,6 +29,8 @@ class Parameter:
             kwargs['parent'] = attr
             self.hint.build(*args, **kwargs)
 
+        if self.default: self.set_value(attr, self.default)
+
         return attr
     
 
@@ -36,4 +38,8 @@ class Parameter:
         field = dpg.get_item_children(argument)[1][0]
         value = self.hint.get(field)
         return value
+    
 
+    def set_value(self, argument: int | str, value) -> bool:
+        field = dpg.get_item_children(argument)[1][0]
+        return self.hint.set(field, value)

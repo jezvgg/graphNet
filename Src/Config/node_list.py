@@ -1,15 +1,16 @@
+from pathlib import Path
+
 from keras import layers
 import keras
 
 from Src.Enums.attr_type import AttrType
 from Src.Nodes import *
-from Src.Models import File
 from Src.Config.parameter import Parameter
 from Src.Config.node_annotation import NodeAnnotation
 from Src.Config.Annotations import *
 
 
-# TODO Перевести в нормальные модели, фабрику и JSON
+# TODO Сделать сериализацию в JSON
 node_list = {
     "Data & Preprocessing":
     {

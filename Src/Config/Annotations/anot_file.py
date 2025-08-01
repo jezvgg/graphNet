@@ -1,6 +1,8 @@
-from Src.Config.Annotations.annotation import Annotation
+from pathlib import Path
 
 import dearpygui.dearpygui as dpg
+
+from Src.Config.Annotations.annotation import Annotation
 
 
 
@@ -15,10 +17,10 @@ class AFile(Annotation):
 
         with dpg.file_dialog(directory_selector=False, show=False, modal=True, \
                               width=1400 ,height=800, tag=browser_id, 
-                              callback=lambda _, appdata: dpg.set_item_user_data(group_id,  appdata)):
+                              callback=lambda _, appdata: dpg.set_item_user_data(group_id, Path(appdata))):
             dpg.add_file_extension(".*")
 
-        with dpg.group(*args, **kwargs, tag=group_id) as item:
+        with dpg.group(*args, **kwargs, tag=group_id, user_data=Path.home()) as item:
             dpg.add_button(label="Choose file...", callback=lambda: dpg.show_item(browser_id))
 
         return item
@@ -30,4 +32,7 @@ class AFile(Annotation):
     
 
     @staticmethod
-    def set(input_id: str| int): pass
+    def set(input_id: str| int, value: Path) -> bool:
+        if not isinstance(value, Path): return False
+        dpg.set_item_user_data(input_id, value)
+        return True

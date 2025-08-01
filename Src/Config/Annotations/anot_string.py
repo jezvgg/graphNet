@@ -18,4 +18,7 @@ class AString(Annotation):
     
 
     @staticmethod
-    def set(input_id: str| int): pass
+    def set(input_id: str| int, value: str) -> bool: 
+        if not isinstance(value, str): return False
+        dpg.set_value(input_id, value)
+        return True
