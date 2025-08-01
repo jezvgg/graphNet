@@ -17,6 +17,9 @@ class Parameter:
 
 
     def build(self, parent: int | str, *args, **kwargs):
+        if (dpg.get_item_type(parent) != 'mvAppItemType::mvNode'):
+            raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNode")
+        
         kwargs['parent'] = parent
         # Возможно исправить потом на более гибкую версию
         attribute_type =  dpg.mvNode_Attr_Output if self.attr_type == AttrType.OUTPUT else dpg.mvNode_Attr_Static
@@ -30,10 +33,7 @@ class Parameter:
     
 
     def get_value(self, argument: int):
-        # ! Ебучие циклически импорты, питон заебал с ними
-        # from Src.Utils import GetterFactory
-        # value = GetterFactory.get_value(self.hint, argument)
-        # print(value)
-        value = self.hint.get(argument)
+        field = dpg.get_item_children(argument)[1][0]
+        value = self.hint.get(field)
         return value
 

@@ -3,6 +3,7 @@ from typing import get_args
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
+from Src.Config.Annotations import *
 
 
 class ASequence(Annotation):
@@ -12,16 +13,19 @@ class ASequence(Annotation):
     def __class_getitem__(cls, items):
         if not isinstance(items, tuple):
             items = (items,)
-        cls.items = items
-        return cls
+        return ASequence(shape = items)
+    
 
+    def __init__(self, shape: tuple[Annotation]):
+        self.shape = shape
+        
 
-    @classmethod
-    def build(cls, *args, **kwargs):
-        shape: tuple[Annotation] = get_args(cls.items)
+    def build(self, *args, **kwargs):
         kwargs = Annotation.check_kwargs(dpg.group, kwargs)
         with dpg.group(horizontal=True, *args, **kwargs) as item:
-            for hint in shape:
+            for hint in self.shape:
+                if hint not in (ABoolean, AFloat, AInteger, AString):
+                    raise Exception("Sequence annotations must be only Boolean, Float, Intege or String!")
                 hint.build(hint, parent=item)
 
             # Если отсутсвует label, то создаст пустой текст
@@ -31,8 +35,11 @@ class ASequence(Annotation):
 
     @staticmethod
     def get(input_field: int | str):
-        return dpg.get_value(input_field)
+        result = []
+        for input_id in dpg.get_item_children(input_field)[1][:-1]:
+            result.append(dpg.get_value(input_id))
+        return result
     
 
     @staticmethod
-    def set(): pass
+    def set(input_id: str| int): pass

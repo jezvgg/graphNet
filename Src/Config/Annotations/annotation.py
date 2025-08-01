@@ -19,10 +19,12 @@ class Annotation(ABC):
     def build(*args, **kwargs) -> str | int: pass
 
 
+    @staticmethod
     @abstractmethod
-    def get(self): pass
+    def get(input_id: str| int): pass
 
 
+    @staticmethod
     @abstractmethod
-    def set(): pass
+    def set(input_id: str| int): pass
     

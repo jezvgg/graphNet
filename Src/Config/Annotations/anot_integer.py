@@ -18,4 +18,4 @@ class AInteger(Annotation):
     
 
     @staticmethod
-    def set(): pass
+    def set(input_id: str| int): pass

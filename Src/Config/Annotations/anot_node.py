@@ -8,14 +8,16 @@ class ANode(Annotation):
 
 
     @staticmethod
-    def build(*args, **kwargs):
+    def build(parent: int | str, *args, **kwargs):
         kwargs = Annotation.check_kwargs(dpg.add_text, kwargs)
 
-        parent = dpg.get_item_parent(kwargs['parent'])
-        dpg.delete_item(kwargs['parent'])
+        if (dpg.get_item_type(parent) != 'mvAppItemType::mvNodeAttribute'):
+            raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
+
+        new_parent = dpg.get_item_parent(parent)
+        dpg.delete_item(parent)
         kwargs = Annotation.check_kwargs(dpg.node_attribute, kwargs)
-        kwargs['tag'] = kwargs['parent']
-        kwargs['parent']  = parent
+        kwargs['parent']  = new_parent
         kwargs['user_data'] = []
 
         with dpg.node_attribute(*args, **kwargs, attribute_type=dpg.mvNode_Attr_Input) as attr:
@@ -27,8 +29,10 @@ class ANode(Annotation):
     def get(input_field: int | str):
         from Src.Nodes import AbstractNode
 
-        parent = dpg.get_item_parent(input_field)
-        user_data = dpg.get_item_user_data(parent)
+        if (dpg.get_item_type(input_field) != 'mvAppItemType::mvNodeAttribute'):
+            raise Exception(f"Incompatable item {dpg.get_item_type(input_field)} must be mvAppItemType::mvNodeAttribute")
+
+        user_data = dpg.get_item_user_data(input_field)
 
         node_in: list[tuple[str, AbstractNode]] = [(dpg.get_item_label(attribute),
                                                     dpg.get_item_user_data(dpg.get_item_parent(attribute))) 
@@ -39,4 +43,4 @@ class ANode(Annotation):
     
 
     @staticmethod
-    def set(): pass
+    def set(input_id: str| int): pass
