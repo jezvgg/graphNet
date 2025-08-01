@@ -2,6 +2,9 @@ from Src.Config.Annotations.annotation import Annotation
 
 import dearpygui.dearpygui as dpg
 
+from Src.Logging.logger_factory import Logger_factory
+
+
 
 
 class ANode(Annotation):
@@ -35,11 +38,18 @@ class ANode(Annotation):
         user_data = dpg.get_item_user_data(input_field)
 
         node_in: list[tuple[str, AbstractNode]] = [(dpg.get_item_label(attribute),
-                                                    dpg.get_item_user_data(dpg.get_item_parent(attribute))) 
+                                                    dpg.get_item_user_data(dpg.get_item_parent(attribute)))
                                                     for attribute in user_data]
 
-        if len(node_in) == 1: return getattr(node_in[0][1], node_in[0][0])
-        return [getattr(node, field) for field, node in node_in]
+        results = []
+        for field, node in node_in:
+            if not hasattr(node, field):
+                raise Exception(f"Атрибут '{field}' не найден в объекте узла типа '{node.__class__.__name__}'.")
+
+            results.append(getattr(node, field))
+
+        if len(results) == 1: return results[0]
+        return results
     
 
     @staticmethod
