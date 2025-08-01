@@ -26,5 +26,5 @@ class Annotation(ABC):
 
     @staticmethod
     @abstractmethod
-    def set(input_id: str| int): pass
+    def set(input_id: str| int, value) -> bool: pass
     

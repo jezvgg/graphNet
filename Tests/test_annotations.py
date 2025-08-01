@@ -1,9 +1,8 @@
-import json
+from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations import *
-from Src.Logging.logger_factory import Logger_factory
 from Tests.DPG_test import DPGUnitTest
 
 
@@ -32,7 +31,10 @@ class test_annotations(DPGUnitTest):
         # False - значение чекбокса
         assert ABoolean.get(checkbox_id) == False
 
-        assert ABoolean.set(checkbox_id) == None
+        assert ABoolean.set(checkbox_id, True) == True
+        assert ABoolean.get(checkbox_id) == True
+
+        assert ABoolean.set(checkbox_id, 1) == False
 
 
     def test_AFloat(self):
@@ -43,7 +45,10 @@ class test_annotations(DPGUnitTest):
 
         assert AFloat.get(input_id) == 0.0
 
-        assert AFloat.set(input_id) == None
+        assert AFloat.set(input_id, 1.5) == True
+        assert AFloat.get(input_id) == 1.5
+
+        assert AFloat.set(input_id, "Example") == False
 
 
     def test_AInteger(self):
@@ -54,7 +59,10 @@ class test_annotations(DPGUnitTest):
 
         assert AInteger.get(input_id) == 0
 
-        assert AInteger.set(input_id) == None
+        assert AInteger.set(input_id, 1) == True
+        assert AInteger.get(input_id) == 1
+
+        assert AInteger.set(input_id, 1.5) == False
 
 
     def test_AString(self):
@@ -65,7 +73,11 @@ class test_annotations(DPGUnitTest):
 
         assert AString.get(input_id) == ''
 
-        assert AString.set(input_id) == None
+        example = "Example"
+        assert AString.set(input_id, example) == True
+        assert AInteger.get(input_id) == example
+
+        assert AInteger.set(input_id, 1.5) == False
 
 
     def test_AFile(self):
@@ -74,9 +86,12 @@ class test_annotations(DPGUnitTest):
         assert isinstance(input_id, int | str) 
         assert input_id in dpg.get_all_items()
 
-        assert AFile.get(input_id) == None
+        assert AFile.get(input_id) == Path.home()
 
-        assert AFile.set(input_id) == None
+        assert AFile.set(input_id, Path.cwd()) == True 
+        assert AFile.get(input_id) == Path.cwd()
+
+        assert AFile.set(input_id, 'Example path') == False
 
 
     def test_ANode(self):
@@ -90,7 +105,8 @@ class test_annotations(DPGUnitTest):
 
         assert ANode.get(input_id) == []
 
-        assert ANode.set(input_id) == None
+        # Тут не должно быть возможности поставить значение
+        assert ANode.set(input_id, None) == False
 
 
     def test_ASequence(self):
@@ -101,7 +117,11 @@ class test_annotations(DPGUnitTest):
 
         assert ASequence[AInteger, AInteger].get(input_id) == [0, 0]
 
-        assert ASequence[AInteger, AInteger].set(input_id) == None
+        assert ASequence[AInteger, AInteger].set(input_id, (1, 1)) == True
+        assert ASequence[AInteger, AInteger].get(input_id) == [1, 1]
+
+        assert ASequence[AInteger, AInteger].set(input_id, 1) == False
+        assert ASequence[AInteger, AInteger].set(input_id, (1, 1, 1)) == False
 
     
 
