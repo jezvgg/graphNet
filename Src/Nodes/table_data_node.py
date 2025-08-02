@@ -8,5 +8,4 @@ class TableDataNode(DataNode):
 
     @staticmethod
     def open_data(files: dict, *args, **kwargs):
-        key = list(files['selections'].keys())[0]
-        return np.genfromtxt(files['selections'][key], delimiter=',', *args, **kwargs)
+        return np.genfromtxt(files[0], delimiter=',', *args, **kwargs)

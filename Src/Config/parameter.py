@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Callable
 
 import dearpygui.dearpygui as dpg
 
@@ -27,6 +28,7 @@ class Parameter:
 
         with dpg.node_attribute(*args, **attribute_kwargs, attribute_type=attribute_type) as attr:
             kwargs['parent'] = attr
+            if self.attr_type != AttrType.INPUT: kwargs['enabled'] = False
             self.hint.build(*args, **kwargs)
 
         if self.default: self.set_value(attr, self.default)
