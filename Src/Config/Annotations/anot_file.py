@@ -17,10 +17,12 @@ class AFile(Annotation):
 
         with dpg.file_dialog(directory_selector=False, show=False, modal=True, \
                               width=1400 ,height=800, tag=browser_id, 
-                              callback=lambda _, appdata: dpg.set_item_user_data(group_id, Path(appdata))):
+                              callback=lambda _, appdata: 
+                                dpg.set_item_user_data(group_id, 
+                                        list(map(Path, appdata['selections'].keys())))):
             dpg.add_file_extension(".*")
 
-        with dpg.group(*args, **kwargs, tag=group_id, user_data=Path.home()) as item:
+        with dpg.group(*args, **kwargs, tag=group_id, user_data=[Path.home()]) as item:
             dpg.add_button(label="Choose file...", callback=lambda: dpg.show_item(browser_id))
 
         return item

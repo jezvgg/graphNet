@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 
 from Src.Nodes import ParameterNode
@@ -13,7 +15,7 @@ class DataNode(ParameterNode):
     
 
     @staticmethod
-    def open_data(files: dict, *args, **kwargs):
+    def open_data(files: list[Path], *args, **kwargs):
         pass
 
 

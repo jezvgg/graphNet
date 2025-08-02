@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from keras import layers
 import keras
 
