@@ -1,5 +1,3 @@
-from typing import get_args
-
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
@@ -8,6 +6,7 @@ from Src.Config.Annotations import *
 
 class ASequence(Annotation):
     items: tuple[type]
+    MIN_SIZE = 72
 
 
     def __class_getitem__(cls, items):
@@ -18,15 +17,21 @@ class ASequence(Annotation):
 
     def __init__(self, shape: tuple[Annotation]):
         self.shape = shape
+
+
+    def __calc_width(self, width: int = Annotation.BASE_WIDTH):
+        return max(self.MIN_SIZE, width // len(self.shape))
         
 
     def build(self, *args, **kwargs):
         kwargs = Annotation.check_kwargs(dpg.group, kwargs)
+        kwargs['width'] = self.__calc_width(kwargs.get('width'))
         with dpg.group(horizontal=True, *args, **kwargs) as item:
             for hint in self.shape:
                 if hint not in (ABoolean, AFloat, AInteger, AString):
                     raise Exception("Sequence annotations must be only Boolean, Float, Intege or String!")
-                hint.build(hint, parent=item)
+                
+                hint.build(parent=item)
 
             # Если отсутсвует label, то создаст пустой текст
             dpg.add_text(kwargs.get('label') or '')
@@ -51,3 +56,4 @@ class ASequence(Annotation):
                 return False
 
         return True
+    

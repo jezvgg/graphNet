@@ -4,6 +4,7 @@ from typing import Callable
 
 
 class Annotation(ABC):
+    BASE_WIDTH = 256
     field_id: str | int
 
 
