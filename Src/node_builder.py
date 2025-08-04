@@ -3,7 +3,7 @@ from keras import layers
 
 from Src.Enums.attr_type import AttrType
 from Src.Logging import Logger_factory, Logger
-from Src.Nodes import AbstractNode, InputLayerNode, DataNode
+from Src.Nodes import AbstractNode, InputLayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode
 
 
@@ -81,6 +81,7 @@ class NodeBuilder:
             for label, attribute in node.annotations.items():
                 width = self.calculate_width(attribute.hint)
                 self.logger.info(f"Attribute label: {label}")
+                attr = attribute.build(label=label, parent=node_id, width=width)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(label="Delete", callback=node.delete)

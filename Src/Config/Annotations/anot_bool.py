@@ -13,8 +13,8 @@ class ABoolean(Annotation):
     
 
     @staticmethod
-    def get(input_field: int | str):
-        return dpg.get_value(input_field)
+    def get(input_id: int | str):
+        return dpg.get_value(input_id)
     
 
     @staticmethod

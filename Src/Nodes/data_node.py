@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
+from Src.Utils import Backfield
 from Src.Nodes import ParameterNode
 
 
@@ -10,7 +11,7 @@ class DataNode(ParameterNode):
     '''
     Нода, которая содержит в себе данные. (файлы или табличные)
     '''
-    _shape: tuple[int]
+    shape: tuple[int] = Backfield()
     data: np.ndarray
     
 
@@ -22,11 +23,6 @@ class DataNode(ParameterNode):
     def compile(self, kwargs = {}):
         # TODO kwargs - костыль убрать
         super().compile(kwargs)
-        self._shape = self.data.shape
+        self.shape = self.data.shape
         return self.data
-    
-
-    @property
-    def shape(self):
-        return self._shape
     

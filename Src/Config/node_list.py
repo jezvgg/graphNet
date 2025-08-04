@@ -21,7 +21,9 @@ node_list = {
                         "files": Parameter(AttrType.INPUT, AFile),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),
-                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])  
+                        "shape": Parameter(AttrType.OUTPUT, 
+                                           ASequence[AInteger, AInteger, AInteger],
+                                           backfield=DataNode.shape)  
                     },
                 input=False
             ),

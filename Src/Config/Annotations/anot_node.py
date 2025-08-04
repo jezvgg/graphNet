@@ -29,13 +29,13 @@ class ANode(Annotation):
     
 
     @staticmethod
-    def get(input_field: int | str):
+    def get(input_id: int | str):
         from Src.Nodes import AbstractNode
 
-        if (dpg.get_item_type(input_field) != 'mvAppItemType::mvNodeAttribute'):
-            raise Exception(f"Incompatable item {dpg.get_item_type(input_field)} must be mvAppItemType::mvNodeAttribute")
+        if (dpg.get_item_type(input_id) != 'mvAppItemType::mvNodeAttribute'):
+            raise Exception(f"Incompatable parent of item {dpg.get_item_type(input_id)} must be mvAppItemType::mvNodeAttribute")
 
-        user_data = dpg.get_item_user_data(input_field)
+        user_data = dpg.get_item_user_data(input_id)
 
         node_in: list[tuple[str, AbstractNode]] = [(dpg.get_item_label(attribute),
                                                     dpg.get_item_user_data(dpg.get_item_parent(attribute)))
