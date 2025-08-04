@@ -171,25 +171,3 @@ class NodeBuilder:
                         queue = [neightbor] + queue
 
                 visited.add(current_node)
-
-
-    def calculate_width(self, annotation_type) -> int:
-        '''
-        Вычисляет ширину нода в зависимости от типа аннотации.
-
-        Args:
-            annotation_type: тип аннотации для определения количества инпутов
-
-        Returns:
-            int: рекомендуемая ширина для каждого инпута
-        '''
-
-        base_width = 256
-        min_width = 48
-
-        if not isinstance(annotation_type, tuple) or len(annotation_type) <= 1: return base_width
-
-        width = int(base_width * 1 / len(annotation_type))
-
-        return max(width, min_width)
-

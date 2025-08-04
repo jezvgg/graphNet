@@ -27,6 +27,7 @@ class Parameter:
 
         with dpg.node_attribute(*args, **attribute_kwargs, attribute_type=attribute_type) as attr:
             kwargs['parent'] = attr
+            kwargs['width'] = Annotation.BASE_WIDTH
             if self.attr_type != AttrType.INPUT: kwargs['enabled'] = False
             input_id = self.hint.build(*args, **kwargs)
 
@@ -47,3 +48,4 @@ class Parameter:
     def set_value(self, argument: int | str, value) -> bool:
         field = dpg.get_item_children(argument)[1][0]
         return self.hint.set(field, value)
+    
