@@ -103,8 +103,7 @@ class AbstractNode(ABC):
         Основной метод нодов, содержащий логику их работы. Тут создаются слои нейронной сети, проходит обучение и т.д. В зависимости от ноды, будет разная логика.
         '''
         if not kwargs: kwargs = {}
-        attributes = dpg.get_item_children(self.node_tag)
-        arguments = [dpg.get_item_children(attribute)[1][0] for attribute in attributes[1]]
+        arguments = dpg.get_item_children(self.node_tag)[1]
 
         self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
         self.logger.debug(f"Аргументы ноды - {arguments}")

@@ -41,11 +41,11 @@ class ASequence(Annotation):
     
 
     def set(self, input_id: str| int, value: tuple) -> bool:
-        if not isinstance(value, tuple) or len(value) != len(self.shape): 
+        if not isinstance(value, tuple) or len(value) > len(self.shape): 
             return False
         
         for input_field, annotation, field_value in \
-            zip(dpg.get_item_children(input_id)[1][:-1], self.shape, value):
+            zip(dpg.get_item_children(input_id)[1][-2::-1], self.shape[::-1], value[::-1]):
 
             if not annotation.set(input_field, field_value):
                 return False

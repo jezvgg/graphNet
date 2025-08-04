@@ -29,12 +29,14 @@ class AFile(Annotation):
     
 
     @staticmethod
-    def get(input_field: int | str):
-        return dpg.get_item_user_data(input_field)
+    def get(input_id: int | str):
+        return dpg.get_item_user_data(input_id)
     
 
     @staticmethod
     def set(input_id: str| int, value: Path) -> bool:
-        if not isinstance(value, Path): return False
+        if not (isinstance(value, list) and \
+            all(isinstance(sub, Path) for sub in value)): 
+            return False
         dpg.set_item_user_data(input_id, value)
         return True

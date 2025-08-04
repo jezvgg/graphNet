@@ -86,12 +86,13 @@ class test_annotations(DPGUnitTest):
         assert isinstance(input_id, int | str) 
         assert input_id in dpg.get_all_items()
 
-        assert AFile.get(input_id) == Path.home()
+        assert AFile.get(input_id) == [Path.home()]
 
-        assert AFile.set(input_id, Path.cwd()) == True 
-        assert AFile.get(input_id) == Path.cwd()
+        assert AFile.set(input_id, [Path.cwd()]) == True 
+        assert AFile.get(input_id) == [Path.cwd()]
 
         assert AFile.set(input_id, 'Example path') == False
+        assert AFile.set(input_id, [Path.cwd(), 'Example path']) == False
 
 
     def test_ANode(self):
