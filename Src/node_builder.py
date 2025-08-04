@@ -79,9 +79,8 @@ class NodeBuilder:
                     dpg.add_text(node.docs)
 
             for label, attribute in node.annotations.items():
-                width = self.calculate_width(attribute.hint)
                 self.logger.info(f"Attribute label: {label}")
-                attr = attribute.build(label=label, parent=node_id, width=width)
+                attr = attribute.build(label=label, parent=node_id)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(label="Delete", callback=node.delete)
