@@ -1,3 +1,5 @@
+from typing import Callable
+
 import dearpygui.dearpygui as dpg
 from keras import layers
 
@@ -17,15 +19,19 @@ class NodeBuilder:
         layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
     node_list: dict[str, dict[str, list[NodeAnnotation]]]
+    delete_callback: Callable
     logger: Logger
 
 
-    def __init__(self, node_list: dict[str: AbstractNode]):
+    def __init__(self, 
+                 node_list: dict[str: AbstractNode],
+                 delete_callback: Callable):
         '''
         Args:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
         '''
         self.logger = Logger_factory.from_instance()("nodes")
+        self.delete_callback = delete_callback
         self.node_list = node_list
 
 
@@ -83,7 +89,7 @@ class NodeBuilder:
                 attr = attribute.build(label=label, parent=node_id)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
-                dpg.add_button(label="Delete", callback=node.delete)
+                dpg.add_button(label="Delete", callback=lambda: self.delete_callback(node_id))
 
             if node.output:
                 with dpg.node_attribute(label="OUTPUT", attribute_type=dpg.mvNode_Attr_Output):
@@ -92,7 +98,7 @@ class NodeBuilder:
         return node_id
     
 
-    def build_input(self, parent: str | int, shape: tuple[int]) -> AbstractNode:
+    def build_input(self, parent: str | int, shape: tuple[int]) -> str | int:
         '''
         Особенный метод, реализующий построение слоя входа.
 
@@ -126,32 +132,32 @@ class NodeBuilder:
         return node_id
     
 
-    def compile_graph(self):
+    def compile_graph(self, start_nodes: list[AbstractNode]):
         '''
         Компиляция графа, от его концов. Работает через обход в ширину. Вызывает метод compile у нода, если все ноды, пришедшие к нему уже скомпилированы. Начинает с нодов, у которых нет входов.
         '''
 
-        ref_node: AbstractNode = dpg.get_item_user_data(dpg.get_item_children("node_editor", slot=1)[-1])
-        queue: list[AbstractNode] = [ref_node]
-        visited = set()
-        starting_nodes: list[AbstractNode] = []
+        # ref_node: AbstractNode = dpg.get_item_user_data(dpg.get_item_children("node_editor", slot=1)[-1])
+        # queue: list[AbstractNode] = [ref_node]
+        # visited = set()
+        # starting_nodes: list[AbstractNode] = []
 
-        # * Двустороний обход в ширину, чтоб найти стартовые ноды
-        while queue:
-            current_node = queue.pop()
+        # # * Двустороний обход в ширину, чтоб найти стартовые ноды
+        # while queue:
+        #     current_node = queue.pop()
 
-            if current_node in visited: continue
+        #     if current_node in visited: continue
 
-            if len(current_node.incoming) == 0: starting_nodes.append(current_node)
+        #     if len(current_node.incoming) == 0: starting_nodes.append(current_node)
             
-            for neightbor in current_node.incoming + current_node.outcoming:
-                    if neightbor not in queue:
-                        queue = [neightbor] + queue
+        #     for neightbor in current_node.incoming + current_node.outcoming:
+        #             if neightbor not in queue:
+        #                 queue = [neightbor] + queue
 
-            visited.add(current_node)
+        #     visited.add(current_node)
 
         visited = set()
-        queue = starting_nodes[:]
+        queue = start_nodes
         self.logger.info("Началась сборка графа.")
 
         while queue:

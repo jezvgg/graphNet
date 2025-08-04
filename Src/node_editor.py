@@ -20,6 +20,7 @@ class NodeEditor:
     builder: NodeBuilder
     __stage_tag: str | int
     __group_tag: str | int
+    __start_nodes: list[AbstractNode]
 
 
     def __init__(self, *args, **kwargs):
@@ -34,9 +35,10 @@ class NodeEditor:
             config = json.load(f)
 
         self.logger = Logger_factory.from_instance()("nodes", config)
-        self.builder = NodeBuilder(node_list)
+        self.builder = NodeBuilder(node_list, self.delete_node)
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
+        self.__start_nodes = []
 
         dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
 
@@ -54,8 +56,10 @@ class NodeEditor:
                                         delink_callback=self.delink_callback, *args, **kwargs):
 
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
+                        self.__start_nodes.append(dpg.get_item_user_data(input_id))
 
-                    dpg.add_button(label="Собрать модель", callback= self.builder.compile_graph)
+                    dpg.add_button(label="Собрать модель", 
+                                   callback = lambda: self.builder.compile_graph(self.__start_nodes))
 
 
     def on_viewport_resize_callback(self,sender, app_data):
@@ -95,6 +99,9 @@ class NodeEditor:
         node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
 
+        # Мы только создали узел и у него ещё нет связей
+        self.__start_nodes.append(dpg.get_item_user_data(node_id))
+
 
     def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
         '''
@@ -128,6 +135,8 @@ class NodeEditor:
         node_out.outcoming.append(node_in)
         node_in.incoming.append(node_out)
 
+        if node_in in self.__start_nodes: self.__start_nodes.remove(node_in)
+
         self.logger.debug(f"Связи после: {node_out} {node_in}")
 
         # Для дебага
@@ -136,7 +145,7 @@ class NodeEditor:
 
     def delink_callback(self, sender: int | str, app_data: int | str):
         '''
-        Функция, которая вызывается, когда создаётся убирается связь между нодами.
+        Функция, которая вызывается, когда убирается связь между нодами.
 
         Args:
             sender: int | str - зачастую является окном редакторивания графа (dpg.node_editor)
@@ -148,6 +157,8 @@ class NodeEditor:
 
         link.outcoming.outcoming.remove(link.incoming)
         link.incoming.incoming.remove(link.outcoming)
+
+        if not link.incoming.incoming: self.__start_nodes.append(link.incoming)
 
         self.logger.debug(f"Связи после: {link.outcoming} {link.incoming}")
 
@@ -161,10 +172,17 @@ class NodeEditor:
         Args:
             node_id: str | int - индетификатор нода, которого нужно удалить (dpg.node)
         '''
-        node_data: AbstractNode = dpg.get_item_user_data(node_id)
+        node: AbstractNode = dpg.get_item_user_data(node_id)
         
-        # TODO Вынести логику из AbstractNode
-        node_data.delete()
+        # Удаляем связи с этим узлом
+        for node_in in node.incoming: 
+            node_in.outcoming.remove(node)
+            node.incoming.remove(node_in)
+
+        for node_out in node.outcoming: 
+            node_out.incoming.remove(node)
+            node.outcoming.remove(node_out)
+            if not node_out.incoming: self.__start_nodes.append(node_out)
 
         dpg.delete_item(node_id)
 
