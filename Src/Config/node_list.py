@@ -19,6 +19,7 @@ node_list = {
                 logic = TableDataNode.open_data,
                 annotations = {
                         "files": Parameter(AttrType.INPUT, AFile),
+                        "delimiter": Parameter(AttrType.INPUT, AString),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),
                         "shape": Parameter(AttrType.OUTPUT, 
@@ -34,7 +35,7 @@ node_list = {
                 annotations = {
                         "files": Parameter(AttrType.INPUT, AFile),
                         "color_mode": Parameter(AttrType.INPUT, AString),
-                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger]) 
+                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
                         }
             )
         ],
