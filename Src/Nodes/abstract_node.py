@@ -82,20 +82,6 @@ class AbstractNode(ABC):
 
     def __hash__(self):
         return self.node_tag
-    
-
-    def delete(self):
-        '''
-        Удалить текущую ноду. Также убирает все связи с этой нодой.
-        '''
-        for node_in in self.incoming: 
-            node_in.outcoming.remove(self)
-            self.incoming.remove(node_in)
-        for node_out in self.outcoming: 
-            node_out.incoming.remove(self)
-            self.outcoming.remove(node_out)
-
-        dpg.delete_item(self.node_tag)
 
 
     def compile(self, kwargs: dict = None):

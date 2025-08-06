@@ -32,10 +32,12 @@ class ANode(Annotation):
     def get(input_id: int | str):
         from Src.Nodes import AbstractNode
 
-        if (dpg.get_item_type(input_id) != 'mvAppItemType::mvNodeAttribute'):
-            raise Exception(f"Incompatable parent of item {dpg.get_item_type(input_id)} must be mvAppItemType::mvNodeAttribute")
+        parent = dpg.get_item_parent(input_id)
 
-        user_data = dpg.get_item_user_data(input_id)
+        if (dpg.get_item_type(parent) != 'mvAppItemType::mvNodeAttribute'):
+            raise Exception(f"Incompatable parent of item {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
+
+        user_data = dpg.get_item_user_data(parent)
 
         node_in: list[tuple[str, AbstractNode]] = [(dpg.get_item_label(attribute),
                                                     dpg.get_item_user_data(dpg.get_item_parent(attribute)))
