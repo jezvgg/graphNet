@@ -19,7 +19,7 @@ node_list = {
                 logic = TableDataNode.open_data,
                 annotations = {
                         "files": Parameter(AttrType.INPUT, AFile),
-                        "delimiter": Parameter(AttrType.INPUT, AString),
+                        "delimiter": Parameter(AttrType.INPUT, AString, default=","),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),
                         "shape": Parameter(AttrType.OUTPUT, 
