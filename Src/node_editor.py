@@ -175,14 +175,19 @@ class NodeEditor:
         node: AbstractNode = dpg.get_item_user_data(node_id)
         
         # Удаляем связи с этим узлом
-        for node_in in node.incoming: 
+        for node_in in node.incoming[:]:
+            print(node_in)
             node_in.outcoming.remove(node)
             node.incoming.remove(node_in)
 
-        for node_out in node.outcoming: 
+        print(node.outcoming)
+        for node_out in node.outcoming[:]: 
+            print(node_out)
             node_out.incoming.remove(node)
             node.outcoming.remove(node_out)
-            if not node_out.incoming: self.__start_nodes.append(node_out)
+        
+        if node in self.__start_nodes: self.__start_nodes.remove(node)
+        if not node_out.incoming: self.__start_nodes.append(node_out)
 
         dpg.delete_item(node_id)
 
