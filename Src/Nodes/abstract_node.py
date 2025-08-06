@@ -16,35 +16,18 @@ class AbstractNode(ABC):
     Attributes:
         node_tag: str | int - индетификатор ноды (dpg.node)
         incoming: list[Node] - связи с нодами, которые подключенны к этой ноде. (Приходящие)
-        outcoming: list[Node] - связи с нодами, к которым подключенна эта нода. (Уходящие)
+        outgoing: list[Node] - связи с нодами, к которым подключенна эта нода. (Уходящие)
     '''
     node_tag: str | int
-    incoming: list["AbstractNode"]
-    outcoming: list["AbstractNode"]
+    # Устанавливаем связи не между узлами, а между их аттрибутами
+    incoming: dict[str | int, str | int]
+    outgoing: dict[str | int, str | int]
     annotations: dict[str, Parameter]
     logic: Callable
     docs: str
     input: bool
     output: bool
     logger: Logger
-
-
-    # TODO Переписать это говно
-    @staticmethod
-    def print_tree(node: "AbstractNode"):
-        '''
-        Метод для дебага.
-        Выводит дерево зависимостей по входящим нодам.
-
-        Args:
-            node: Node - нода с которой начинать построение.
-        '''
-        if len(node.outcoming) == 0: 
-            print(node)
-            return
-
-        print(node, "->", end=' ')
-        AbstractNode.print_tree(node.outcoming[0])
 
 
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \
@@ -61,8 +44,8 @@ class AbstractNode(ABC):
         self.node_tag = node_tag
         self.annotations = annotations
         self.logic = logic
-        self.incoming = []
-        self.outcoming = []
+        self.incoming = {}
+        self.outgoing = {}
         self.input = input
         self.output = output
 
@@ -77,7 +60,9 @@ class AbstractNode(ABC):
 
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__} {self.node_tag} {dict(incoming=self.incoming, outcoming=self.outcoming)}"
+        incoming_nodes : list["AbstractNode"] = [dpg.get_item_parent(attribute) for attribute in self.incoming.values()]
+        outgoing_nodes : list["AbstractNode"] = [dpg.get_item_parent(attribute) for attribute in self.outgoing.values()]
+        return f"{self.__class__.__name__} {self.node_tag} {dict(incoming=incoming_nodes, outgoing=outgoing_nodes)}"
     
 
     def __hash__(self):
@@ -111,7 +96,7 @@ class AbstractNode(ABC):
 @dataclass
 class node_link:
     '''
-    Класс для dpg.add_node_link, указывает какие ноды связываются.
+    Класс для dpg.add_node_link, указывает какие аттрибуты узлов связываются.
     '''
-    outcoming: AbstractNode
-    incoming: AbstractNode
+    outgoing: str | int
+    incoming: str | int
