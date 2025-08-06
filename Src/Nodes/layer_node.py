@@ -8,9 +8,6 @@ class LayerNode(AbstractNode):
     '''
     Класс хранящий данные, для связи нода с слоём нейроной сети.
     '''
-    incoming: list["LayerNode"]
-    outcoming: list["LayerNode"]
-
 
     def compile(self):
         self.layer: layers.Layer = super().compile()

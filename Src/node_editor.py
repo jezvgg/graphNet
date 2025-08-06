@@ -132,8 +132,8 @@ class NodeEditor:
         data_out.append(app_data[1])
         dpg.set_item_user_data(app_data[0], data_out)
 
-        node_out.outcoming.append(node_in)
-        node_in.incoming.append(node_out)
+        node_out.outgoing[app_data[0]] = app_data[1]
+        node_in.incoming[app_data[1]] = app_data[0]
 
         if node_in in self.__start_nodes: self.__start_nodes.remove(node_in)
 
@@ -153,14 +153,17 @@ class NodeEditor:
         '''
         link: node_link = dpg.get_item_user_data(app_data)
 
-        self.logger.debug(f"Связи до: {link.outcoming} {link.incoming}")
+        self.logger.debug(f"Связи до: {link.outgoing} {link.incoming}")
 
-        link.outcoming.outcoming.remove(link.incoming)
-        link.incoming.incoming.remove(link.outcoming)
+        node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(link.outgoing))
+        node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(link.incoming))
 
-        if not link.incoming.incoming: self.__start_nodes.append(link.incoming)
+        del node_out.outgoing[link.outgoing]
+        del node_in.incoming[link.incoming]
 
-        self.logger.debug(f"Связи после: {link.outcoming} {link.incoming}")
+        if not node_in.incoming: self.__start_nodes.append(link.incoming)
+
+        self.logger.debug(f"Связи после: {link.outgoing} {link.incoming}")
 
         dpg.delete_item(app_data)
 
@@ -175,20 +178,20 @@ class NodeEditor:
         node: AbstractNode = dpg.get_item_user_data(node_id)
         
         # Удаляем связи с этим узлом
-        for node_in in node.incoming[:]:
-            print(node_in)
-            node_in.outcoming.remove(node)
-            node.incoming.remove(node_in)
+        for attr_id in node.incoming.copy().values():
+            node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
+            del node.incoming[node_out.outgoing[attr_id]]
+            del node_out.outgoing[attr_id]
 
-        print(node.outcoming)
-        for node_out in node.outcoming[:]: 
-            print(node_out)
-            node_out.incoming.remove(node)
-            node.outcoming.remove(node_out)
+        for attr_id in node.outgoing.copy().values(): 
+            node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
+            del node.outgoing[node_in.incoming[attr_id]]
+            del node_in.incoming[attr_id]
+            if not node_in.incoming: self.__start_nodes.append(node_in)
         
         if node in self.__start_nodes: self.__start_nodes.remove(node)
-        if not node_out.incoming: self.__start_nodes.append(node_out)
 
+        del node
         dpg.delete_item(node_id)
 
 

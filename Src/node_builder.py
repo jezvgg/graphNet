@@ -137,25 +137,6 @@ class NodeBuilder:
         Компиляция графа, от его концов. Работает через обход в ширину. Вызывает метод compile у нода, если все ноды, пришедшие к нему уже скомпилированы. Начинает с нодов, у которых нет входов.
         '''
 
-        # ref_node: AbstractNode = dpg.get_item_user_data(dpg.get_item_children("node_editor", slot=1)[-1])
-        # queue: list[AbstractNode] = [ref_node]
-        # visited = set()
-        # starting_nodes: list[AbstractNode] = []
-
-        # # * Двустороний обход в ширину, чтоб найти стартовые ноды
-        # while queue:
-        #     current_node = queue.pop()
-
-        #     if current_node in visited: continue
-
-        #     if len(current_node.incoming) == 0: starting_nodes.append(current_node)
-            
-        #     for neightbor in current_node.incoming + current_node.outcoming:
-        #             if neightbor not in queue:
-        #                 queue = [neightbor] + queue
-
-        #     visited.add(current_node)
-
         visited = set()
         queue = start_nodes
         self.logger.info("Началась сборка графа.")
@@ -165,13 +146,14 @@ class NodeBuilder:
             self.logger.debug(f"Текущая очередь - {queue}")
             self.logger.debug(f"Текущая нода - {current_node}")
 
-            if set(current_node.incoming) | visited == visited:
+            if set(current_node.incoming.values()) | visited == visited:
                 self.logger.debug("Нода подошла.")
 
                 layer = current_node.compile()
                 print(layer)
 
-                for neightbor in current_node.outcoming:
+                for attr_id in current_node.outgoing.values():
+                    neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
                     if neightbor not in queue:
                         queue = [neightbor] + queue
 
