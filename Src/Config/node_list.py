@@ -1,6 +1,7 @@
 from keras import layers
 import keras
 
+from Src.Enums import Activations, Padding, ColorMode
 from Src.Enums.attr_type import AttrType
 from Src.Nodes import *
 from Src.Config.parameter import Parameter
@@ -34,7 +35,7 @@ node_list = {
                 logic = ImageDataNode.open_data,
                 annotations = {
                         "files": Parameter(AttrType.INPUT, AFile),
-                        "color_mode": Parameter(AttrType.INPUT, AString),
+                        "color_mode": Parameter(AttrType.INPUT, AEnum(ColorMode)),
                         "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
                         }
             )
@@ -61,7 +62,7 @@ node_list = {
                 logic = layers.Dense,
                 annotations = {
                         "units": Parameter(AttrType.INPUT, AInteger),
-                        "activation": Parameter(AttrType.INPUT, AString),
+                        "activation": Parameter(AttrType.INPUT, AEnum(Activations)),
                         "use_bias": Parameter(AttrType.INPUT, ABoolean)
                     }
             )
@@ -76,8 +77,8 @@ node_list = {
                         "filters": Parameter(AttrType.INPUT, AInteger),
                         "kernel_size": Parameter(AttrType.INPUT, AInteger),
                         "strides": Parameter(AttrType.INPUT, AInteger),
-                        "padding": Parameter(AttrType.INPUT, AString),
-                        "activation": Parameter(AttrType.INPUT, AString),
+                        "padding": Parameter(AttrType.INPUT, AEnum(Padding)),
+                        "activation": Parameter(AttrType.INPUT, AEnum(Activations)),
                         "use_bias": Parameter(AttrType.INPUT, ABoolean),
                     } 
             ),
@@ -88,7 +89,7 @@ node_list = {
                 annotations = {
                         "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger]),
                         "strides": Parameter(AttrType.INPUT, AInteger),
-                        "padding": Parameter(AttrType.INPUT, AString),
+                        "padding": Parameter(AttrType.INPUT, AEnum(Padding)),
                     }
             )
         ],
