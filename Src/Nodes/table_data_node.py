@@ -5,10 +5,7 @@ from Src.Nodes import DataNode
 
 
 class TableDataNode(DataNode):
-    data: np.ndarray 
-    
 
     @staticmethod
     def open_data(files: dict, *args, **kwargs):
-        key = list(files['selections'].keys())[0]
-        return np.genfromtxt(files['selections'][key], delimiter=',', *args, **kwargs)
+        return np.genfromtxt(files[0], *args, **kwargs)
