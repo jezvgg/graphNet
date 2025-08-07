@@ -5,23 +5,31 @@ import dearpygui.dearpygui as dpg
 from Src.Config.Annotations.annotation import Annotation
 
 
+
+
 class AEnum(Annotation):
     """
     Аннотация для создания выпадающего списка (dpg.add_combo).
     Используется для полей с предопределенным набором строковых значений.
     """
 
-    def __init__(self, source: list[str] | type):
+
+    def __class_getitem__(cls, enum_source: type):
+        """
+        Позволяет создавать объект AEnum с помощью синтаксиса AEnum[YourEnumClass].
+        Не вызывает ошибок, просто передает источник в конструктор.
+        """
+        return cls(source=enum_source)
+
+
+    def __init__(self, source: type):
         """
         Args:
-            source (list[str] | type): Источник данных. Может быть списком строк
+            source (type): Источник данных. Может быть списком строк
                                         или классом, унаследованным от enum.Enum.
         """
-        if isinstance(source, type):
-            self.items = [e.value for e in source]
-            return
+        self.items = [member.value for member in source]
 
-        self.items = source
 
     def build(self, *args, **kwargs):
         """
@@ -34,6 +42,7 @@ class AEnum(Annotation):
 
         return dpg.add_combo(*args, **kwargs)
 
+
     @staticmethod
     def get(input_id: int | str):
         """
@@ -41,12 +50,13 @@ class AEnum(Annotation):
         """
         return dpg.get_value(input_id)
 
+
     @staticmethod
     def set(input_id: str | int, value: str) -> bool:
         """
         Устанавливает значение для dpg.add_combo.
         """
-        if not isinstance(value, str):
+        if not isinstance(value, enum):
             return False
 
         dpg.set_value(input_id, value)

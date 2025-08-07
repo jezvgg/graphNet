@@ -2,3 +2,6 @@ from Src.Enums.activations import Activations
 from Src.Enums.padding import Padding
 from Src.Enums.colormode import ColorMode
 from Src.Enums.attr_type import AttrType
+from Src.Enums.losses import Losses
+from Src.Enums.optimizers import Optimizers
+from Src.Enums.delimiters import Delimiters
