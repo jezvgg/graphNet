@@ -8,6 +8,10 @@ from pathlib import Path
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger
+from Src.Events import EventManager
+from Src.Enums import EventType
+
+
 
 
 class Logger_factory(object):
@@ -30,21 +34,20 @@ class Logger_factory(object):
         return cls._instance
 
 
-    def __init__(self, config: dict[str, str|int] = None) -> "Logger_factory":
+    def __init__(self, config: dict[str, str | int] = None) -> "Logger_factory":
         '''
         Класс для логирования, синглтон.
 
         Args:
             config: dict - конфигурация для создания логгеров.
         '''
-        if 'filename' in config: 
+        if 'filename' in config:
             config['filename'] = config['filename'].format(curdata=datetime.now().strftime(config['datefmt']))
 
         Path.mkdir(Path(config['filename']).parent, exist_ok=True)
 
         self.config = config
         logging.basicConfig(**self.config)
-
 
         self.__console_tag = dpg.generate_uuid()
         self.__stage_tag = dpg.generate_uuid()
@@ -69,7 +72,7 @@ class Logger_factory(object):
         Returns:
             Logger - экземпляр логировщика
         '''
-        if logger_name in Logger_factory._loggers: 
+        if logger_name in Logger_factory._loggers:
             logger = Logger_factory._loggers[logger_name]
             if not config: return logger
         else:
@@ -77,12 +80,12 @@ class Logger_factory(object):
             Logger_factory._loggers[logger_name] = logger
 
         config = self.config | config
-            
+
         logger.propagate = False
         handler = None
         if 'filename' in config and config['filename'] == 'stream':
             handler = logging.StreamHandler(sys.stdout)
-        elif 'filename' in config: 
+        elif 'filename' in config:
             handler = logging.FileHandler(config['filename'].format(curdata=f"{logger_name}_{datetime.now().strftime(config['datefmt'])}"))
 
         if 'format' in config and handler:
@@ -90,11 +93,11 @@ class Logger_factory(object):
 
         if handler: logger.addHandler(handler)
 
-        if 'level' in config: 
+        if 'level' in config:
             logger.setLevel(config['level'])
-            
-        return logger        
-    
+
+        return logger
+
 
     def show(self, parent: str | int):
         '''
@@ -103,15 +106,8 @@ class Logger_factory(object):
         Args:
             parent_window: str | int - индетификатор родительского окна
         '''
-        from Src.Events.callbacks import DPGCallback
-
         dpg.show_item(self.__console_tag)
-
-        resize_callback = DPGCallback(parent)
-        resize_callback.add_state_callback("rect_size", self.resize)
-
-        with dpg.handler_registry():
-            dpg.add_mouse_move_handler(callback=resize_callback.check)
+        EventManager.add(EventType.VISIBLE, parent, lambda *_: self.resize())
 
 
     def hide(self):
@@ -125,7 +121,4 @@ class Logger_factory(object):
         '''
         Переместить консоль в верхний правый угол
         '''
-        dpg.set_item_pos(self.__console_tag, (dpg.get_viewport_width()-dpg.get_item_width(self.__console_tag), 0))
-
-
-    
+        dpg.set_item_pos(self.__console_tag, (dpg.get_viewport_width() - dpg.get_item_width(self.__console_tag), 0))

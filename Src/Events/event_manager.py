@@ -1,83 +1,98 @@
 from typing import Callable
 
-from Src.Logging import Logger_factory,Logger
+import dearpygui.dearpygui as dpg
+
+from Src.Enums import EventType
 
 
 
 
-class Event_manager:
+class EventManager:
     """
-    Класс-наблюдатель для управления пользовательскими событиями.
-
-    Class Attributes:
-        _events: dict[str, list[Callable]] - словарь событий и их обработчиков
-        logger: Logger - экземпляр логгера
+    Менеджер событий для DearPyGui.
+    Использует ItemHandlerRegistry для событий (click, hover и т.д.).
     """
-
-    _events: dict[str, list[Callable]] = {}
-    logger: Logger = Logger_factory.from_instance()('events')
-
-
-    @classmethod
-    def add_custom_event(cls, event_name: str, handlers: list[Callable]) -> None:
-        """
-        Добавление пользовательского события и его обработчиков.
-
-        Args:
-            event_name: str - название события
-            handlers: list[Callable] - список функций-обработчиков события
-        """
-        if event_name not in cls._events:
-            cls._events[event_name] = []
-
-        cls._events[event_name]+=handlers
+    _logger = None
+    _global_handler_registry = None
 
 
     @classmethod
-    def remove_custom_event(cls, event_name: str = None, handler: Callable = None) -> None:
-        """
-        Отписка от события, или очистка обработчика события или всех событий.
-        
-        Args:
-            event_name: str, optional - название события. Если None, очищаются все события
-            handler: Callable, optional - функция-обработчик для удаления
-        """
-        # Если не указано имя события, очищаем все события
-        if not event_name:
-            cls._events.clear()
-            return
-        # Если указан конкретный обработчик, удаляем только его
-        if handler and handler in cls._events[event_name]:
-            cls._events[event_name].remove(handler)
-        else:
-            # Иначе удаляем все обработчики события
-            del cls._events[event_name]
+    def set_logger(cls, logger):
+        """Устанавливает экземпляр логгера для класса."""
+        cls._logger = logger
+        cls._logger and cls._logger.info("Logger установлен для EventManager")
 
 
     @classmethod
-    def trigger_custom_event(cls, event_name: str,*args,**kwargs) -> None:
+    def add(cls, event_type: EventType, item_id: str | int = None,
+            handler: Callable = None, *, user_data=None):
         """
-        Вызов пользовательского события.
+        Регистрирует обработчик на событие.
+        Обрабатывает item-specific, global и viewport события.
 
         Args:
-            event_name: str - название события
-            *args, **kwargs - аргументы, передаваемые обработчикам
+            event_type (EventType): Тип события из перечисления EventType.
+            item_id (str | int, optional): ID элемента DPG. Для глобальных событий должен быть None.
+            handler (Callable, optional): Функция-обработчик (sender, app_data, user_data).
+            user_data (any, optional): Пользовательские данные для передачи в обработчик.
         """
-        if event_name not in cls._events:
-            cls.logger.error(f"Событие '{event_name}' не определено")
+
+        # Обработчики специфичные для объектов
+        if item_id and dpg.does_item_exist(item_id):
+            registry_id = cls._get_or_create_item_registry(item_id)
+            event_type(parent=registry_id, callback=handler, user_data=user_data)
+            cls._logger and cls._logger.info(f"Обработчик '{event_type}' добавлен к элементу {item_id}")
             return
 
-        for handler in cls._events[event_name]:
-            handler(*args,**kwargs)
+        # Обработчик для viewport'а
+        if event_type == EventType.VIEWPORT_RESIZE:
+            event_type(handler)
+            cls._logger and cls._logger.info(f"Обработчик '{event_type}' установлен для viewport")
+            return
 
+        # Глобальные обработчики
+        global_registry = cls._get_or_create_global_registry()
+        event_type(parent=global_registry, callback=handler, user_data=user_data)
+        cls._logger and cls._logger.info(f"Глобальный обработчик '{event_type}' добавлен")
 
 
     @classmethod
-    def get_events(cls) -> dict[str, list[Callable]]:
-        """
-        Метод для доступа к словарю событий.
+    def add_value_changed(cls, item_id: str | int, handler: Callable, *, user_data=None):
+        """Регистрирует обработчик на изменение значения элемента."""
+        if dpg.does_item_exist(item_id):
+            dpg.configure_item(item_id, callback=handler, user_data=user_data)
+            cls._logger and cls._logger.info(f"Обработчик 'value_changed' установлен для {item_id}")
 
-        Returns:
-            dict[str, list[Callable]] - словарь событий и их обработчиков
-        """
-        return cls._events
+
+    @classmethod
+    def clear(cls, item_id: str | int):
+        """Удаляет все обработчики, привязанные к элементу."""
+        if not dpg.does_item_exist(item_id):
+            return
+
+        dpg.configure_item(item_id, callback=None, user_data=None)
+
+        registry_id = dpg.get_item_info(item_id).get("handlers")
+        if registry_id:
+            dpg.delete_item(registry_id)
+
+        cls._logger and cls._logger.info(f"Обработчики для {item_id} очищены")
+
+
+    @classmethod
+    def _get_or_create_item_registry(cls, item_id: str | int) -> int:
+        """Получает или создает ItemHandlerRegistry для элемента."""
+        registry_id = dpg.get_item_info(item_id).get("handlers")
+        if not registry_id:
+            registry_id = dpg.add_item_handler_registry()
+            dpg.bind_item_handler_registry(item_id, registry_id)
+            cls._logger and cls._logger.debug(f"Создан ItemHandlerRegistry ({registry_id}) для {item_id}")
+        return registry_id
+
+
+    @classmethod
+    def _get_or_create_global_registry(cls):
+        """Создает глобальный registry для обработчиков, если его нет."""
+        if cls._global_handler_registry is None:
+            cls._global_handler_registry = dpg.add_handler_registry()
+        return cls._global_handler_registry
