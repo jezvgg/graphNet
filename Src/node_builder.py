@@ -1,10 +1,12 @@
+from typing import Callable
+
 import dearpygui.dearpygui as dpg
 from keras import layers
 
+from Src.Enums.attr_type import AttrType
 from Src.Logging import Logger_factory, Logger
-from Src.Utils import AttributesFactory
 from Src.Nodes import AbstractNode, InputLayerNode
-from Src.Nodes.node_list import listNode
+from Src.Config.node_list import NodeAnnotation, Parameter, ANode
 
 
 
@@ -16,16 +18,20 @@ class NodeBuilder:
         factory: InputsFactory - фабрика конвертации аннотаций в инпуты
         layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
-    node_list: dict[str, dict[str, list[listNode]]]
+    node_list: dict[str, dict[str, list[NodeAnnotation]]]
+    delete_callback: Callable
     logger: Logger
 
 
-    def __init__(self, node_list: dict[str: AbstractNode]):
+    def __init__(self, 
+                 node_list: dict[str: AbstractNode],
+                 delete_callback: Callable):
         '''
         Args:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
         '''
         self.logger = Logger_factory.from_instance()("nodes")
+        self.delete_callback = delete_callback
         self.node_list = node_list
 
 
@@ -55,7 +61,7 @@ class NodeBuilder:
         return list
 
 
-    def build_node(self, node_data: listNode, parent: str | int) -> str | int:
+    def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
         Построение dpg.node из класса AbstractNode. Используется, для создания новых нодов в редакторе. Ноды берутся из user_data в списке слева.
 
@@ -78,12 +84,12 @@ class NodeBuilder:
                 with dpg.tree_node(label="Docs"):
                     dpg.add_text(node.docs)
 
-            for label, hint in node.annotations.items():
-                width = self.calculate_width(hint)
-                AttributesFactory.build(hint, label=label, parent=node_id, width=width)
+            for label, attribute in node.annotations.items():
+                self.logger.info(f"Attribute label: {label}")
+                attr = attribute.build(label=label, parent=node_id)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
-                dpg.add_button(label="Delete", callback=node.delete)
+                dpg.add_button(label="Delete", callback=lambda: self.delete_callback(node_id))
 
             if node.output:
                 with dpg.node_attribute(label="OUTPUT", attribute_type=dpg.mvNode_Attr_Output):
@@ -92,7 +98,7 @@ class NodeBuilder:
         return node_id
     
 
-    def build_input(self, parent: str | int, shape: tuple[int]) -> AbstractNode:
+    def build_input(self, parent: str | int, shape: tuple[int]) -> str | int:
         '''
         Особенный метод, реализующий построение слоя входа.
 
@@ -103,21 +109,18 @@ class NodeBuilder:
         Returns:
             str | int - индетификатор новой ноды
         '''
-        layer = listNode(
+        layer = NodeAnnotation(
             label="Input",
             node_type=InputLayerNode, 
-            kwargs={
-                "logic": layers.Input,
-                "annotations": {
-                    "shape": (int, ) * len(shape)
+            logic = layers.Input,
+            annotations = {
+                    "shape": Parameter(AttrType.INPUT, ANode),
                 }
-            })
+            )
 
         node_id = self.build_node(layer, parent=parent)
 
         attributes = dpg.get_item_children(node_id)[1]
-        print(attributes)
-        print([dpg.get_item_children(argument) for argument in attributes])
 
         arguments = [dpg.get_item_children(argument)[1][0] for argument in attributes]
 
@@ -129,32 +132,13 @@ class NodeBuilder:
         return node_id
     
 
-    def compile_graph(self):
+    def compile_graph(self, start_nodes: list[AbstractNode]):
         '''
         Компиляция графа, от его концов. Работает через обход в ширину. Вызывает метод compile у нода, если все ноды, пришедшие к нему уже скомпилированы. Начинает с нодов, у которых нет входов.
         '''
 
-        ref_node: AbstractNode = dpg.get_item_user_data(dpg.get_item_children("node_editor", slot=1)[-1])
-        queue: list[AbstractNode] = [ref_node]
         visited = set()
-        starting_nodes: list[AbstractNode] = []
-
-        # * Двустороний обход в ширину, чтоб найти стартовые ноды
-        while queue:
-            current_node = queue.pop()
-
-            if current_node in visited: continue
-
-            if len(current_node.incoming) == 0: starting_nodes.append(current_node)
-            
-            for neightbor in current_node.incoming + current_node.outcoming:
-                    if neightbor not in queue:
-                        queue = [neightbor] + queue
-
-            visited.add(current_node)
-
-        visited = set()
-        queue = starting_nodes[:]
+        queue = start_nodes
         self.logger.info("Началась сборка графа.")
 
         while queue:
@@ -162,36 +146,15 @@ class NodeBuilder:
             self.logger.debug(f"Текущая очередь - {queue}")
             self.logger.debug(f"Текущая нода - {current_node}")
 
-            if set(current_node.incoming) | visited == visited:
+            if set(current_node.incoming.values()) | visited == visited:
                 self.logger.debug("Нода подошла.")
 
                 layer = current_node.compile()
                 print(layer)
 
-                for neightbor in current_node.outcoming:
+                for attr_id in current_node.outgoing.values():
+                    neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
                     if neightbor not in queue:
                         queue = [neightbor] + queue
 
                 visited.add(current_node)
-
-
-    def calculate_width(self, annotation_type) -> int:
-        '''
-        Вычисляет ширину нода в зависимости от типа аннотации.
-
-        Args:
-            annotation_type: тип аннотации для определения количества инпутов
-
-        Returns:
-            int: рекомендуемая ширина для каждого инпута
-        '''
-
-        base_width = 256
-        min_width = 48
-
-        if not isinstance(annotation_type, tuple) or len(annotation_type) <= 1: return base_width
-
-        width = int(base_width * 1 / len(annotation_type))
-
-        return max(width, min_width)
-

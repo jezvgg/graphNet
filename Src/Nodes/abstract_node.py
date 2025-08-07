@@ -2,13 +2,11 @@ from dataclasses import dataclass
 from abc import ABC
 from typing import Callable
 import inspect
-from enum import Enum
 
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger_factory, Logger
-from Src.Models import File
-
+from Src.Config.parameter import Parameter, AttrType
 
 
 class AbstractNode(ABC):
@@ -18,35 +16,18 @@ class AbstractNode(ABC):
     Attributes:
         node_tag: str | int - индетификатор ноды (dpg.node)
         incoming: list[Node] - связи с нодами, которые подключенны к этой ноде. (Приходящие)
-        outcoming: list[Node] - связи с нодами, к которым подключенна эта нода. (Уходящие)
+        outgoing: list[Node] - связи с нодами, к которым подключенна эта нода. (Уходящие)
     '''
     node_tag: str | int
-    incoming: list["AbstractNode"]
-    outcoming: list["AbstractNode"]
-    annotations: dict[str: type]
+    # Устанавливаем связи не между узлами, а между их аттрибутами
+    incoming: dict[str | int, str | int]
+    outgoing: dict[str | int, str | int]
+    annotations: dict[str, Parameter]
     logic: Callable
     docs: str
     input: bool
     output: bool
     logger: Logger
-
-
-    # TODO Убрать это говно
-    @staticmethod
-    def print_tree(node: "AbstractNode"):
-        '''
-        Метод для дебага.
-        Выводит дерево зависимостей по входящим нодам.
-
-        Args:
-            node: Node - нода с которой начинать построение.
-        '''
-        if len(node.outcoming) == 0: 
-            print(node)
-            return
-
-        print(node, "->", end=' ')
-        AbstractNode.print_tree(node.outcoming[0])
 
 
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \
@@ -63,8 +44,8 @@ class AbstractNode(ABC):
         self.node_tag = node_tag
         self.annotations = annotations
         self.logic = logic
-        self.incoming = []
-        self.outcoming = []
+        self.incoming = {}
+        self.outgoing = {}
         self.input = input
         self.output = output
 
@@ -79,61 +60,34 @@ class AbstractNode(ABC):
 
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__} {self.node_tag} {dict(incoming=self.incoming, outcoming=self.outcoming)}"
+        incoming_nodes : list["AbstractNode"] = [dpg.get_item_parent(attribute) for attribute in self.incoming.values()]
+        outgoing_nodes : list["AbstractNode"] = [dpg.get_item_parent(attribute) for attribute in self.outgoing.values()]
+        return f"{self.__class__.__name__} {self.node_tag} {dict(incoming=incoming_nodes, outgoing=outgoing_nodes)}"
     
 
     def __hash__(self):
         return self.node_tag
-    
-
-    def delete(self):
-        '''
-        Удалить текущую ноду. Также убирает все связи с этой нодой.
-        '''
-        for node_in in self.incoming: 
-            node_in.outcoming.remove(self)
-            self.incoming.remove(node_in)
-        for node_out in self.outcoming: 
-            node_out.incoming.remove(self)
-            self.outcoming.remove(node_out)
-
-        dpg.delete_item(self.node_tag)
 
 
-    def compile(self, kwargs = None):
+    def compile(self, kwargs: dict = None):
         '''
         Основной метод нодов, содержащий логику их работы. Тут создаются слои нейронной сети, проходит обучение и т.д. В зависимости от ноды, будет разная логика.
         '''
         if not kwargs: kwargs = {}
-        attributes = dpg.get_item_children(self.node_tag)
-        arguments = [dpg.get_item_children(attribute)[1][0] for attribute in attributes[1]]
+        arguments = dpg.get_item_children(self.node_tag)[1]
 
-        # ? Вынести куда-нибудь эту функцию?
-        # TODO Вынести куда-нибудь нахер этот код
         self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
         self.logger.debug(f"Аргументы ноды - {arguments}")
+
         for argument in arguments:
             name = dpg.get_item_label(argument)
 
-            if name not in self.annotations: continue
+            if name not in self.annotations or \
+            self.annotations[name].attr_type == AttrType.OUTPUT: continue
 
-            if isinstance(self.annotations[name], tuple):
-                kwargs[name] = tuple(dpg.get_values(dpg.get_item_children(argument)[1])[:len(self.annotations[name])])
+            kwargs[name] = self.annotations[name].get_value(argument)
 
-            elif issubclass(self.annotations[name], File):
-                kwargs[name] = dpg.get_item_user_data(argument)
-            
-            elif issubclass(self.annotations[name], AbstractNode):
-                parent = dpg.get_item_parent(argument)
-                user_data = dpg.get_item_user_data(parent)
-                if len(user_data) == 1: kwargs[name] = getattr(user_data[0], 'data')
-                else: kwargs[name] = [getattr(node, 'data') for node in user_data]
-
-            elif issubclass(self.annotations[name], Enum):
-                enum_member = self.annotations[name][dpg.get_value(argument)]
-                kwargs[name] = enum_member.value
-            
-            else: kwargs[name] = dpg.get_value(argument)
+            self.logger.debug(kwargs)
             
         return self.logic(**kwargs)
     
@@ -142,7 +96,7 @@ class AbstractNode(ABC):
 @dataclass
 class node_link:
     '''
-    Класс для dpg.add_node_link, указывает какие ноды связываются.
+    Класс для dpg.add_node_link, указывает какие аттрибуты узлов связываются.
     '''
-    outcoming: AbstractNode
-    incoming: AbstractNode
+    outgoing: str | int
+    incoming: str | int

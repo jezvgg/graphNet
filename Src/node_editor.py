@@ -5,7 +5,8 @@ import dearpygui.dearpygui as dpg
 from Src.Nodes import AbstractNode, node_link
 from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
-from Src.Nodes.node_list import node_list, listNode
+from Src.Config.node_list import node_list, NodeAnnotation
+
 
 
 class NodeEditor:
@@ -19,6 +20,7 @@ class NodeEditor:
     builder: NodeBuilder
     __stage_tag: str | int
     __group_tag: str | int
+    __start_nodes: list[AbstractNode]
 
 
     def __init__(self, *args, **kwargs):
@@ -33,9 +35,10 @@ class NodeEditor:
             config = json.load(f)
 
         self.logger = Logger_factory.from_instance()("nodes", config)
-        self.builder = NodeBuilder(node_list)
+        self.builder = NodeBuilder(node_list, self.delete_node)
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
+        self.__start_nodes = []
 
         dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
 
@@ -53,8 +56,10 @@ class NodeEditor:
                                         delink_callback=self.delink_callback, *args, **kwargs):
 
                         input_id = self.builder.build_input("node_editor", shape=(8, 8, 1))
+                        self.__start_nodes.append(dpg.get_item_user_data(input_id))
 
-                    dpg.add_button(label="Собрать модель", callback= self.builder.compile_graph)
+                    dpg.add_button(label="Собрать модель", 
+                                   callback = lambda: self.builder.compile_graph(self.__start_nodes))
 
 
     def on_viewport_resize_callback(self,sender, app_data):
@@ -90,9 +95,12 @@ class NodeEditor:
 
         self.logger.info(f"Рассчитанная позиция - {pos}")
 
-        node_data: listNode = dpg.get_item_user_data(app_data)
+        node_data: NodeAnnotation = dpg.get_item_user_data(app_data)
         node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
+
+        # Мы только создали узел и у него ещё нет связей
+        self.__start_nodes.append(dpg.get_item_user_data(node_id))
 
 
     def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
@@ -101,7 +109,7 @@ class NodeEditor:
 
         Args:
             sender: int | str - зачастую является окном редакторивания графа (dpg.node_editor)
-            app_data: tuple(str | int, str | int) - исходящий и приходящий нод.
+            app_data: tuple(str | int, str | int) - исходящие и приходящие атрибуты нодов.
         '''
         self.logger.debug(f"На вход пришло {app_data}")
 
@@ -114,13 +122,20 @@ class NodeEditor:
 
         self.logger.debug(f"Связи до: {node_out} {node_in}")
 
-        data: list | None = dpg.get_item_user_data(app_data[1])
-        if not data: data = []
-        data.append(node_out)
-        dpg.set_item_user_data(app_data[1], data)
+        data_in: list | None = dpg.get_item_user_data(app_data[1])
+        if not data_in: data_in = []
+        data_in.append(app_data[0])
+        dpg.set_item_user_data(app_data[1], data_in)
 
-        node_out.outcoming.append(node_in)
-        node_in.incoming.append(node_out)
+        data_out: list | None = dpg.get_item_user_data(app_data[0])
+        if not data_out: data_out = []
+        data_out.append(app_data[1])
+        dpg.set_item_user_data(app_data[0], data_out)
+
+        node_out.outgoing[app_data[0]] = app_data[1]
+        node_in.incoming[app_data[1]] = app_data[0]
+
+        if node_in in self.__start_nodes: self.__start_nodes.remove(node_in)
 
         self.logger.debug(f"Связи после: {node_out} {node_in}")
 
@@ -130,7 +145,7 @@ class NodeEditor:
 
     def delink_callback(self, sender: int | str, app_data: int | str):
         '''
-        Функция, которая вызывается, когда создаётся убирается связь между нодами.
+        Функция, которая вызывается, когда убирается связь между нодами.
 
         Args:
             sender: int | str - зачастую является окном редакторивания графа (dpg.node_editor)
@@ -138,12 +153,17 @@ class NodeEditor:
         '''
         link: node_link = dpg.get_item_user_data(app_data)
 
-        self.logger.debug(f"Связи до: {link.outcoming} {link.incoming}")
+        self.logger.debug(f"Связи до: {link.outgoing} {link.incoming}")
 
-        link.outcoming.outcoming.remove(link.incoming)
-        link.incoming.incoming.remove(link.outcoming)
+        node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(link.outgoing))
+        node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(link.incoming))
 
-        self.logger.debug(f"Связи после: {link.outcoming} {link.incoming}")
+        del node_out.outgoing[link.outgoing]
+        del node_in.incoming[link.incoming]
+
+        if not node_in.incoming: self.__start_nodes.append(link.incoming)
+
+        self.logger.debug(f"Связи после: {link.outgoing} {link.incoming}")
 
         dpg.delete_item(app_data)
 
@@ -155,11 +175,23 @@ class NodeEditor:
         Args:
             node_id: str | int - индетификатор нода, которого нужно удалить (dpg.node)
         '''
-        node_data: AbstractNode = dpg.get_item_user_data(node_id)
+        node: AbstractNode = dpg.get_item_user_data(node_id)
         
-        # TODO Вынести логику из AbstractNode
-        node_data.delete()
+        # Удаляем связи с этим узлом
+        for attr_id in node.incoming.copy().values():
+            node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
+            del node.incoming[node_out.outgoing[attr_id]]
+            del node_out.outgoing[attr_id]
 
+        for attr_id in node.outgoing.copy().values(): 
+            node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
+            del node.outgoing[node_in.incoming[attr_id]]
+            del node_in.incoming[attr_id]
+            if not node_in.incoming: self.__start_nodes.append(node_in)
+        
+        if node in self.__start_nodes: self.__start_nodes.remove(node)
+
+        del node
         dpg.delete_item(node_id)
 
 

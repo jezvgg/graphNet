@@ -4,3 +4,5 @@ Logs/*
 *.png
 *.dat
 *.txt
+.*
+smth.py

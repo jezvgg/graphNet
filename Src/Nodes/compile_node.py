@@ -29,7 +29,9 @@ class CompileNode(ParameterNode):
 
 
         inputs = [node.layer for node in input_nodes]
-        outputs = [node.layer for node in dpg.get_item_user_data(dpg.get_item_children(self.node_tag)[1][0])]
+
+        outputs = [dpg.get_item_user_data(dpg.get_item_parent(attribute)).layer for attribute in 
+                   dpg.get_item_user_data(dpg.get_item_children(self.node_tag)[1][0])]
 
         model = keras.models.Model(inputs=inputs, outputs=outputs)
 
