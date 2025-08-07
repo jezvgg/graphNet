@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import logging
 import sys
+from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
@@ -42,6 +43,8 @@ class Logger_factory(object):
         '''
         if 'filename' in config:
             config['filename'] = config['filename'].format(curdata=datetime.now().strftime(config['datefmt']))
+
+        Path.mkdir(Path(config['filename']).parent, exist_ok=True)
 
         self.config = config
         logging.basicConfig(**self.config)
@@ -83,8 +86,7 @@ class Logger_factory(object):
         if 'filename' in config and config['filename'] == 'stream':
             handler = logging.StreamHandler(sys.stdout)
         elif 'filename' in config:
-            handler = logging.FileHandler(
-                config['filename'].format(curdata=f"{logger_name}_{datetime.now().strftime(config['datefmt'])}"))
+            handler = logging.FileHandler(config['filename'].format(curdata=f"{logger_name}_{datetime.now().strftime(config['datefmt'])}"))
 
         if 'format' in config and handler:
             handler.setFormatter(logging.Formatter(config['format']))
@@ -120,5 +122,3 @@ class Logger_factory(object):
         Переместить консоль в верхний правый угол
         '''
         dpg.set_item_pos(self.__console_tag, (dpg.get_viewport_width() - dpg.get_item_width(self.__console_tag), 0))
-
-
