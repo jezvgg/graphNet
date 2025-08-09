@@ -98,7 +98,7 @@ class NodeBuilder:
         return node_id
     
 
-    def build_input(self, parent: str | int, shape: tuple[int]) -> str | int:
+    def build_input(self, parent: str | int) -> str | int:
         '''
         Особенный метод, реализующий построение слоя входа.
 
@@ -119,15 +119,6 @@ class NodeBuilder:
             )
 
         node_id = self.build_node(layer, parent=parent)
-
-        attributes = dpg.get_item_children(node_id)[1]
-
-        arguments = [dpg.get_item_children(argument)[1][0] for argument in attributes]
-
-        input_argument = [arg for arg in arguments if dpg.get_item_label(arg) == "shape"][0]
-        
-        for value, input in zip(shape, dpg.get_item_children(input_argument)[1]):
-            dpg.set_value(input, value)
 
         return node_id
     
@@ -150,7 +141,7 @@ class NodeBuilder:
                 self.logger.debug("Нода подошла.")
 
                 layer = current_node.compile()
-                print(layer)
+                self.logger.debug(str(layer))
 
                 for attr_id in current_node.outgoing.values():
                     neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))

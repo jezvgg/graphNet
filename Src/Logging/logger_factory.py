@@ -30,7 +30,7 @@ class Logger_factory(object):
         return cls._instance
 
 
-    def __init__(self, config: dict[str, str|int] = None) -> "Logger_factory":
+    def __init__(self, config: dict[str, str|int]) -> "Logger_factory":
         '''
         Класс для логирования, синглтон.
 

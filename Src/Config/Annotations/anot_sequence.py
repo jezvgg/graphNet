@@ -25,7 +25,7 @@ class ASequence(Annotation):
 
     def build(self, *args, **kwargs):
         kwargs = Annotation.check_kwargs(dpg.group, kwargs)
-        kwargs['width'] = self.__calc_width(kwargs.get('width'))
+        kwargs['width'] = self.__calc_width(kwargs.get('width', Annotation.BASE_WIDTH))
         with dpg.group(horizontal=True, *args, **kwargs) as item:
             for hint in self.shape:
                 if hint not in (ABoolean, AFloat, AInteger, AString):

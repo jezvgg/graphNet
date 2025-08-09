@@ -24,8 +24,8 @@ class ANode(Annotation):
         kwargs['user_data'] = []
 
         with dpg.node_attribute(*args, **kwargs, attribute_type=dpg.mvNode_Attr_Input) as attr:
-            dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
-        return attr
+            input_id = dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
+        return input_id
     
 
     @staticmethod
