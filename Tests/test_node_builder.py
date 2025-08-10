@@ -70,7 +70,7 @@ class test_NodeBuilder(DPGUnitTest):
         assert dpg.get_item_type(node_id) == "mvAppItemType::mvNode"
         assert getattr(dpg.get_item_user_data(node_id), 'node_tag') == node_id
 
-        
+
     def test_build_input(self):
         builder = NodeBuilder({}, lambda x:x)
         with dpg.window() as id:
@@ -81,16 +81,7 @@ class test_NodeBuilder(DPGUnitTest):
 
         assert isinstance(node, InputLayerNode)
         assert dpg.get_item_label(node_id) == "Input"
-    def test_build_input(self):
-        builder = NodeBuilder({}, lambda x:x)
-        with dpg.window() as id:
-            with dpg.node_editor() as editor_id:
-                node_id = builder.build_input(editor_id)
-
-        node = dpg.get_item_user_data(node_id)
-
-        assert isinstance(node, InputLayerNode)
-        assert dpg.get_item_label(node_id) == "Input"
+    
     
     def test_compile_graph(self):
         # TODO: Нужно написать:

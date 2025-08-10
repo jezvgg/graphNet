@@ -60,9 +60,11 @@ class NodeEditor:
 
                     dpg.add_button(label="Собрать модель", 
                                    callback = lambda: self.builder.compile_graph(self.__start_nodes))
+        
+        self.on_viewport_resize_callback()
 
 
-    def on_viewport_resize_callback(self,sender, app_data):
+    def on_viewport_resize_callback(self, **kwargs):
         '''
         Callback для изменения размера node_editor'a
         '''
@@ -118,7 +120,7 @@ class NodeEditor:
 
         self.logger.debug(f"Node_out - {dpg.get_item_label(dpg.get_item_parent(app_data[0]))}")
 
-        dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=node_link(node_out, node_in))
+        dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=node_link(app_data[0], app_data[1]))
 
         self.logger.debug(f"Связи до: {node_out} {node_in}")
 

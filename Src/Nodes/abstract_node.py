@@ -60,9 +60,7 @@ class AbstractNode(ABC):
 
 
     def __str__(self) -> str:
-        incoming_nodes : list["AbstractNode"] = [dpg.get_item_parent(attribute) for attribute in self.incoming.values()]
-        outgoing_nodes : list["AbstractNode"] = [dpg.get_item_parent(attribute) for attribute in self.outgoing.values()]
-        return f"{self.__class__.__name__} {self.node_tag} {dict(incoming=incoming_nodes, outgoing=outgoing_nodes)}"
+        return f"{self.__class__.__name__} {self.node_tag} {dict(incoming=self.incoming, outgoing=self.outgoing)}"
     
 
     def __hash__(self):
