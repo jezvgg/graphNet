@@ -51,12 +51,11 @@ class AEnum(Annotation):
         return dpg.get_value(input_id)
 
 
-    @staticmethod
-    def set(input_id: str | int, value: str) -> bool:
+    def set(self, input_id: str | int, value: str) -> bool:
         """
         Устанавливает значение для dpg.add_combo.
         """
-        if not isinstance(value, enum):
+        if not isinstance(value, str) or value not in self.items:
             return False
 
         dpg.set_value(input_id, value)

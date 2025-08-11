@@ -1,9 +1,15 @@
 from pathlib import Path
+import enum
 
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations import *
 from Tests.DPG_test import DPGUnitTest
+
+
+class TestEnum(enum.Enum):
+    FIRST = 'first'
+    SECOND = 'second'
 
 
 class test_annotations(DPGUnitTest):
@@ -124,6 +130,23 @@ class test_annotations(DPGUnitTest):
         assert ASequence[AInteger, AInteger].set(input_id, 1) == False
         assert ASequence[AInteger, AInteger].set(input_id, (1, 1, 1)) == False
 
+    def test_AEnum(self):
+        annotation = AEnum[TestEnum]
+
+        combo_id = annotation.build(parent=self.parent)
+
+        assert isinstance(combo_id, int | str)
+        assert combo_id in dpg.get_all_items()
+
+        assert annotation.get(combo_id) == TestEnum.FIRST.value
+
+        assert annotation.set(combo_id, TestEnum.SECOND.value) == True
+        assert annotation.get(combo_id) == TestEnum.SECOND.value
+
+        assert annotation.set(combo_id, "Invalid value") == False
+        assert annotation.set(combo_id, 123) == False
+
+        assert annotation.get(combo_id) == TestEnum.SECOND.value
     
 
     
