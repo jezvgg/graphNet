@@ -1,6 +1,7 @@
 from keras import layers
 import keras
 
+from Src.Enums import *
 from Src.Enums.attr_type import AttrType
 from Src.Nodes import *
 from Src.Config.parameter import Parameter
@@ -19,7 +20,7 @@ node_list = {
                 logic = TableDataNode.open_data,
                 annotations = {
                         "files": Parameter(AttrType.INPUT, AFile),
-                        "delimiter": Parameter(AttrType.INPUT, AString, default=","),
+                        "delimiter": Parameter(AttrType.INPUT, AEnum[Delimiters]),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),
                         "shape": Parameter(AttrType.OUTPUT, 
@@ -34,7 +35,7 @@ node_list = {
                 logic = ImageDataNode.open_data,
                 annotations = {
                         "files": Parameter(AttrType.INPUT, AFile),
-                        "color_mode": Parameter(AttrType.INPUT, AString),
+                        "color_mode": Parameter(AttrType.INPUT, AEnum[ColorMode]),
                         "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
                         }
             )
@@ -61,7 +62,7 @@ node_list = {
                 logic = layers.Dense,
                 annotations = {
                         "units": Parameter(AttrType.INPUT, AInteger),
-                        "activation": Parameter(AttrType.INPUT, AString),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
                         "use_bias": Parameter(AttrType.INPUT, ABoolean)
                     }
             )
@@ -76,8 +77,8 @@ node_list = {
                         "filters": Parameter(AttrType.INPUT, AInteger),
                         "kernel_size": Parameter(AttrType.INPUT, AInteger),
                         "strides": Parameter(AttrType.INPUT, AInteger),
-                        "padding": Parameter(AttrType.INPUT, AString),
-                        "activation": Parameter(AttrType.INPUT, AString),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
                         "use_bias": Parameter(AttrType.INPUT, ABoolean),
                     } 
             ),
@@ -88,7 +89,7 @@ node_list = {
                 annotations = {
                         "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger]),
                         "strides": Parameter(AttrType.INPUT, AInteger),
-                        "padding": Parameter(AttrType.INPUT, AString),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
                     }
             )
         ],
@@ -117,8 +118,8 @@ node_list = {
                 node_type= CompileNode,
                 logic = keras.models.Model.compile,
                 annotations = {
-                        "optimizer": Parameter(AttrType.INPUT, ANode),
-                        "loss": Parameter(AttrType.INPUT, ANode),
+                        "optimizer": Parameter(AttrType.INPUT, AEnum[Optimizers]),
+                        "loss": Parameter(AttrType.INPUT, AEnum[Losses]),
                         # "metrics": MetricNode
                     }
             ),
@@ -133,61 +134,6 @@ node_list = {
                         "epochs": Parameter(AttrType.INPUT, AInteger)
                     }
             )
-        ],
-        "Optimizers": [
-            NodeAnnotation(
-                label="Adam",
-                node_type= OptimizerNode,
-                logic = keras.optimizers.Adam,
-                annotations = {
-                        "learning_rate": Parameter(AttrType.INPUT, AFloat),
-                        # "beta_1": float,
-                        # "beta_2": float,
-                        # "epsilon": float
-                    },
-                input = False
-            ),
-            NodeAnnotation(
-                label="Stochastic Gradient Descent",
-                node_type= OptimizerNode,
-                logic = keras.optimizers.SGD,
-                annotations = {
-                        "learning_rate": Parameter(AttrType.INPUT, AFloat),
-                        "momentum": Parameter(AttrType.INPUT, AFloat),
-                        "nesterov": Parameter(AttrType.INPUT, ABoolean)
-                    },
-                input = False
-            ),
-            NodeAnnotation(
-                label="RMSprop",
-                node_type= OptimizerNode,
-                logic = keras.optimizers.RMSprop,
-                annotations =  {
-                        "learning_rate": Parameter(AttrType.INPUT, AFloat),
-                        "momentum": Parameter(AttrType.INPUT, AFloat)
-                    },
-                input =  False
-            )
-        ],
-        "Losses": [
-            NodeAnnotation(
-                label="Binary cross-entropy",
-                node_type= LossNode,
-                logic = keras.losses.BinaryCrossentropy,
-                input =  False
-            ),
-            NodeAnnotation(
-                label="Mean Squared Error",
-                node_type= LossNode,
-                logic = keras.losses.MeanSquaredError,
-                input = False
-            ),
-            NodeAnnotation(
-                label="Cross-entropy",
-                node_type= LossNode,
-                logic = keras.losses.CategoricalCrossentropy,
-                input = False
-            ),
         ],
         "Metrics": [
             NodeAnnotation(
