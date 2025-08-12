@@ -104,6 +104,8 @@ class NodeEditor:
         # Мы только создали узел и у него ещё нет связей
         self.__start_nodes.append(dpg.get_item_user_data(node_id))
 
+        self.logger.debug(f"Start nodes: {self.__start_nodes}")
+
 
     def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
         '''
@@ -141,6 +143,8 @@ class NodeEditor:
 
         self.logger.debug(f"Связи после: {node_out} {node_in}")
 
+        self.logger.debug(f"Start nodes: {self.__start_nodes}")
+
         # Для дебага
         # Node.print_tree(dpg.get_item_user_data("node_input"))
 
@@ -169,6 +173,8 @@ class NodeEditor:
 
         dpg.delete_item(app_data)
 
+        self.logger.debug(f"Start nodes: {self.__start_nodes}")
+
 
     def delete_node(self, node_id: str | int):
         '''
@@ -195,6 +201,8 @@ class NodeEditor:
 
         del node
         dpg.delete_item(node_id)
+
+        self.logger.debug(f"Start nodes: {self.__start_nodes}")
 
 
     def show(self, parent: str | int):

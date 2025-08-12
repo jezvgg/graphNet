@@ -129,7 +129,7 @@ class NodeBuilder:
         '''
 
         visited = set()
-        queue = start_nodes
+        queue = start_nodes[:]
         self.logger.info("Началась сборка графа.")
 
         while queue:
