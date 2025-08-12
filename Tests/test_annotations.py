@@ -138,15 +138,15 @@ class test_annotations(DPGUnitTest):
         assert isinstance(combo_id, int | str)
         assert combo_id in dpg.get_all_items()
 
-        assert annotation.get(combo_id) == TestEnum.FIRST.value
+        assert annotation.get(combo_id) == TestEnum.FIRST
 
-        assert annotation.set(combo_id, TestEnum.SECOND.value) == True
-        assert annotation.get(combo_id) == TestEnum.SECOND.value
+        assert annotation.set(combo_id, TestEnum.SECOND) == True
+        assert annotation.get(combo_id) == TestEnum.SECOND
 
         assert annotation.set(combo_id, "Invalid value") == False
         assert annotation.set(combo_id, 123) == False
 
-        assert annotation.get(combo_id) == TestEnum.SECOND.value
+        assert annotation.get(combo_id) == TestEnum.SECOND
     
 
     

@@ -1,3 +1,4 @@
+from typing import Literal
 import enum
 
 import dearpygui.dearpygui as dpg
@@ -22,12 +23,13 @@ class AEnum(Annotation):
         return cls(source=enum_source)
 
 
-    def __init__(self, source: type):
+    def __init__(self, source: enum.Enum):
         """
         Args:
             source (type): Источник данных. Может быть списком строк
                                         или классом, унаследованным от enum.Enum.
         """
+        self.source = source
         self.items = [member.value for member in source]
 
 
@@ -43,20 +45,19 @@ class AEnum(Annotation):
         return dpg.add_combo(*args, **kwargs)
 
 
-    @staticmethod
-    def get(input_id: int | str):
+    def get(self, input_id: int | str):
         """
         Получает текущее выбранное значение из dpg.add_combo.
         """
-        return dpg.get_value(input_id)
+        return self.source(dpg.get_value(input_id))
 
 
-    def set(self, input_id: str | int, value: str) -> bool:
+    def set(self, input_id: str | int, value: enum.Enum) -> bool:
         """
         Устанавливает значение для dpg.add_combo.
         """
-        if not isinstance(value, str) or value not in self.items:
+        if not isinstance(value, enum.Enum) or value.value not in self.items:
             return False
 
-        dpg.set_value(input_id, value)
+        dpg.set_value(input_id, value.value)
         return True

@@ -78,7 +78,7 @@ class NodeBuilder:
         with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
             if node.input:
                 with dpg.node_attribute(label="INPUT", attribute_type=dpg.mvNode_Attr_Input):
-                    dpg.add_text("INPUT")
+                    dpg.add_text("INPUT", label="INPUT")
                 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
                 with dpg.tree_node(label="Docs"):
@@ -93,7 +93,7 @@ class NodeBuilder:
 
             if node.output:
                 with dpg.node_attribute(label="OUTPUT", attribute_type=dpg.mvNode_Attr_Output):
-                    dpg.add_text("OUTPUT")
+                    dpg.add_text("OUTPUT", label="OUTPUT")
 
         return node_id
     

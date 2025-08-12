@@ -135,26 +135,6 @@ node_list = {
                     }
             )
         ],
-        "Metrics": [
-            NodeAnnotation(
-                label="Accuracy",
-                node_type= ParameterNode,
-                logic = keras.metrics.Accuracy,
-                input = False
-            ),
-            NodeAnnotation(
-                label="F1 score",
-                node_type= ParameterNode,
-                logic = keras.metrics.F1Score,
-                input = False
-            ),
-            NodeAnnotation(
-                label="Mean Squared Error",
-                node_type= ParameterNode,
-                logic = keras.metrics.MeanSquaredError,
-                input = False
-            )
-        ],
         "Utils": [
             NodeAnnotation(
                 label="Save model",
