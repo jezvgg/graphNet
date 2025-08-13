@@ -126,7 +126,7 @@ node_list = {
             NodeAnnotation(
                 label="Fit model",
                 node_type= FitNode,
-                logic = keras.models.Model.fit,
+                logic = FitNode.fit,
                 annotations = {
                         "self": Parameter(AttrType.INPUT, ANode),
                         "x": Parameter(AttrType.INPUT, ANode),

@@ -123,7 +123,7 @@ class NodeBuilder:
         return node_id
     
 
-    def compile_graph(self, start_nodes: list[AbstractNode]):
+    def compile_graph(self, start_nodes: list[AbstractNode]) -> set[AbstractNode]:
         '''
         Компиляция графа, от его концов. Работает через обход в ширину. Вызывает метод compile у нода, если все ноды, пришедшие к нему уже скомпилированы. Начинает с нодов, у которых нет входов.
         '''
@@ -133,11 +133,12 @@ class NodeBuilder:
         self.logger.info("Началась сборка графа.")
 
         while queue:
-            current_node = queue.pop()
             self.logger.debug(f"Текущая очередь - {queue}")
+            current_node = queue.pop(0)
             self.logger.debug(f"Текущая нода - {current_node}")
 
-            if set(current_node.incoming.values()) | visited == visited:
+            if all([dpg.get_item_user_data(dpg.get_item_parent(value)) in visited \
+                for value in current_node.incoming.values()]):
                 self.logger.debug("Нода подошла.")
 
                 layer = current_node.compile()
@@ -146,6 +147,8 @@ class NodeBuilder:
                 for attr_id in current_node.outgoing.values():
                     neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
                     if neightbor not in queue:
-                        queue = [neightbor] + queue
+                        queue.append(neightbor)
 
                 visited.add(current_node)
+
+        return visited

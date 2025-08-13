@@ -49,14 +49,18 @@ class AEnum(Annotation):
         """
         Получает текущее выбранное значение из dpg.add_combo.
         """
-        return self.source(dpg.get_value(input_id))
+        if dpg.get_item_type(input_id) != "mvAppItemType::mvCombo":
+            raise Exception(f"Incompatable item for AEnum.get - {dpg.get_item_type(input_id)}") 
+        return dpg.get_value(input_id)
 
 
     def set(self, input_id: str | int, value: enum.Enum) -> bool:
         """
         Устанавливает значение для dpg.add_combo.
         """
-        if not isinstance(value, enum.Enum) or value.value not in self.items:
+        if not isinstance(value, enum.Enum) or \
+            value.value not in self.items or \
+            dpg.get_item_type(input_id) != "mvAppItemType::mvCombo":
             return False
 
         dpg.set_value(input_id, value.value)

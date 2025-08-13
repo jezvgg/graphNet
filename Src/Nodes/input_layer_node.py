@@ -11,9 +11,11 @@ class InputLayerNode(AbstractNode):
     '''
     logic: layers.Input
     layer: layers.Input
+    inputs: set["InputLayerNode"]
 
 
     def compile(self):
         self.layer = super().compile()
+        self.inputs = set([self])
         return self.layer
         

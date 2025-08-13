@@ -40,12 +40,12 @@ class Parameter:
     
 
     def get_value(self, argument: int | str):
-        field = dpg.get_item_children(argument)[1][0]
+        field = dpg.get_item_children(argument, slot=1)[0]
         value = self.hint.get(field)
         return value
     
 
     def set_value(self, argument: int | str, value) -> bool:
-        field = dpg.get_item_children(argument)[1][0]
+        field = dpg.get_item_children(argument, slot=1)[0]
         return self.hint.set(field, value)
     

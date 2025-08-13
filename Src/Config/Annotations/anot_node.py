@@ -25,6 +25,7 @@ class ANode(Annotation):
 
         with dpg.node_attribute(*args, **kwargs, attribute_type=dpg.mvNode_Attr_Input) as attr:
             input_id = dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
+
         return input_id
     
 
@@ -34,7 +35,7 @@ class ANode(Annotation):
 
         parent = dpg.get_item_parent(input_id)
 
-        if (dpg.get_item_type(parent) != 'mvAppItemType::mvNodeAttribute'):
+        if dpg.get_item_type(parent) != 'mvAppItemType::mvNodeAttribute':
             raise Exception(f"Incompatable parent of item {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
         user_data = dpg.get_item_user_data(parent)

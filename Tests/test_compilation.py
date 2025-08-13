@@ -57,29 +57,30 @@ class test_compilation(DPGUnitTest):
         categorical = self.node_editor.drop_callback("node_editor", nodes_in_mock["To categorical"])
         compile = self.node_editor.drop_callback("node_editor", nodes_in_mock["Compile"])
         fit = self.node_editor.drop_callback("node_editor", nodes_in_mock["Fit"])
+        nodes = [input, dataX, dataY, dense, categorical, compile, fit]
 
         # Соединяем их в пайплайн
         self.node_editor.link_callback("node_editor", (get_attr("shape", dataX), get_attr("shape", input)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", input), get_attr("INPUT", dense)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataY), get_attr("x", categorical)))
-        self.node_editor.link_callback("node_editor", (get_attr("shape", dataX), get_attr("shape", input)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dense), get_attr("INPUT", compile)))
 
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataX), get_attr("x", fit)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", compile), get_attr("self", fit)))
-        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataY), get_attr("y", fit)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", categorical), get_attr("y", fit)))
 
         # Задаём данные в ноды
-        assert AFile.set(get_attr("files", dataX), [Path("Tests/X.txt")])
-        assert AFile.set(get_attr("files", dataY), [Path("Tests/y.txt")])
-        assert AInteger.set(get_attr("num_classes", categorical), 2)
-        assert AInteger.set(get_attr("units", dense), 1)
-        assert AEnum[Losses].set(get_attr("loss", compile), Losses.binary_crossentropy)
-        assert AInteger.set(get_attr("epochs", fit), 10)
+        assert AFile.set(dpg.get_item_children(get_attr("files", dataX), slot=1)[0], [Path("Tests/X.txt")])
+        assert AFile.set(dpg.get_item_children(get_attr("files", dataY), slot=1)[0], [Path("Tests/y.txt")])
+        assert AInteger.set(dpg.get_item_children(get_attr("num_classes", categorical), slot=1)[0], 2)
+        assert AInteger.set(dpg.get_item_children(get_attr("units", dense), slot=1)[0], 2)
+        assert AEnum[Activations].set(dpg.get_item_children(get_attr("activation", dense), slot=1)[0], Activations.softmax)
+        assert AEnum[Losses].set(dpg.get_item_children(get_attr("loss", compile), slot=1)[0], Losses.binary_crossentropy)
+        assert AInteger.set(dpg.get_item_children(get_attr("epochs", fit), slot=1)[0], 10)
 
         # Компилируем
-        self.node_editor.builder.compile_graph(self.node_editor._NodeEditor__start_nodes)
+        visited = self.node_editor.builder.compile_graph(self.node_editor._NodeEditor__start_nodes)
 
-        assert True
+        assert all([dpg.get_item_user_data(node) in visited for node in nodes])
 
 

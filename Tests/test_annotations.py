@@ -81,9 +81,9 @@ class test_annotations(DPGUnitTest):
 
         example = "Example"
         assert AString.set(input_id, example) == True
-        assert AInteger.get(input_id) == example
+        assert AString.get(input_id) == example
 
-        assert AInteger.set(input_id, 1.5) == False
+        assert AString.set(input_id, 1.5) == False
 
 
     def test_AFile(self):
@@ -138,15 +138,15 @@ class test_annotations(DPGUnitTest):
         assert isinstance(combo_id, int | str)
         assert combo_id in dpg.get_all_items()
 
-        assert annotation.get(combo_id) == TestEnum.FIRST
+        assert TestEnum(annotation.get(combo_id)) == TestEnum.FIRST
 
         assert annotation.set(combo_id, TestEnum.SECOND) == True
-        assert annotation.get(combo_id) == TestEnum.SECOND
+        assert TestEnum(annotation.get(combo_id)) == TestEnum.SECOND
 
         assert annotation.set(combo_id, "Invalid value") == False
         assert annotation.set(combo_id, 123) == False
 
-        assert annotation.get(combo_id) == TestEnum.SECOND
+        assert TestEnum(annotation.get(combo_id)) == TestEnum.SECOND
     
 
     

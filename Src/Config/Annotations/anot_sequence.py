@@ -35,10 +35,14 @@ class ASequence(Annotation):
 
             # Если отсутсвует label, то создаст пустой текст
             dpg.add_text(kwargs.get('label') or '')
+
         return item
 
 
     def get(self, input_field: int | str):
+        if dpg.get_item_type(input_field) != "mvAppItemType::mvGroup":
+            raise Exception(f"Incompatable item for ASequence.get - {dpg.get_item_type(input_field)}") 
+        
         result = []
         for input_id in dpg.get_item_children(input_field)[1][:-1]:
             result.append(dpg.get_value(input_id))
@@ -46,7 +50,8 @@ class ASequence(Annotation):
     
 
     def set(self, input_id: str| int, value: tuple) -> bool:
-        if not isinstance(value, tuple) or len(value) > len(self.shape): 
+        if not isinstance(value, tuple) or len(value) > len(self.shape) or \
+            dpg.get_item_type(input_id) != "mvAppItemType::mvGroup": 
             return False
         
         for input_field, annotation, field_value in \

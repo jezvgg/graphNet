@@ -48,6 +48,7 @@ class AbstractNode(ABC):
         self.outgoing = {}
         self.input = input
         self.output = output
+        self.OUTPUT = None
 
         if not docs: docs = inspect.getdoc(self.logic)
         self.docs = docs
@@ -87,7 +88,8 @@ class AbstractNode(ABC):
 
             self.logger.debug(kwargs)
             
-        return self.logic(**kwargs)
+        self.OUTPUT = self.logic(**kwargs)
+        return self.OUTPUT
     
 
 
