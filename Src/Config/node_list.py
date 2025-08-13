@@ -126,7 +126,7 @@ node_list = {
             NodeAnnotation(
                 label="Fit model",
                 node_type= FitNode,
-                logic = keras.models.Model.fit,
+                logic = FitNode.fit,
                 annotations = {
                         "self": Parameter(AttrType.INPUT, ANode),
                         "x": Parameter(AttrType.INPUT, ANode),
@@ -142,26 +142,6 @@ node_list = {
                         "self": Parameter(AttrType.INPUT, ANode),
                         "x": Parameter(AttrType.INPUT, ANode),
                     },
-                input = False
-            )
-        ],
-        "Metrics": [
-            NodeAnnotation(
-                label="Accuracy",
-                node_type= ParameterNode,
-                logic = keras.metrics.Accuracy,
-                input = False
-            ),
-            NodeAnnotation(
-                label="F1 score",
-                node_type= ParameterNode,
-                logic = keras.metrics.F1Score,
-                input = False
-            ),
-            NodeAnnotation(
-                label="Mean Squared Error",
-                node_type= ParameterNode,
-                logic = keras.metrics.MeanSquaredError,
                 input = False
             )
         ],

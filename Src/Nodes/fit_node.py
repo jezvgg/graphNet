@@ -6,7 +6,13 @@ from Src.Nodes import ParameterNode
 
 
 class FitNode(ParameterNode):
-    logic: keras.models.Model.fit
+    logic: "FitNode.fit"
+
+
+    @staticmethod
+    def fit(**kwargs):
+        keras.models.Model.fit(**kwargs)
+        return kwargs.get('self')
 
 
     def compile(self):

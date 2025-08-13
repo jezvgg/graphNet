@@ -14,11 +14,15 @@ class AString(Annotation):
 
     @staticmethod
     def get(input_id: int | str):
+        if dpg.get_item_type(input_id) != "mvAppItemType::mvInputText":
+            raise Exception(f"Incompatable item for AString.get - {dpg.get_item_type(input_id)}") 
         return dpg.get_value(input_id)
     
 
     @staticmethod
     def set(input_id: str| int, value: str) -> bool: 
-        if not isinstance(value, str): return False
+        if not isinstance(value, str) or dpg.get_item_type(input_id) != "mvAppItemType::mvInputText": 
+            return False
+        
         dpg.set_value(input_id, value)
         return True

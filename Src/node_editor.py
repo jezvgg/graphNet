@@ -72,7 +72,7 @@ class NodeEditor:
             dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
 
 
-    def drop_callback(self, sender: str | int, app_data: str | int):
+    def drop_callback(self, sender: str | int, app_data: str | int) -> str | int:
         '''
         Функция, которая выполняется, при перетягивания блока в окно редакторования графа. Создаём новую ноду в окне.
 
@@ -104,8 +104,12 @@ class NodeEditor:
         # Мы только создали узел и у него ещё нет связей
         self.__start_nodes.append(dpg.get_item_user_data(node_id))
 
+        self.logger.debug(f"Start nodes: {self.__start_nodes}")
 
-    def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]):
+        return node_id
+
+
+    def link_callback(self, sender: str | int, app_data: tuple[str | int, str | int]) -> str | int:
         '''
         Функция, которая вызывается, когда создаётся новая связь между нодами.
 
@@ -120,7 +124,7 @@ class NodeEditor:
 
         self.logger.debug(f"Node_out - {dpg.get_item_label(dpg.get_item_parent(app_data[0]))}")
 
-        dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=node_link(app_data[0], app_data[1]))
+        link_id = dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=node_link(app_data[0], app_data[1]))
 
         self.logger.debug(f"Связи до: {node_out} {node_in}")
 
@@ -141,8 +145,12 @@ class NodeEditor:
 
         self.logger.debug(f"Связи после: {node_out} {node_in}")
 
+        self.logger.debug(f"Start nodes: {self.__start_nodes}")
+
         # Для дебага
         # Node.print_tree(dpg.get_item_user_data("node_input"))
+
+        return link_id
 
 
     def delink_callback(self, sender: int | str, app_data: int | str):
@@ -168,6 +176,8 @@ class NodeEditor:
         self.logger.debug(f"Связи после: {link.outgoing} {link.incoming}")
 
         dpg.delete_item(app_data)
+
+        self.logger.debug(f"Start nodes: {self.__start_nodes}")
 
 
     def delete_node(self, node_id: str | int):
@@ -195,6 +205,8 @@ class NodeEditor:
 
         del node
         dpg.delete_item(node_id)
+
+        self.logger.debug(f"Start nodes: {self.__start_nodes}")
 
 
     def show(self, parent: str | int):

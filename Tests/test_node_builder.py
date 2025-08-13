@@ -81,13 +81,3 @@ class test_NodeBuilder(DPGUnitTest):
 
         assert isinstance(node, InputLayerNode)
         assert dpg.get_item_label(node_id) == "Input"
-    
-    
-    def test_compile_graph(self):
-        # TODO: Нужно написать:
-        # 1. Тест компиляции с 1 узлом
-        # 2. Тест компиляции с несколькими узлами
-        # 3. Тест компиляции на перцептроне
-        assert False
-
-    
