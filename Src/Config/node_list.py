@@ -133,6 +133,16 @@ node_list = {
                         "y": Parameter(AttrType.INPUT, ANode),
                         "epochs": Parameter(AttrType.INPUT, AInteger)
                     }
+            ),
+            NodeAnnotation(
+                label="Predict",
+                node_type= PredictNode,
+                logic = keras.models.Model.predict,
+                annotations = {
+                        "self": Parameter(AttrType.INPUT, ANode),
+                        "x": Parameter(AttrType.INPUT, ANode),
+                    },
+                input = False
             )
         ],
         "Metrics": [
