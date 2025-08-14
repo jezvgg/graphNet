@@ -1,3 +1,5 @@
+import numpy as np
+
 from keras import layers
 import keras
 
@@ -168,6 +170,17 @@ node_list = {
                         "show_layer_names": Parameter(AttrType.INPUT, ABoolean),
                         "show_layer_activations": Parameter(AttrType.INPUT, ABoolean)
                     },
+                input = False,
+                output = False
+            ),
+            NodeAnnotation(
+                label="Save data",
+                node_type = UtilsNode,
+                logic = np.savetxt,
+                annotations = {
+                    "X": Parameter(AttrType.INPUT, ANode),
+                    "fname": Parameter(AttrType.INPUT, AString, default='result.txt')
+                },
                 input = False,
                 output = False
             )
