@@ -40,6 +40,8 @@ class test_compilation(DPGUnitTest):
             "Dense": node_list["Neural Network Layers"]["Full"][0],
             "Compile": node_list["Training"]["General"][0],
             "Fit": node_list["Training"]["General"][1],
+            "Predict": node_list["Training"]["General"][2],
+            "Save": node_list["Training"]["Utils"][2]
         }
         get_attr = lambda attr_name, node_id: [attribute for attribute in dpg.get_item_children(node_id, slot=1) \
                                                for field in dpg.get_item_children(attribute, slot=1)\
@@ -57,7 +59,9 @@ class test_compilation(DPGUnitTest):
         categorical = self.node_editor.drop_callback("node_editor", nodes_in_mock["To categorical"])
         compile = self.node_editor.drop_callback("node_editor", nodes_in_mock["Compile"])
         fit = self.node_editor.drop_callback("node_editor", nodes_in_mock["Fit"])
-        nodes = [input, dataX, dataY, dense, categorical, compile, fit]
+        predict = self.node_editor.drop_callback("node_editor", nodes_in_mock["Predict"])
+        save = self.node_editor.drop_callback("node_editor", nodes_in_mock["Save"])
+        nodes = [input, dataX, dataY, dense, categorical, compile, fit, predict, save]
 
         # Соединяем их в пайплайн
         self.node_editor.link_callback("node_editor", (get_attr("shape", dataX), get_attr("shape", input)))
@@ -68,6 +72,10 @@ class test_compilation(DPGUnitTest):
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataX), get_attr("x", fit)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", compile), get_attr("self", fit)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", categorical), get_attr("y", fit)))
+
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", fit), get_attr("self", predict)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataX), get_attr("x", predict)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", predict), get_attr("X", save)))
 
         # Задаём данные в ноды
         assert AFile.set(dpg.get_item_children(get_attr("files", dataX), slot=1)[0], [Path("Tests/X.txt")])
@@ -83,4 +91,6 @@ class test_compilation(DPGUnitTest):
 
         assert all([dpg.get_item_user_data(node) in visited for node in nodes])
 
-
+        filepath: Path = Path(AString.get(dpg.get_item_children(get_attr("fname", save), slot=1)[0]))
+        assert filepath.exists()
+        filepath.unlink(missing_ok=True)
