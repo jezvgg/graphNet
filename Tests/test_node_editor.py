@@ -24,7 +24,7 @@ class test_NodeEditor(DPGUnitTest):
     def setUpClass(cls):
         super().setUpClass()
         dpg.create_viewport(title='Custom Title')
-        with open("logger_config.json") as f:
+        with open("Tests/logger_config.json") as f:
             config = json.load(f)
 
         log_factory = Logger_factory(config)
@@ -231,4 +231,5 @@ class test_NodeEditor(DPGUnitTest):
         assert len(dpg.get_item_children("node_editor", slot=1)) == nodes_count - 1
         assert node_attr2 not in node2.incoming
         assert node2 in self.node_editor._NodeEditor__start_nodes
+
 
