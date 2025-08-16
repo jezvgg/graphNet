@@ -36,6 +36,7 @@ class DPGType(Enum):
     NODE_EDITOR = 'mvAppItemType::mvNodeEditor'
     NODE = 'mvAppItemType::mvNode'
     NODE_LINK = 'mvAppItemType::mvNodeLink'
+    NODE_ATTRIBUTE = 'mvAppItemType::mvNodeAttribute'
 
     # Обработчики
     HANDLER_REGISTRY = 'mvAppItemType::mvHandlerRegistry'
