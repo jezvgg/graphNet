@@ -4,8 +4,7 @@ import enum
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
-
-
+from Src.Enums import DPGType
 
 
 class AEnum(Annotation):
@@ -49,7 +48,7 @@ class AEnum(Annotation):
         """
         Получает текущее выбранное значение из dpg.add_combo.
         """
-        if dpg.get_item_type(input_id) != "mvAppItemType::mvCombo":
+        if dpg.get_item_type(input_id) != DPGType.COMBO.value:
             raise Exception(f"Incompatable item for AEnum.get - {dpg.get_item_type(input_id)}") 
         return dpg.get_value(input_id)
 
@@ -60,7 +59,7 @@ class AEnum(Annotation):
         """
         if not isinstance(value, enum.Enum) or \
             value.value not in self.items or \
-            dpg.get_item_type(input_id) != "mvAppItemType::mvCombo":
+            dpg.get_item_type(input_id) != DPGType.COMBO.value:
             return False
 
         dpg.set_value(input_id, value.value)

@@ -3,7 +3,7 @@ from pathlib import Path
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
-
+from Src.Enums import DPGType
 
 
 class AFile(Annotation):
@@ -30,7 +30,7 @@ class AFile(Annotation):
 
     @staticmethod
     def get(input_id: int | str):
-        if dpg.get_item_type(input_id) != "mvAppItemType::mvGroup":
+        if dpg.get_item_type(input_id) != DPGType.GROUP.value:
             raise Exception(f"Incompatable item for AFile.get - {dpg.get_item_type(input_id)}") 
         return dpg.get_item_user_data(input_id)
     
@@ -39,7 +39,7 @@ class AFile(Annotation):
     def set(input_id: str| int, value: Path) -> bool:
         if not (isinstance(value, list) and \
             all(isinstance(sub, Path) for sub in value) and \
-            dpg.get_item_type(input_id) == "mvAppItemType::mvGroup"): 
+            dpg.get_item_type(input_id) == DPGType.GROUP.value):
             return False
         dpg.set_item_user_data(input_id, value)
         return True

@@ -1,6 +1,8 @@
-from Src.Config.Annotations.annotation import Annotation
-
 import dearpygui.dearpygui as dpg
+
+from Src.Config.Annotations.annotation import Annotation
+from Src.Enums import DPGType
+
 
 
 
@@ -14,7 +16,7 @@ class AInteger(Annotation):
 
     @staticmethod
     def get(input_id: int | str):
-        if dpg.get_item_type(input_id) != "mvAppItemType::mvInputInt":
+        if dpg.get_item_type(input_id) != DPGType.INPUT_INT.value:
             raise Exception(f"Incompatable item for AInteger.get - {dpg.get_item_type(input_id)}") 
         
         return dpg.get_value(input_id)
@@ -22,7 +24,7 @@ class AInteger(Annotation):
 
     @staticmethod
     def set(input_id: str| int, value: int) -> bool:
-        if not isinstance(value, int) or dpg.get_item_type(input_id) != "mvAppItemType::mvInputInt": 
+        if not isinstance(value, int) or dpg.get_item_type(input_id) != DPGType.INPUT_INT.value:
             return False
         
         dpg.set_value(input_id, value)

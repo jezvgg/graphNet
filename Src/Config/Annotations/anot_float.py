@@ -1,6 +1,8 @@
-from Src.Config.Annotations.annotation import Annotation
-
 import dearpygui.dearpygui as dpg
+
+from Src.Config.Annotations.annotation import Annotation
+from Src.Enums import DPGType
+
 
 
 
@@ -14,7 +16,7 @@ class AFloat(Annotation):
 
     @staticmethod
     def get(input_id: int | str):
-        if dpg.get_item_type(input_id) != "mvAppItemType::mvInputFloat":
+        if dpg.get_item_type(input_id) != DPGType.INPUT_FLOAT.value:
             raise Exception(f"Incompatable item for AFloat.get - {dpg.get_item_type(input_id)}")
         
         return dpg.get_value(input_id)
@@ -22,7 +24,7 @@ class AFloat(Annotation):
 
     @staticmethod
     def set(input_id: str| int, value: float) -> bool: 
-        if not isinstance(value, float) or dpg.get_item_type(input_id) != "mvAppItemType::mvInputFloat": 
+        if not isinstance(value, float) or dpg.get_item_type(input_id) != DPGType.INPUT_FLOAT.value:
             return False
         
         dpg.set_value(input_id, value)

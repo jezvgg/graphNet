@@ -1,7 +1,7 @@
-from Src.Config.Annotations.annotation import Annotation
-
 import dearpygui.dearpygui as dpg
 
+from Src.Config.Annotations.annotation import Annotation
+from Src.Enums import DPGType
 from Src.Logging.logger_factory import Logger_factory
 
 
@@ -14,7 +14,8 @@ class ANode(Annotation):
     def build(parent: int | str, *args, **kwargs):
         kwargs = Annotation.check_kwargs(dpg.add_text, kwargs)
 
-        if (dpg.get_item_type(parent) != 'mvAppItemType::mvNodeAttribute'):
+
+        if (dpg.get_item_type(parent) != DPGType.NODE_ATTRIBUTE.value):
             raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
         new_parent = dpg.get_item_parent(parent)
@@ -35,7 +36,7 @@ class ANode(Annotation):
 
         parent = dpg.get_item_parent(input_id)
 
-        if dpg.get_item_type(parent) != 'mvAppItemType::mvNodeAttribute':
+        if dpg.get_item_type(parent) != DPGType.NODE_ATTRIBUTE.value:
             raise Exception(f"Incompatable parent of item {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
         user_data = dpg.get_item_user_data(parent)
