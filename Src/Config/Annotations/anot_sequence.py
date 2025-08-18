@@ -2,6 +2,9 @@ import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
 from Src.Config.Annotations import *
+from Src.Enums import DPGType
+
+
 
 
 class ASequence(Annotation):
@@ -40,7 +43,7 @@ class ASequence(Annotation):
 
 
     def get(self, input_field: int | str):
-        if dpg.get_item_type(input_field) != "mvAppItemType::mvGroup":
+        if dpg.get_item_type(input_field) != DPGType.GROUP.value:
             raise Exception(f"Incompatable item for ASequence.get - {dpg.get_item_type(input_field)}") 
         
         result = []
@@ -51,7 +54,7 @@ class ASequence(Annotation):
 
     def set(self, input_id: str| int, value: tuple) -> bool:
         if not isinstance(value, tuple) or len(value) > len(self.shape) or \
-            dpg.get_item_type(input_id) != "mvAppItemType::mvGroup": 
+            dpg.get_item_type(input_id) != DPGType.GROUP.value:
             return False
         
         for input_field, annotation, field_value in \

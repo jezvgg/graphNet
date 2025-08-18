@@ -1,6 +1,8 @@
-from Src.Config.Annotations.annotation import Annotation
-
 import dearpygui.dearpygui as dpg
+
+from Src.Config.Annotations.annotation import Annotation
+from Src.Enums import DPGType
+
 
 
 
@@ -14,14 +16,14 @@ class AString(Annotation):
 
     @staticmethod
     def get(input_id: int | str):
-        if dpg.get_item_type(input_id) != "mvAppItemType::mvInputText":
+        if dpg.get_item_type(input_id) != DPGType.INPUT_TEXT.value:
             raise Exception(f"Incompatable item for AString.get - {dpg.get_item_type(input_id)}") 
         return dpg.get_value(input_id)
     
 
     @staticmethod
     def set(input_id: str| int, value: str) -> bool: 
-        if not isinstance(value, str) or dpg.get_item_type(input_id) != "mvAppItemType::mvInputText": 
+        if not isinstance(value, str) or dpg.get_item_type(input_id) != DPGType.INPUT_TEXT.value:
             return False
         
         dpg.set_value(input_id, value)
