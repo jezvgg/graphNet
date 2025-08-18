@@ -5,3 +5,6 @@ Logs/*
 .*
 smth.py
 stream
+./*.txt
+./*.csv
+./*.dat

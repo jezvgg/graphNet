@@ -8,4 +8,4 @@ class TableDataNode(DataNode):
 
     @staticmethod
     def open_data(files: dict, *args, **kwargs):
-        return np.genfromtxt(files[0], *args, **kwargs)
+        return np.genfromtxt(files[0], *args, **kwargs, ndmin=2)
