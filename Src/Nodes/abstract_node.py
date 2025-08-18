@@ -20,8 +20,8 @@ class AbstractNode(ABC):
     '''
     node_tag: str | int
     # Устанавливаем связи не между узлами, а между их аттрибутами
-    incoming: dict[str | int, str | int]
-    outgoing: dict[str | int, str | int]
+    incoming: dict[str | int, list[str | int]]
+    outgoing: dict[str | int, list[str | int]]
     annotations: dict[str, Parameter]
     logic: Callable
     docs: str

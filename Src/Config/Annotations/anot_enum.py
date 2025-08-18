@@ -48,8 +48,9 @@ class AEnum(Annotation):
         """
         Получает текущее выбранное значение из dpg.add_combo.
         """
-        if dpg.get_item_type(input_id) != DPGType.COMBO.value:
+        if DPGType(dpg.get_item_type(input_id)) != DPGType.COMBO:
             raise Exception(f"Incompatable item for AEnum.get - {dpg.get_item_type(input_id)}") 
+        
         return dpg.get_value(input_id)
 
 
@@ -59,7 +60,7 @@ class AEnum(Annotation):
         """
         if not isinstance(value, enum.Enum) or \
             value.value not in self.items or \
-            dpg.get_item_type(input_id) != DPGType.COMBO.value:
+            DPGType(dpg.get_item_type(input_id)) != DPGType.COMBO:
             return False
 
         dpg.set_value(input_id, value.value)

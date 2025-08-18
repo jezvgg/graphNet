@@ -30,8 +30,9 @@ class AFile(Annotation):
 
     @staticmethod
     def get(input_id: int | str):
-        if dpg.get_item_type(input_id) != DPGType.GROUP.value:
+        if DPGType(dpg.get_item_type(input_id)) != DPGType.GROUP:
             raise Exception(f"Incompatable item for AFile.get - {dpg.get_item_type(input_id)}") 
+        
         return dpg.get_item_user_data(input_id)
     
 
@@ -39,7 +40,8 @@ class AFile(Annotation):
     def set(input_id: str| int, value: Path) -> bool:
         if not (isinstance(value, list) and \
             all(isinstance(sub, Path) for sub in value) and \
-            dpg.get_item_type(input_id) == DPGType.GROUP.value):
+            DPGType(dpg.get_item_type(input_id)) == DPGType.GROUP):
             return False
+        
         dpg.set_item_user_data(input_id, value)
         return True

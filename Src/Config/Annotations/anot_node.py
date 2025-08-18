@@ -15,7 +15,7 @@ class ANode(Annotation):
         kwargs = Annotation.check_kwargs(dpg.add_text, kwargs)
 
 
-        if (dpg.get_item_type(parent) != DPGType.NODE_ATTRIBUTE.value):
+        if DPGType(dpg.get_item_type(parent)) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
         new_parent = dpg.get_item_parent(parent)
@@ -36,7 +36,7 @@ class ANode(Annotation):
 
         parent = dpg.get_item_parent(input_id)
 
-        if dpg.get_item_type(parent) != DPGType.NODE_ATTRIBUTE.value:
+        if DPGType(dpg.get_item_type(parent)) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent of item {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
         user_data = dpg.get_item_user_data(parent)

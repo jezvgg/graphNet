@@ -138,17 +138,14 @@ class NodeEditor:
         data_out.append(app_data[1])
         dpg.set_item_user_data(app_data[0], data_out)
 
-        node_out.outgoing[app_data[0]] = app_data[1]
-        node_in.incoming[app_data[1]] = app_data[0]
+        node_out.outgoing[app_data[0]] = data_out
+        node_in.incoming[app_data[1]] = data_in
 
         if node_in in self.__start_nodes: self.__start_nodes.remove(node_in)
 
         self.logger.debug(f"Связи после: {node_out} {node_in}")
 
         self.logger.debug(f"Start nodes: {self.__start_nodes}")
-
-        # Для дебага
-        # Node.print_tree(dpg.get_item_user_data("node_input"))
 
         return link_id
 
@@ -163,20 +160,29 @@ class NodeEditor:
         '''
         link: node_link = dpg.get_item_user_data(app_data)
 
-        self.logger.debug(f"Связи до: {link.outgoing} {link.incoming}")
-
-        node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(link.outgoing))
-        node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(link.incoming))
-
-        del node_out.outgoing[link.outgoing]
-        del node_in.incoming[link.incoming]
-
-        if not node_in.incoming: self.__start_nodes.append(link.incoming)
-
-        self.logger.debug(f"Связи после: {link.outgoing} {link.incoming}")
+        self.delink(link.outgoing, link.incoming)
 
         dpg.delete_item(app_data)
 
+
+    def delink(self, attr_outgoing: str | int, attr_incoming: str | int):
+        self.logger.debug(f"Связи до: {attr_outgoing} {attr_incoming}")
+
+        node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_outgoing))
+        node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_incoming))
+
+        node_out.outgoing[attr_outgoing].remove(attr_incoming)
+        node_in.incoming[attr_incoming].remove(attr_outgoing)
+
+        dpg.set_item_user_data(attr_outgoing, node_out.outgoing[attr_outgoing])
+        dpg.set_item_user_data(attr_incoming, node_in.incoming[attr_incoming])
+
+        if not node_out.outgoing[attr_outgoing]: del node_out.outgoing[attr_outgoing]
+        if not node_in.incoming[attr_incoming]: del node_in.incoming[attr_incoming]
+
+        if not node_in.incoming: self.__start_nodes.append(node_in)
+
+        self.logger.debug(f"Связи после: {attr_outgoing} {attr_incoming}")
         self.logger.debug(f"Start nodes: {self.__start_nodes}")
 
 
@@ -190,16 +196,17 @@ class NodeEditor:
         node: AbstractNode = dpg.get_item_user_data(node_id)
         
         # Удаляем связи с этим узлом
-        for attr_id in node.incoming.copy().values():
-            node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
-            del node.incoming[node_out.outgoing[attr_id]]
-            del node_out.outgoing[attr_id]
 
-        for attr_id in node.outgoing.copy().values(): 
-            node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
-            del node.outgoing[node_in.incoming[attr_id]]
-            del node_in.incoming[attr_id]
-            if not node_in.incoming: self.__start_nodes.append(node_in)
+        incoming = node.incoming.copy()
+        outgoing = node.outgoing.copy()
+
+        for attr_in in incoming.keys():
+            for attr_out in incoming[attr_in]:
+                self.delink(attr_out, attr_in)
+
+        for attr_out in outgoing.keys():
+            for attr_in in outgoing[attr_out]:
+                self.delink(attr_out, attr_in)
         
         if node in self.__start_nodes: self.__start_nodes.remove(node)
 
