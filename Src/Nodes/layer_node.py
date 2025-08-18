@@ -1,3 +1,5 @@
+from itertools import chain
+
 from keras import layers
 import dearpygui.dearpygui as dpg
 
@@ -11,15 +13,18 @@ class LayerNode(AbstractNode):
     '''
     inputs: set["LayerNode"]
 
+
     def compile(self):
         self.layer: layers.Layer = super().compile()
+        input_nodes = [dpg.get_item_user_data(dpg.get_item_parent(node)) \
+                        for node in chain(*self.incoming.values())]
 
-        input_layers = [getattr(dpg.get_item_user_data(dpg.get_item_parent(node)), 'layer') for node in self.incoming.values()]
+        input_layers = [getattr(node, 'layer') for node in input_nodes]
         if len(input_layers) == 1: input_layers = input_layers[0]
 
         self.layer = self.layer(input_layers)
 
-        inputs = [getattr(dpg.get_item_user_data(dpg.get_item_parent(node)),'inputs') for node in self.incoming.values()]
+        inputs = [getattr(node, 'inputs') for node in input_nodes]
         self.inputs = set().union(*inputs)
 
         return self.layer

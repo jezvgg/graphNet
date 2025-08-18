@@ -124,8 +124,8 @@ class test_NodeEditor(DPGUnitTest):
         assert node_attr2 in node1.outgoing[node_attr1]
         assert node_attr3 in node1.outgoing[node_attr1]
 
-        assert node_attr1 == node2.incoming[node_attr2]
-        assert node_attr1 == node3.incoming[node_attr3]
+        assert node_attr1 in node2.incoming[node_attr2]
+        assert node_attr1 in node3.incoming[node_attr3]
 
 
     def test_delink_callback(self):

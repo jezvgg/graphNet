@@ -1,4 +1,5 @@
 from typing import Callable
+from itertools import chain
 
 import dearpygui.dearpygui as dpg
 from keras import layers
@@ -138,13 +139,13 @@ class NodeBuilder:
             self.logger.debug(f"Текущая нода - {current_node}")
 
             if all([dpg.get_item_user_data(dpg.get_item_parent(value)) in visited \
-                for value in current_node.incoming.values()]):
+                for value in chain(*current_node.incoming.values())]):
                 self.logger.debug("Нода подошла.")
 
                 layer = current_node.compile()
                 self.logger.debug(str(layer))
 
-                for attr_id in current_node.outgoing.values():
+                for attr_id in chain(*current_node.outgoing.values()):
                     neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
                     if neightbor not in queue:
                         queue.append(neightbor)

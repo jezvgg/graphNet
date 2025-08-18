@@ -1,3 +1,5 @@
+from itertools import chain
+
 import dearpygui.dearpygui as dpg
 import keras
 
@@ -27,7 +29,8 @@ class CompileNode(ParameterNode):
         #                 queue = [neightbor] + queue
 
 
-        input_nodes = [getattr(dpg.get_item_user_data(dpg.get_item_parent(node)),'inputs') for node in self.incoming.values()]
+        input_nodes = [getattr(dpg.get_item_user_data(dpg.get_item_parent(node)),'inputs') \
+                       for node in chain(*self.incoming.values())]
         input_nodes = set().union(*input_nodes)
         inputs = [getattr(node, 'layer') for node in input_nodes]
 
