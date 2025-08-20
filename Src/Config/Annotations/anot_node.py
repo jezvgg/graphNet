@@ -1,13 +1,15 @@
+from typing import TypeVar, Generic
+
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
 from Src.Enums import DPGType
-from Src.Logging.logger_factory import Logger_factory
 
 
+T = TypeVar('T')
 
 
-class ANode(Annotation):
+class ANode(Generic[T], Annotation):
 
 
     @staticmethod

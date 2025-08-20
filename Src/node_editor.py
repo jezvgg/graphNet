@@ -1,4 +1,5 @@
 import json
+from typing import get_args
 
 import dearpygui.dearpygui as dpg
 
@@ -121,6 +122,12 @@ class NodeEditor:
 
         node_out: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(app_data[0]))
         node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(app_data[1]))
+
+        # Проверка при связывании, что правильные узлы связываются
+        accaptable: tuple[AbstractNode] = get_args(node_in.annotations[dpg.get_item_label(app_data[1])].hint)
+        if accaptable and not isinstance(node_out, accaptable[0]):
+            self.logger.warning(f"Некорректная попытка связывания узлов: {node_out} -> {node_in}({dpg.get_item_label(app_data[1])}) должно быть {accaptable[0]}")
+            return
 
         self.logger.debug(f"Node_out - {dpg.get_item_label(dpg.get_item_parent(app_data[0]))}")
 

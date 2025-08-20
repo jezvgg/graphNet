@@ -11,7 +11,7 @@ from Src.Config.node_annotation import NodeAnnotation
 from Src.Config.Annotations import *
 
 
-# TODO Сделать сериализацию в JSON
+# TODO Сделать сериализацию в JSON?
 node_list = {
     "Data & Preprocessing":
     {
@@ -48,7 +48,7 @@ node_list = {
                 node_type= PipelineNode,
                 logic = keras.utils.to_categorical,
                 annotations = {
-                        "x": Parameter(AttrType.INPUT, ANode),
+                        "x": Parameter(AttrType.INPUT, ANode[DataNode]),
                         "num_classes": Parameter(AttrType.INPUT, AInteger)
                     }
             )
@@ -130,9 +130,9 @@ node_list = {
                 node_type= FitNode,
                 logic = FitNode.fit,
                 annotations = {
-                        "self": Parameter(AttrType.INPUT, ANode),
-                        "x": Parameter(AttrType.INPUT, ANode),
-                        "y": Parameter(AttrType.INPUT, ANode),
+                        "self": Parameter(AttrType.INPUT, ANode[CompileNode]),
+                        "x": Parameter(AttrType.INPUT, ANode[DataNode]),
+                        "y": Parameter(AttrType.INPUT, ANode[DataNode]),
                         "epochs": Parameter(AttrType.INPUT, AInteger)
                     }
             ),
@@ -141,8 +141,8 @@ node_list = {
                 node_type= PredictNode,
                 logic = keras.models.Model.predict,
                 annotations = {
-                        "self": Parameter(AttrType.INPUT, ANode),
-                        "x": Parameter(AttrType.INPUT, ANode),
+                        "self": Parameter(AttrType.INPUT, ANode[FitNode]),
+                        "x": Parameter(AttrType.INPUT, ANode[DataNode]),
                     },
                 input = False
             )
@@ -153,7 +153,7 @@ node_list = {
                 node_type= UtilsNode,
                 logic = keras.saving.save_model,
                 annotations = {
-                        "model": Parameter(AttrType.INPUT, ANode),
+                        "model": Parameter(AttrType.INPUT, ANode[FitNode]),
                         "filepath": Parameter(AttrType.INPUT, AString)
                     },
                 input = False,
@@ -164,7 +164,7 @@ node_list = {
                 node_type= UtilsNode,
                 logic = keras.utils.plot_model,
                 annotations = {
-                        "model": Parameter(AttrType.INPUT, ANode),
+                        "model": Parameter(AttrType.INPUT, ANode[CompileNode]),
                         "to_file": Parameter(AttrType.INPUT, AString),
                         "show_shapes": Parameter(AttrType.INPUT, ABoolean),
                         "show_layer_names": Parameter(AttrType.INPUT, ABoolean),
@@ -178,7 +178,7 @@ node_list = {
                 node_type = UtilsNode,
                 logic = np.savetxt,
                 annotations = {
-                    "X": Parameter(AttrType.INPUT, ANode),
+                    "X": Parameter(AttrType.INPUT, ANode[DataNode]),
                     "fname": Parameter(AttrType.INPUT, AString, default='result.txt')
                 },
                 input = False,
