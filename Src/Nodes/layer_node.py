@@ -15,7 +15,8 @@ class LayerNode(AbstractNode):
 
 
     def compile(self):
-        self.layer: layers.Layer = super().compile()
+        status: bool = super().compile()
+        self.layer: layers.Layer = self.OUTPUT
         input_nodes = [dpg.get_item_user_data(dpg.get_item_parent(node)) \
                         for node in chain(*self.incoming.values())]
 
@@ -27,7 +28,7 @@ class LayerNode(AbstractNode):
         inputs = [getattr(node, 'inputs') for node in input_nodes]
         self.inputs = set().union(*inputs)
 
-        return self.layer
+        return status
 
 
 

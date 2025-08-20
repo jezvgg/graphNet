@@ -18,6 +18,9 @@ class AbstractNode(ABC):
         incoming: list[Node] - связи с нодами, которые подключенны к этой ноде. (Приходящие)
         outgoing: list[Node] - связи с нодами, к которым подключенна эта нода. (Уходящие)
     '''
+    __error_message: str = None
+    _error_id: int | str = None
+
     node_tag: str | int
     # Устанавливаем связи не между узлами, а между их аттрибутами
     incoming: dict[str | int, list[str | int]]
@@ -68,7 +71,7 @@ class AbstractNode(ABC):
         return self.node_tag
 
 
-    def compile(self, kwargs: dict = None):
+    def compile(self, kwargs: dict = None) -> bool:
         '''
         Основной метод нодов, содержащий логику их работы. Тут создаются слои нейронной сети, проходит обучение и т.д. В зависимости от ноды, будет разная логика.
         '''
@@ -87,10 +90,54 @@ class AbstractNode(ABC):
             kwargs[name] = self.annotations[name].get_value(argument)
 
             self.logger.debug(kwargs)
+
+        try: 
+            self.OUTPUT = self.logic(**kwargs)
+            self.lower_error()
+
+        except AttributeError as ex:
+            self.raise_error(ex, "Некорректные данные для узла")
+            return False
+        
+        except Exception as ex:
+            self.raise_error(ex)
+            return False
             
-        self.OUTPUT = self.logic(**kwargs)
-        return self.OUTPUT
+        return True
     
+
+    def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
+        with dpg.theme() as error_theme:
+            with dpg.theme_component(dpg.mvNode):
+                dpg.add_theme_color(dpg.mvNodeCol_NodeOutline, (175, 0, 0, 255), category=dpg.mvThemeCat_Nodes)
+
+            with dpg.theme_component(dpg.mvTooltip):
+                dpg.add_theme_color(dpg.mvThemeCol_Border, (175, 0, 0, 255), category=dpg.mvThemeCat_Core)
+
+        dpg.bind_item_theme(self.node_tag, error_theme)
+
+        with dpg.stage():
+            self._error_id = dpg.add_text("ОШИБКА!")
+
+        dpg.move_item(item=self._error_id, parent=self.node_tag)
+            
+        with dpg.tooltip(parent=self._error_id):
+            dpg.add_text(f"{error_message_type}:")
+            dpg.add_text(error_message)
+
+
+    def lower_error(self):
+        with dpg.theme() as default_theme:
+            with dpg.theme_component(dpg.mvNode):
+                dpg.add_theme_color(dpg.mvNodeCol_NodeOutline, (100, 100, 100, 255), category=dpg.mvThemeCat_Nodes)
+
+            with dpg.theme_component(dpg.mvTooltip):
+                dpg.add_theme_color(dpg.mvThemeCol_Border, (78, 78, 78, 255), category=dpg.mvThemeCat_Core)
+            
+        dpg.bind_item_theme(self.node_tag, default_theme)
+
+        if self._error_id: dpg.delete_item(self._error_id)
+        self.__error_message = None
 
 
 @dataclass

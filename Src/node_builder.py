@@ -142,7 +142,10 @@ class NodeBuilder:
                 for value in chain(*current_node.incoming.values())]):
                 self.logger.debug("Нода подошла.")
 
-                layer = current_node.compile()
+                status = current_node.compile()
+                if not status: break
+                
+                layer = current_node.OUTPUT
                 self.logger.debug(str(layer))
 
                 for attr_id in chain(*current_node.outgoing.values()):

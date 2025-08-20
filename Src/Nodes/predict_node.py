@@ -11,4 +11,4 @@ class PredictNode(ParameterNode):
 
 
     def compile(self):
-        super().compile(kwargs={"verbose": False})
+        return super().compile(kwargs={"verbose": False})
