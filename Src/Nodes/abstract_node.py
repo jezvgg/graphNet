@@ -105,8 +105,6 @@ class AbstractNode(ABC):
         except Exception as ex:
             self.raise_error(ex)
             return False
-        
-        raise Exception("Какая-то ошибка!")
             
         return True
     
