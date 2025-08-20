@@ -1,4 +1,5 @@
 import json
+import sys
 
 import dearpygui.dearpygui as dpg
 
@@ -9,8 +10,12 @@ from Src.node_editor import NodeEditor
 dpg.create_context()
 dpg.create_viewport(title='Custom Title')
 
+base_path = sys._MEIPASS if hasattr(sys, '_MEIPASS') else '.'
+config_path = f"{base_path}/Src/Logging/logger_config.json"
+font_path = f"{base_path}/notomono-regular.ttf"
 
-with open("Src/Logging/logger_config.json") as f:
+
+with open(config_path) as f:
     config = json.load(f)
 
 log_factory = Logger_factory(config)
@@ -19,7 +24,7 @@ main_logger = log_factory("main")
 
 
 with dpg.font_registry():
-    with dpg.font("notomono-regular.ttf", 13, default_font=True, tag="Default font") as f:
+    with dpg.font(font_path, 13, default_font=True, tag="Default font") as f:
         dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)
 dpg.bind_font("Default font")
 
@@ -32,6 +37,6 @@ with dpg.window(tag="Prime"):
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.set_primary_window("Prime", True)
-dpg.set_global_font_scale(1.8)
+dpg.set_global_font_scale(1)
 dpg.start_dearpygui()
 dpg.destroy_context()

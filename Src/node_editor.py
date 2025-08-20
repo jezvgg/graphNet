@@ -1,4 +1,5 @@
 import json
+import sys
 
 import dearpygui.dearpygui as dpg
 
@@ -31,7 +32,10 @@ class NodeEditor:
             *args, **kwargs - передаются в dpg.node_editor
         '''
 
-        with open("Src/Logging/logger_config_debug.json") as f:
+        base_path = sys._MEIPASS if hasattr(sys, '_MEIPASS') else '.'
+        config_debug_path = f"{base_path}/Src/Logging/logger_config_debug.json"
+
+        with open(config_debug_path) as f:
             config = json.load(f)
 
         self.logger = Logger_factory.from_instance()("nodes", config)
