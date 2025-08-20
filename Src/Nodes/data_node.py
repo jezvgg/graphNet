@@ -22,7 +22,8 @@ class DataNode(ParameterNode):
 
     def compile(self, kwargs = {}):
         # TODO kwargs - костыль убрать
-        super().compile(kwargs)
+        status = super().compile(kwargs)
+        if not status or len(self.data.shape) < 2: return False
         self.shape = self.data.shape[1:]
-        return self.data
+        return status
     

@@ -22,7 +22,7 @@ class AFile(Annotation):
                                         list(map(Path, appdata['selections'].values())))):
             dpg.add_file_extension(".*")
 
-        with dpg.group(*args, **kwargs, tag=group_id, user_data=[Path.home()]) as item:
+        with dpg.group(*args, **kwargs, tag=group_id, user_data=None) as item:
             dpg.add_button(label="Choose file...", callback=lambda: dpg.show_item(browser_id))
 
         return item

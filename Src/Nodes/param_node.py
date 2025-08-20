@@ -9,5 +9,6 @@ class ParameterNode(AbstractNode):
 
     def compile(self, kwargs = {}):
         # TODO kwargs - костыль убрать
-        self.data = super().compile(kwargs)
-        return self.data
+        status = super().compile(kwargs)
+        self.data = self.OUTPUT
+        return status

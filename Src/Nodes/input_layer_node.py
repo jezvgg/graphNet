@@ -15,7 +15,8 @@ class InputLayerNode(AbstractNode):
 
 
     def compile(self):
-        self.layer = super().compile()
+        status = super().compile()
+        self.layer = self.OUTPUT
         self.inputs = set([self])
-        return self.layer
+        return status
         

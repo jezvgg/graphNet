@@ -14,20 +14,6 @@ class CompileNode(ParameterNode):
 
     def compile(self):
         self.logger.debug("Модель начала компиляцию")
-        # queue = self.incoming[:]
-        # input_nodes: list[InputLayerNode] = []
-
-        # # * Одностороний обход в ширину, чтоб найти входные слои
-        # while queue:
-        #     current_node = queue.pop()
-
-        #     if isinstance(current_node, InputLayerNode):
-        #         input_nodes.append(current_node)
-            
-        #     for neightbor in current_node.incoming:
-        #             if neightbor not in queue:
-        #                 queue = [neightbor] + queue
-
 
         input_nodes = [getattr(dpg.get_item_user_data(dpg.get_item_parent(node)),'inputs') \
                        for node in chain(*self.incoming.values())]
@@ -39,13 +25,15 @@ class CompileNode(ParameterNode):
 
         model = keras.models.Model(inputs=inputs, outputs=outputs)
 
-        super().compile({"self": model})
+        status = super().compile({"self": model})
         self.logger.info("Модель скомпилирована")
 
         self.logger.info(f"model: {model}")
+
+        # TODO: Поубирать лишнии параметры
         self.data = model
         self.OUTPUT = self.data
-        return self.data
+        return status
 
 
 
