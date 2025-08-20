@@ -58,6 +58,9 @@ class AbstractNode(ABC):
 
         self.logger = Logger_factory.from_instance()("nodes")
 
+        with dpg.stage():
+            self._error_id = dpg.add_text("ОШИБКА!")
+
 
     def __repr__(self) -> str:
         return f"{self.node_tag}"
@@ -102,6 +105,8 @@ class AbstractNode(ABC):
         except Exception as ex:
             self.raise_error(ex)
             return False
+        
+        raise Exception("Какая-то ошибка!")
             
         return True
     
@@ -116,14 +121,13 @@ class AbstractNode(ABC):
 
         dpg.bind_item_theme(self.node_tag, error_theme)
 
-        with dpg.stage():
-            self._error_id = dpg.add_text("ОШИБКА!")
-
         dpg.move_item(item=self._error_id, parent=self.node_tag)
             
         with dpg.tooltip(parent=self._error_id):
             dpg.add_text(f"{error_message_type}:")
             dpg.add_text(error_message)
+
+        self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
 
 
     def lower_error(self):
@@ -136,7 +140,8 @@ class AbstractNode(ABC):
             
         dpg.bind_item_theme(self.node_tag, default_theme)
 
-        if self._error_id: dpg.delete_item(self._error_id)
+        if self._error_id and dpg.does_item_exist(self._error_id): 
+            dpg.delete_item(self._error_id)
         self.__error_message = None
 
 

@@ -132,6 +132,7 @@ class NodeBuilder:
         visited = set()
         queue = start_nodes[:]
         self.logger.info("Началась сборка графа.")
+        status = True
 
         while queue:
             self.logger.debug(f"Текущая очередь - {queue}")
@@ -142,7 +143,13 @@ class NodeBuilder:
                 for value in chain(*current_node.incoming.values())]):
                 self.logger.debug("Нода подошла.")
 
-                status = current_node.compile()
+                try:
+                    status = current_node.compile()
+
+                except Exception as ex:
+                    self.raise_error(ex)
+                    status = False
+
                 if not status: break
                 
                 layer = current_node.OUTPUT
@@ -156,3 +163,22 @@ class NodeBuilder:
                 visited.add(current_node)
 
         return visited
+    
+
+    def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
+        with dpg.window(label="Непревиденная ошибка", modal=True, no_title_bar=True, \
+                        no_resize=True, no_move=True) as error_window:
+            dpg.add_text("Произошла непредвиденная ошибка, сообщите пожалуйста разработчикам.")
+            dpg.add_text(f"{error_message_type}:")
+            dpg.add_text(error_message)
+            dpg.add_button(label="Close", callback=lambda: dpg.configure_item(error_window, show=False))
+
+        # TODO: Прикрепить модальное окно на середину при изменении размера
+        dpg.set_item_pos(error_window, [
+            (dpg.get_viewport_width() - dpg.get_item_width(error_window)) // 4,
+            (dpg.get_viewport_height() - dpg.get_item_height(error_window)) // 3
+        ])
+
+        self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
+        
+
