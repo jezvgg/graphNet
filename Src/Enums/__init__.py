@@ -6,3 +6,4 @@ from Src.Enums.losses import Losses
 from Src.Enums.optimizers import Optimizers
 from Src.Enums.delimiters import Delimiters
 from Src.Enums.dpg_types import DPGType
+from Src.Enums.metrics import Metrics

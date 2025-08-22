@@ -2,6 +2,7 @@ import numpy as np
 
 from keras import layers
 import keras
+from openpyxl.styles.builtins import output
 
 from Src.Enums import *
 from Src.Enums.attr_type import AttrType
@@ -172,6 +173,23 @@ node_list = {
                     },
                 input = False,
                 output = False
+            ),
+            NodeAnnotation(
+                label="Calculate Metric",
+                node_type=MetricNode,
+                logic=MetricNode.calculate,
+                annotations={
+                    "metric": Parameter(AttrType.INPUT, AEnum[Metrics]),
+                    "y_true": Parameter(AttrType.INPUT, ANode),
+                    "y_pred": Parameter(AttrType.INPUT, ANode),
+                    "data": Parameter(
+                        AttrType.OUTPUT,
+                        AFloat,
+                        backfield='data'
+                    )
+                },
+                input=False,
+                # output=False
             ),
             NodeAnnotation(
                 label="Save data",
