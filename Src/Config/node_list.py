@@ -2,7 +2,6 @@ import numpy as np
 
 from keras import layers
 import keras
-from openpyxl.styles.builtins import output
 
 from Src.Enums import *
 from Src.Enums.attr_type import AttrType
@@ -189,7 +188,7 @@ node_list = {
                     )
                 },
                 input=False,
-                # output=False
+                output=False
             ),
             NodeAnnotation(
                 label="Save data",
@@ -205,3 +204,4 @@ node_list = {
         ]
     }
 }
+
