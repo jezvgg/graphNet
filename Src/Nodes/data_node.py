@@ -1,29 +1,30 @@
 from pathlib import Path
+from abc import abstractmethod
 
 import numpy as np
 
 from Src.Utils import Backfield
-from Src.Nodes import ParameterNode
+from Src.Nodes import AbstractNode
 
 
 
-class DataNode(ParameterNode):
+class DataNode(AbstractNode):
     '''
     Нода, которая содержит в себе данные. (файлы или табличные)
     '''
     shape: tuple[int] = Backfield()
-    data: np.ndarray
+    OUTPUT: np.ndarray
     
 
     @staticmethod
+    @abstractmethod
     def open_data(files: list[Path], *args, **kwargs):
         pass
 
 
-    def compile(self, kwargs = {}):
-        # TODO kwargs - костыль убрать
-        status = super().compile(kwargs)
-        if not status or len(self.data.shape) < 2: return False
-        self.shape = self.data.shape[1:]
+    def compile(self):
+        status = super().compile()
+        if not status or len(self.OUTPUT.shape) < 2: return False
+        self.shape = self.OUTPUT.shape[1:]
         return status
     

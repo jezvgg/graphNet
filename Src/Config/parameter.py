@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import get_origin
 
 import dearpygui.dearpygui as dpg
 
@@ -30,7 +29,7 @@ class Parameter:
             kwargs['parent'] = attr
             kwargs['width'] = Annotation.BASE_WIDTH
 
-            if (self.hint == ANode or get_origin(self.hint) == ANode) and \
+            if (isinstance(self.hint, ANode) or self.hint is ANode) and \
                 attribute_type == dpg.mvNode_Attr_Output: 
                 kwargs['attribute_type'] = dpg.mvNode_Attr_Output
             if self.attr_type != AttrType.INPUT: kwargs['enabled'] = False

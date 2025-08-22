@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from abc import ABC
 from typing import Callable
 import inspect
+import traceback
 
 import dearpygui.dearpygui as dpg
 
@@ -93,6 +94,8 @@ class AbstractNode(ABC):
                 if not isinstance(args, list): args = [args]
                 continue
 
+            self.logger.debug(f"Аннотация - {self.annotations[name]}")
+
             kwargs[name] = self.annotations[name].get_value(argument)
 
             self.logger.debug(kwargs)
@@ -130,6 +133,7 @@ class AbstractNode(ABC):
             dpg.add_text(error_message)
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
+        self.logger.info(traceback.format_exc())
 
 
     def lower_error(self):

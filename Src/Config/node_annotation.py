@@ -34,7 +34,7 @@ class NodeAnnotation:
             self.annotations['INPUT'] = self.input
 
         self.output = output
-        if self.output: self.output = Parameter(AttrType.OUTPUT, ANode)
+        if self.output: self.output = Parameter(AttrType.OUTPUT, ANode[object])
 
 
     @property

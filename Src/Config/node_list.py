@@ -4,7 +4,6 @@ from keras import layers
 import keras
 
 from Src.Enums import *
-from Src.Enums.attr_type import AttrType
 from Src.Nodes import *
 from Src.Config.parameter import Parameter
 from Src.Config.node_annotation import NodeAnnotation
@@ -51,7 +50,7 @@ node_list = {
                 annotations = {
                         "num_classes": Parameter(AttrType.INPUT, AInteger)
                     },
-                input=DataNode
+                input=Single[DataNode]
             )
         ]
     },
@@ -62,7 +61,7 @@ node_list = {
             NodeAnnotation(
                 label= "Dense",
                 node_type= LayerNode,
-                logic = layers.Dense,
+                logic = LayerNode.layer(layers.Dense),
                 annotations = {
                         "units": Parameter(AttrType.INPUT, AInteger),
                         "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
@@ -76,7 +75,7 @@ node_list = {
             NodeAnnotation(
                 label= "Conv2D",
                 node_type= LayerNode,
-                logic = layers.Conv2D,
+                logic = LayerNode.layer(layers.Conv2D),
                 annotations = {
                         "filters": Parameter(AttrType.INPUT, AInteger),
                         "kernel_size": Parameter(AttrType.INPUT, AInteger),
@@ -90,7 +89,7 @@ node_list = {
             NodeAnnotation(
                 label= "MaxPooling2D",
                 node_type= LayerNode,
-                logic = layers.MaxPooling2D,
+                logic = LayerNode.layer(layers.MaxPooling2D),
                 annotations = {
                         "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger]),
                         "strides": Parameter(AttrType.INPUT, AInteger),
@@ -103,19 +102,19 @@ node_list = {
             NodeAnnotation(
                 label="Concatenate",
                 node_type= LayerNode,
-                logic = layers.Concatenate,
+                logic = LayerNode.layer(layers.Concatenate),
                 input=LayerNode
             ),
             NodeAnnotation(
                 label="Flatten",
                 node_type= LayerNode,
-                logic = layers.Flatten,
+                logic = LayerNode.layer(layers.Flatten),
                 input=LayerNode
             ),
             NodeAnnotation(
                 label="Add",
                 node_type= LayerNode,
-                logic = layers.Add,
+                logic = LayerNode.layer(layers.Add),
                 input=LayerNode
             )
         ]
@@ -125,7 +124,7 @@ node_list = {
             NodeAnnotation(
                 label="Compile model",
                 node_type= CompileNode,
-                logic = keras.models.Model.compile,
+                logic = CompileNode.compile_model,
                 annotations = {
                         "optimizer": Parameter(AttrType.INPUT, AEnum[Optimizers]),
                         "loss": Parameter(AttrType.INPUT, AEnum[Losses]),
@@ -138,20 +137,20 @@ node_list = {
                 node_type= FitNode,
                 logic = FitNode.fit,
                 annotations = {
-                        "x": Parameter(AttrType.INPUT, ANode[DataNode]),
-                        "y": Parameter(AttrType.INPUT, ANode[DataNode]),
+                        "x": Parameter(AttrType.INPUT, ANode[Single[DataNode | PipelineNode]]),
+                        "y": Parameter(AttrType.INPUT, ANode[Single[DataNode | PipelineNode]]),
                         "epochs": Parameter(AttrType.INPUT, AInteger)
                     },
-                input=CompileNode
+                input = Single[CompileNode]
             ),
             NodeAnnotation(
                 label="Predict",
                 node_type= PredictNode,
-                logic = keras.models.Model.predict,
+                logic = PredictNode.predict,
                 annotations = {
-                        "x": Parameter(AttrType.INPUT, ANode[DataNode]),
+                        "x": Parameter(AttrType.INPUT, ANode[Single[DataNode | PipelineNode]]),
                     },
-                input = FitNode
+                input = Single[FitNode]
             )
         ],
         "Utils": [
@@ -160,7 +159,7 @@ node_list = {
                 node_type= UtilsNode,
                 logic = keras.saving.save_model,
                 annotations = {
-                        "model": Parameter(AttrType.INPUT, ANode[FitNode]),
+                        "model": Parameter(AttrType.INPUT, ANode[Single[FitNode]]),
                         "filepath": Parameter(AttrType.INPUT, AString)
                     },
                 input = False,
@@ -171,7 +170,7 @@ node_list = {
                 node_type= UtilsNode,
                 logic = keras.utils.plot_model,
                 annotations = {
-                        "model": Parameter(AttrType.INPUT, ANode[CompileNode]),
+                        "model": Parameter(AttrType.INPUT, ANode[Single[CompileNode]]),
                         "to_file": Parameter(AttrType.INPUT, AString),
                         "show_shapes": Parameter(AttrType.INPUT, ABoolean),
                         "show_layer_names": Parameter(AttrType.INPUT, ABoolean),
@@ -185,7 +184,7 @@ node_list = {
                 node_type = UtilsNode,
                 logic = np.savetxt,
                 annotations = {
-                    "X": Parameter(AttrType.INPUT, ANode[DataNode]),
+                    "X": Parameter(AttrType.INPUT, ANode[Single[DataNode | PipelineNode]]),
                     "fname": Parameter(AttrType.INPUT, AString, default='result.txt')
                 },
                 input = False,

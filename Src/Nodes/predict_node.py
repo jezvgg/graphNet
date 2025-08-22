@@ -1,14 +1,13 @@
 import keras
-import dearpygui.dearpygui as dpg
 
-from Src.Nodes import ParameterNode
-
+from Src.Nodes import AbstractNode
 
 
 
-class PredictNode(ParameterNode):
+class PredictNode(AbstractNode):
     logic: keras.models.Model.predict
 
 
-    def compile(self):
-        return super().compile(kwargs={"verbose": False})
+    @staticmethod
+    def predict(model: keras.models.Model, **kwargs):
+        return model.predict(**kwargs, verbose=False)

@@ -1,4 +1,5 @@
 from itertools import chain
+from dataclasses import dataclass
 
 from keras import layers
 import dearpygui.dearpygui as dpg
@@ -6,29 +7,36 @@ import dearpygui.dearpygui as dpg
 from Src.Nodes import AbstractNode
 
 
+@dataclass
+class LayerResult:
+    layer: layers.Layer
+    inputs: set[layers.InputLayer]
+
 
 class LayerNode(AbstractNode):
     '''
     Класс хранящий данные, для связи нода с слоём нейроной сети.
     '''
     inputs: set["LayerNode"]
+    OUTPUT: LayerResult
 
 
-    def compile(self):
-        status: bool = super().compile()
-        self.layer: layers.Layer = self.OUTPUT
-        input_nodes = [dpg.get_item_user_data(dpg.get_item_parent(node)) \
-                        for node in chain(*self.incoming.values())]
+    @staticmethod
+    def layer(layer: layers.Layer):
+        '''
+        Фабрика функций, для новых INPUT \ OUTPUT,
+        чтоб INPUT мог приходить как args
+        '''
+        return lambda *args, **kwargs: LayerNode.compile_layer(layer, *args, **kwargs)
+    
 
-        input_layers = [getattr(node, 'layer') for node in input_nodes]
-        if len(input_layers) == 1: input_layers = input_layers[0]
-
-        self.layer = self.layer(input_layers)
-
-        inputs = [getattr(node, 'inputs') for node in input_nodes]
-        self.inputs = set().union(*inputs)
-
-        return status
-
-
-
+    @staticmethod
+    def compile_layer(layer: layers.Layer, *args: LayerResult, **kwargs):
+        '''
+        Компанует выход который должен быть у Layer,
+        чтоб не городить костыли с обработкой inputs
+        '''
+        print(kwargs)
+        print()
+        return LayerResult(layer=layer(**kwargs)(*[arg.layer for arg in args]), 
+                            inputs=set().union(*[arg.inputs for arg in args]))

@@ -1,5 +1,6 @@
-from Src.Nodes import ParameterNode
+from Src.Nodes import AbstractNode
 
 
-class PipelineNode(ParameterNode):
+
+class PipelineNode(AbstractNode):
     pass

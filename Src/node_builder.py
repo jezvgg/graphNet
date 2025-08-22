@@ -8,7 +8,7 @@ from keras import layers
 from Src.Enums.attr_type import AttrType
 from Src.Logging import Logger_factory, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, DataNode
-from Src.Config.node_list import NodeAnnotation, Parameter, ANode
+from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
 
 
 
@@ -113,9 +113,9 @@ class NodeBuilder:
         layer = NodeAnnotation(
             label="Input",
             node_type=InputLayerNode, 
-            logic = layers.Input,
+            logic = InputLayerNode.create_input,
             annotations = {
-                    "shape": Parameter(AttrType.INPUT, ANode[DataNode]),
+                    "shape": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                 },
             input=False
             )
@@ -153,8 +153,7 @@ class NodeBuilder:
 
                 if not status: break
                 
-                layer = current_node.OUTPUT
-                self.logger.debug(str(layer))
+                self.logger.debug(f"resulted OUTPUT - {current_node.OUTPUT}")
 
                 for attr_id in chain(*current_node.outgoing.values()):
                     neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))

@@ -7,6 +7,7 @@ from Src.Nodes import DataNode
 
 class ImageDataNode(DataNode):
 
+    # TODO: 100% не работает, нужно будет починить
     @staticmethod
     def open_data(files: dict, *args, **kwargs):
         images = []

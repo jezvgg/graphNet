@@ -1,6 +1,6 @@
-from Src.Nodes import ParameterNode
+from Src.Nodes import AbstractNode
 
 
 
-class MetricNode(ParameterNode):
+class MetricNode(AbstractNode):
     pass

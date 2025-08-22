@@ -1,20 +1,26 @@
-from typing import TypeVar, Generic
+from dataclasses import dataclass
 
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
+from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
-from Src.Logging.logger_factory import Logger_factory
 
 
-T = TypeVar('T') 
 
 
-class ANode(Generic[T], Annotation):
+@dataclass
+class ANode(Annotation):
+    node_type: type = object
+    single: bool = False
 
 
-    @staticmethod
-    def build(parent: int | str, *args, **kwargs):
+    def __class_getitem__(cls, item):
+        if isinstance(item, Single): return ANode(item.node_type, True)
+        return ANode(item, False)
+
+
+    def build(self, parent: int | str, *args, **kwargs):
         if DPGType(dpg.get_item_type(parent)) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
@@ -32,8 +38,7 @@ class ANode(Generic[T], Annotation):
         return input_id
     
 
-    @staticmethod
-    def get(input_id: int | str):
+    def get(self, input_id: int | str):
         from Src.Nodes import AbstractNode
 
         parent = dpg.get_item_parent(input_id)
@@ -50,14 +55,15 @@ class ANode(Generic[T], Annotation):
         results = []
         for field, node in node_in:
             if not hasattr(node, field):
-                raise Exception(f"Атрибут '{field}' не найден в объекте узла типа '{node.__class__.__name__}'.")
+                raise AttributeError(f"Атрибут '{field}' не найден в объекте узла типа '{node.__class__.__name__}'.")
 
             results.append(getattr(node, field))
 
-        if len(results) == 1: return results[0]
+        # TODO: Сделать raise AttributeException если results пустой
+        print(results)
+        if self.single and results: return results[0]
         return results
     
 
-    @staticmethod
-    def set(input_id: str| int, value) -> bool:
+    def set(self, input_id: str| int, value) -> bool:
         return False 

@@ -7,6 +7,7 @@ from Src.Nodes import AbstractNode, node_link
 from Src.node_builder import NodeBuilder
 from Src.Logging import Logger_factory, Logger
 from Src.Config.node_list import node_list, NodeAnnotation
+from Src.Config.Annotations import ANode
 
 
 
@@ -124,9 +125,13 @@ class NodeEditor:
         node_in: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(app_data[1]))
 
         # Проверка при связывании, что правильные узлы связываются
-        accaptable: tuple[AbstractNode] = get_args(node_in.annotations[dpg.get_item_label(app_data[1])].hint)
-        if accaptable and not isinstance(node_out, accaptable[0]):
-            self.logger.warning(f"Некорректная попытка связывания узлов: {node_out} -> {node_in}({dpg.get_item_label(app_data[1])}) должно быть {accaptable[0]}")
+        accaptable: ANode = node_in.annotations[dpg.get_item_label(app_data[1])].hint
+        if not isinstance(node_out, accaptable.node_type):
+            self.logger.warning(f"Некорректная попытка связывания узлов: {node_out} -> {node_in}({dpg.get_item_label(app_data[1])}) должно быть {accaptable.node_type}")
+            return
+        # Проверка, что не больше одной связи, если нужно
+        if accaptable.single and dpg.get_item_user_data(app_data[1]):
+            self.logger.warning(f"Некорректная попытка связывания узлов: {node_out} -> {node_in}({dpg.get_item_label(app_data[1])}) связей не может быть больше 1!")
             return
 
         self.logger.debug(f"Node_out - {dpg.get_item_label(dpg.get_item_parent(app_data[0]))}")
