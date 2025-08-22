@@ -39,7 +39,8 @@ node_list = {
                         "files": Parameter(AttrType.INPUT, AFile),
                         "color_mode": Parameter(AttrType.INPUT, AEnum[ColorMode]),
                         "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
-                        }
+                        },
+                input=False
             )
         ],
         "Preprocessing Utils": [
@@ -48,9 +49,9 @@ node_list = {
                 node_type= PipelineNode,
                 logic = keras.utils.to_categorical,
                 annotations = {
-                        "x": Parameter(AttrType.INPUT, ANode[DataNode]),
                         "num_classes": Parameter(AttrType.INPUT, AInteger)
-                    }
+                    },
+                input=DataNode
             )
         ]
     },
@@ -66,7 +67,8 @@ node_list = {
                         "units": Parameter(AttrType.INPUT, AInteger),
                         "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
                         "use_bias": Parameter(AttrType.INPUT, ABoolean)
-                    }
+                    },
+                input=LayerNode
             )
         ],
         "Convolutional":
@@ -82,7 +84,8 @@ node_list = {
                         "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
                         "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
                         "use_bias": Parameter(AttrType.INPUT, ABoolean),
-                    } 
+                    },
+                input=LayerNode
             ),
             NodeAnnotation(
                 label= "MaxPooling2D",
@@ -92,7 +95,8 @@ node_list = {
                         "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger]),
                         "strides": Parameter(AttrType.INPUT, AInteger),
                         "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
-                    }
+                    },
+                input=LayerNode
             )
         ],
         "Etc":[
@@ -100,16 +104,19 @@ node_list = {
                 label="Concatenate",
                 node_type= LayerNode,
                 logic = layers.Concatenate,
+                input=LayerNode
             ),
             NodeAnnotation(
                 label="Flatten",
                 node_type= LayerNode,
                 logic = layers.Flatten,
+                input=LayerNode
             ),
             NodeAnnotation(
                 label="Add",
                 node_type= LayerNode,
                 logic = layers.Add,
+                input=LayerNode
             )
         ]
     },
@@ -123,28 +130,28 @@ node_list = {
                         "optimizer": Parameter(AttrType.INPUT, AEnum[Optimizers]),
                         "loss": Parameter(AttrType.INPUT, AEnum[Losses]),
                         # "metrics": MetricNode
-                    }
+                    },
+                input=LayerNode
             ),
             NodeAnnotation(
                 label="Fit model",
                 node_type= FitNode,
                 logic = FitNode.fit,
                 annotations = {
-                        "self": Parameter(AttrType.INPUT, ANode[CompileNode]),
                         "x": Parameter(AttrType.INPUT, ANode[DataNode]),
                         "y": Parameter(AttrType.INPUT, ANode[DataNode]),
                         "epochs": Parameter(AttrType.INPUT, AInteger)
-                    }
+                    },
+                input=CompileNode
             ),
             NodeAnnotation(
                 label="Predict",
                 node_type= PredictNode,
                 logic = keras.models.Model.predict,
                 annotations = {
-                        "self": Parameter(AttrType.INPUT, ANode[FitNode]),
                         "x": Parameter(AttrType.INPUT, ANode[DataNode]),
                     },
-                input = False
+                input = FitNode
             )
         ],
         "Utils": [

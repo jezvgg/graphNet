@@ -28,13 +28,11 @@ class AbstractNode(ABC):
     annotations: dict[str, Parameter]
     logic: Callable
     docs: str
-    input: bool
-    output: bool
     logger: Logger
 
 
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \
-                 logic: Callable, docs: str = None, input = True, output = True):
+                 logic: Callable, docs: str = None):
         '''
         Нода (узел графа), класс который используется для сохранения связей в графе, а также информации о ноде. 
 
@@ -49,8 +47,6 @@ class AbstractNode(ABC):
         self.logic = logic
         self.incoming = {}
         self.outgoing = {}
-        self.input = input
-        self.output = output
         self.OUTPUT = None
 
         if not docs: docs = inspect.getdoc(self.logic)
@@ -79,7 +75,8 @@ class AbstractNode(ABC):
         Основной метод нодов, содержащий логику их работы. Тут создаются слои нейронной сети, проходит обучение и т.д. В зависимости от ноды, будет разная логика.
         '''
         if not kwargs: kwargs = {}
-        arguments = dpg.get_item_children(self.node_tag)[1]
+        args = []
+        arguments = dpg.get_item_children(self.node_tag, slot=1)
 
         self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
         self.logger.debug(f"Аргументы ноды - {arguments}")
@@ -88,14 +85,21 @@ class AbstractNode(ABC):
             name = dpg.get_item_label(argument)
 
             if name not in self.annotations or \
-            self.annotations[name].attr_type == AttrType.OUTPUT: continue
+            self.annotations[name].attr_type == AttrType.OUTPUT: 
+                continue
+
+            if name == 'INPUT':
+                args = self.annotations[name].get_value(argument)
+                if not isinstance(args, list): args = [args]
+                continue
 
             kwargs[name] = self.annotations[name].get_value(argument)
 
             self.logger.debug(kwargs)
+            self.logger.debug(args)
 
         try: 
-            self.OUTPUT = self.logic(**kwargs)
+            self.OUTPUT = self.logic(*args, **kwargs)
             self.lower_error()
 
         except AttributeError as ex:

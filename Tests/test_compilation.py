@@ -66,14 +66,14 @@ class test_compilation(DPGUnitTest):
         # Соединяем их в пайплайн
         self.node_editor.link_callback("node_editor", (get_attr("shape", dataX), get_attr("shape", input)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", input), get_attr("INPUT", dense)))
-        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataY), get_attr("x", categorical)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataY), get_attr("INPUT", categorical)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dense), get_attr("INPUT", compile)))
 
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataX), get_attr("x", fit)))
-        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", compile), get_attr("self", fit)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", compile), get_attr("INPUT", fit)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", categorical), get_attr("y", fit)))
 
-        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", fit), get_attr("self", predict)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", fit), get_attr("INPUT", predict)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataX), get_attr("x", predict)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", predict), get_attr("X", save)))
 

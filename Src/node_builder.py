@@ -1,5 +1,6 @@
 from typing import Callable
 from itertools import chain
+import traceback
 
 import dearpygui.dearpygui as dpg
 from keras import layers
@@ -77,24 +78,23 @@ class NodeBuilder:
         node: AbstractNode = node_data.node_type(node_id, **node_data.kwargs)
 
         with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
-            if node.input:
-                with dpg.node_attribute(label="INPUT", attribute_type=dpg.mvNode_Attr_Input):
-                    dpg.add_text("INPUT", label="INPUT")
+            if node_data.input:
+                node_data.input.build(label="INPUT", parent=node_id)
                 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
                 with dpg.tree_node(label="Docs"):
                     dpg.add_text(node.docs)
 
             for label, attribute in node.annotations.items():
+                if label == 'INPUT': continue
                 self.logger.info(f"Attribute label: {label}")
                 attr = attribute.build(label=label, parent=node_id)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(label="Delete", callback=lambda: self.delete_callback(node_id))
 
-            if node.output:
-                with dpg.node_attribute(label="OUTPUT", attribute_type=dpg.mvNode_Attr_Output):
-                    dpg.add_text("OUTPUT", label="OUTPUT")
+            if node_data.output:
+                node_data.output.build(label="OUTPUT", parent=node_id)
 
         return node_id
     
@@ -116,7 +116,8 @@ class NodeBuilder:
             logic = layers.Input,
             annotations = {
                     "shape": Parameter(AttrType.INPUT, ANode[DataNode]),
-                }
+                },
+            input=False
             )
 
         node_id = self.build_node(layer, parent=parent)
@@ -171,6 +172,7 @@ class NodeBuilder:
             dpg.add_text("Произошла непредвиденная ошибка, сообщите пожалуйста разработчикам.")
             dpg.add_text(f"{error_message_type}:")
             dpg.add_text(error_message)
+            dpg.add_text(traceback.format_exc())
             dpg.add_button(label="Close", callback=lambda: dpg.configure_item(error_window, show=False))
 
         # TODO: Прикрепить модальное окно на середину при изменении размера

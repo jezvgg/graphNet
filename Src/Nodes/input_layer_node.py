@@ -1,11 +1,11 @@
 from keras import layers
 import dearpygui.dearpygui as dpg
 
-from Src.Nodes import AbstractNode
+from Src.Nodes import LayerNode, AbstractNode
 
 
 
-class InputLayerNode(AbstractNode):
+class InputLayerNode(LayerNode):
     '''
     Класс для связи данных и нейронной сети, реализует логику keras.Input.
     '''
@@ -15,7 +15,7 @@ class InputLayerNode(AbstractNode):
 
 
     def compile(self):
-        status = super().compile()
+        status = AbstractNode.compile(self)
         self.layer = self.OUTPUT
         self.inputs = set([self])
         return status
