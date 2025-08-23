@@ -1,13 +1,14 @@
 from typing import Callable
 from itertools import chain
+import traceback
 
 import dearpygui.dearpygui as dpg
 from keras import layers
 
 from Src.Enums.attr_type import AttrType
 from Src.Logging import Logger_factory, Logger
-from Src.Nodes import AbstractNode, InputLayerNode
-from Src.Config.node_list import NodeAnnotation, Parameter, ANode
+from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
+from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
 
 
 
@@ -77,24 +78,36 @@ class NodeBuilder:
         node: AbstractNode = node_data.node_type(node_id, **node_data.kwargs)
 
         with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
-            if node.input:
-                with dpg.node_attribute(label="INPUT", attribute_type=dpg.mvNode_Attr_Input):
-                    dpg.add_text("INPUT", label="INPUT")
+            if node_data.input:
+                node_data.input.build(label="INPUT", parent=node_id)
                 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
                 with dpg.tree_node(label="Docs"):
                     dpg.add_text(node.docs)
 
             for label, attribute in node.annotations.items():
-                self.logger.info(f"Attribute label: {label}")
+                if label == 'INPUT': continue
+                self.logger.debug(f"Attribute label: {label}")
                 attr = attribute.build(label=label, parent=node_id)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_button(label="Delete", callback=lambda: self.delete_callback(node_id))
 
-            if node.output:
-                with dpg.node_attribute(label="OUTPUT", attribute_type=dpg.mvNode_Attr_Output):
-                    dpg.add_text("OUTPUT", label="OUTPUT")
+            if node_data.output:
+                node_data.output.build(label="OUTPUT", parent=node_id)
+
+        with dpg.theme() as node_theme:
+            with dpg.theme_component(dpg.mvNode):
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBar, node.color, category=dpg.mvThemeCat_Nodes)
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, 
+                                    [min(color * 1.2, 255) for color in node.color],
+                                    category=dpg.mvThemeCat_Nodes)
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, 
+                                    [min(color * 1.25, 255) for color in node.color],
+                                    category=dpg.mvThemeCat_Nodes)
+
+        self.logger.debug([(color * 1.2) % 256 for color in node.color])
+        dpg.bind_item_theme(node_id, node_theme)
 
         return node_id
     
@@ -110,13 +123,16 @@ class NodeBuilder:
         Returns:
             str | int - индетификатор новой ноды
         '''
+        # TODO: Сделать типизированную передачу у shape TableDataNode
         layer = NodeAnnotation(
             label="Input",
             node_type=InputLayerNode, 
-            logic = layers.Input,
+            logic = InputLayerNode.create_input,
             annotations = {
-                    "shape": Parameter(AttrType.INPUT, ANode),
-                }
+                    "shape": Parameter(AttrType.INPUT, ANode[Single[object]]),
+                },
+            input=False,
+            output=LayerNode
             )
 
         node_id = self.build_node(layer, parent=parent)
@@ -152,8 +168,7 @@ class NodeBuilder:
 
                 if not status: break
                 
-                layer = current_node.OUTPUT
-                self.logger.debug(str(layer))
+                self.logger.debug(f"resulted OUTPUT - {current_node.OUTPUT}")
 
                 for attr_id in chain(*current_node.outgoing.values()):
                     neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
@@ -171,6 +186,7 @@ class NodeBuilder:
             dpg.add_text("Произошла непредвиденная ошибка, сообщите пожалуйста разработчикам.")
             dpg.add_text(f"{error_message_type}:")
             dpg.add_text(error_message)
+            dpg.add_text(traceback.format_exc())
             dpg.add_button(label="Close", callback=lambda: dpg.configure_item(error_window, show=False))
 
         # TODO: Прикрепить модальное окно на середину при изменении размера

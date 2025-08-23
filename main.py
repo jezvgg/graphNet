@@ -24,7 +24,7 @@ main_logger = log_factory("main")
 
 
 with dpg.font_registry():
-    with dpg.font(font_path, 13, default_font=True, tag="Default font") as f:
+    with dpg.font("notomono-regular.ttf", 18, default_font=True, tag="Default font") as f:
         dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)
 dpg.bind_font("Default font")
 

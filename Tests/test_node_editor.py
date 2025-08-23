@@ -4,7 +4,7 @@ import dearpygui.dearpygui as dpg
 
 from Src.node_editor import NodeEditor
 from Src.Config import NodeAnnotation, Parameter
-from Src.Config.Annotations import AInteger
+from Src.Config.Annotations import ANode
 from Src.Nodes import AbstractNode
 from Src.Enums.attr_type import AttrType
 from Src.Logging.logger_factory import Logger_factory
@@ -60,7 +60,7 @@ class test_NodeEditor(DPGUnitTest):
                     node_type=AbstractNode,
                     logic = lambda x:x,
                     annotations={
-                        "x": Parameter(AttrType.OUTPUT, AInteger)
+                        "x": Parameter(AttrType.OUTPUT, ANode[object])
                         }
                     )
         anode2 = NodeAnnotation(
@@ -68,7 +68,7 @@ class test_NodeEditor(DPGUnitTest):
                     node_type=AbstractNode,
                     logic = lambda x: x,
                     annotations={
-                        "x": Parameter(AttrType.INPUT, AInteger)
+                        "x": Parameter(AttrType.INPUT, ANode[object])
                     }
         )
         anode3 = NodeAnnotation(
@@ -76,7 +76,7 @@ class test_NodeEditor(DPGUnitTest):
                     node_type=AbstractNode,
                     logic = lambda x: x,
                     annotations={
-                        "x": Parameter(AttrType.INPUT, AInteger)
+                        "x": Parameter(AttrType.INPUT, ANode[object])
                     }
         )
 
@@ -134,7 +134,7 @@ class test_NodeEditor(DPGUnitTest):
                     node_type=AbstractNode,
                     logic = lambda x:x,
                     annotations={
-                        "x": Parameter(AttrType.OUTPUT, AInteger)
+                        "x": Parameter(AttrType.OUTPUT, ANode[object])
                         }
                     )
         anode2 = NodeAnnotation(
@@ -142,7 +142,7 @@ class test_NodeEditor(DPGUnitTest):
                     node_type=AbstractNode,
                     logic = lambda x:x,
                     annotations={
-                        "x": Parameter(AttrType.INPUT, AInteger)
+                        "x": Parameter(AttrType.INPUT, ANode[object])
                         }
                     )
         
@@ -188,7 +188,7 @@ class test_NodeEditor(DPGUnitTest):
                     node_type=AbstractNode,
                     logic = lambda x:x,
                     annotations={
-                        "x": Parameter(AttrType.OUTPUT, AInteger)
+                        "x": Parameter(AttrType.OUTPUT, ANode[object])
                         }
                     )
         anode2 = NodeAnnotation(
@@ -196,7 +196,7 @@ class test_NodeEditor(DPGUnitTest):
                     node_type=AbstractNode,
                     logic = lambda x:x,
                     annotations={
-                        "x": Parameter(AttrType.INPUT, AInteger)
+                        "x": Parameter(AttrType.INPUT, ANode[object])
                         }
                     )
         
