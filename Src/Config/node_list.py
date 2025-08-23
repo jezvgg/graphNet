@@ -20,7 +20,8 @@ node_list = {
                 node_type = TableDataNode,
                 logic = TableDataNode.open_data,
                 annotations = {
-                        "files": Parameter(AttrType.INPUT, AFile),
+                        # "files": Parameter(AttrType.INPUT, AFile),
+                        "files": Parameter(AttrType.INPUT, AString),
                         "delimiter": Parameter(AttrType.INPUT, AEnum[Delimiters]),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),

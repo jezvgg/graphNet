@@ -13,4 +13,4 @@ class TableDataNode(ShapeNode):
         if not files: 
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
         
-        return np.genfromtxt(files[0], *args, **kwargs, ndmin=2)
+        return np.genfromtxt(files, *args, **kwargs, ndmin=2)
