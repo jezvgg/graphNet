@@ -26,4 +26,4 @@ class MetricNode(ParameterNode):
 
         metric_fn.update_state(y_true,y_pred)
 
-        return metric_fn.result().numpy()
+        return float(metric_fn.result().numpy())

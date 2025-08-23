@@ -184,7 +184,7 @@ node_list = {
                     "data": Parameter(
                         AttrType.OUTPUT,
                         AFloat,
-                        backfield='data'
+                        backfield=MetricNode.data
                     )
                 },
                 input=False,
@@ -193,7 +193,7 @@ node_list = {
             NodeAnnotation(
                 label="Save data",
                 node_type = UtilsNode,
-                logic = np.savetxt,
+                logic = lambda X, fname: np.savetxt(fname, [X] if not hasattr(X, '__len__') else X),
                 annotations = {
                     "X": Parameter(AttrType.INPUT, ANode),
                     "fname": Parameter(AttrType.INPUT, AString, default='result.txt')
@@ -204,4 +204,3 @@ node_list = {
         ]
     }
 }
-
