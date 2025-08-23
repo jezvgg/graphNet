@@ -19,7 +19,7 @@ class NodeAnnotation:
 
     def __init__(self, label: str, node_type: type, logic: Callable, 
                  annotations: dict[str, Parameter] = {}, docs: str = None, 
-                 input: bool = Any, output: bool = Any):
+                 input: bool = Any, output: bool = None):
         self.label = label
         self.node_type = node_type
         self.logic = logic
@@ -34,7 +34,8 @@ class NodeAnnotation:
             self.annotations['INPUT'] = self.input
 
         self.output = output
-        if self.output: self.output = Parameter(AttrType.OUTPUT, ANode[object])
+        if self.output == None: self.output = node_type
+        if self.output: self.output = Parameter(AttrType.OUTPUT, ANode[self.output])
 
 
     @property

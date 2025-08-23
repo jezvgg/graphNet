@@ -9,6 +9,7 @@ class InputLayerNode(LayerNode):
     Класс для связи данных и нейронной сети, реализует логику keras.Input.
     '''
     OUTPUT: LayerResult
+    color = (231, 231, 21, 255)
 
 
     @staticmethod

@@ -35,6 +35,21 @@ class ANode(Annotation):
         with dpg.node_attribute(*args, **kwargs) as attr:
             input_id = dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
 
+        if hasattr(self.node_type, 'color'):
+            with dpg.theme() as attr_theme:
+                with dpg.theme_component(dpg.mvNodeAttribute):
+                    dpg.add_theme_color(dpg.mvNodeCol_Pin, 
+                                        getattr(self.node_type, 'color'), 
+                                        category=dpg.mvThemeCat_Nodes)
+                    dpg.add_theme_color(dpg.mvNodeCol_PinHovered, 
+                                        [min(color * 1.2, 255) for color in getattr(self.node_type, 'color')],
+                                        category=dpg.mvThemeCat_Nodes)
+                    dpg.add_theme_color(dpg.mvNodeCol_Link, 
+                                        getattr(self.node_type, 'color'), 
+                                        category=dpg.mvThemeCat_Nodes)
+                    
+            dpg.bind_item_theme(attr, attr_theme)
+
         return input_id
     
 
@@ -60,7 +75,6 @@ class ANode(Annotation):
             results.append(getattr(node, field))
 
         # TODO: Сделать raise AttributeException если results пустой
-        print(results)
         if self.single and results: return results[0]
         return results
     

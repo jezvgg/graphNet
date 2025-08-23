@@ -3,4 +3,4 @@ from Src.Nodes import AbstractNode
 
 
 class UtilsNode(AbstractNode):
-    pass
+    color = (144, 144, 255, 255)

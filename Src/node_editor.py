@@ -97,7 +97,7 @@ class NodeEditor:
         pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
         pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
 
-        self.logger.info(f"Рассчитанная позиция - {pos}")
+        self.logger.info(f"Узел поставлен на позиции - {pos}")
 
         node_data: NodeAnnotation = dpg.get_item_user_data(app_data)
         node_id = self.builder.build_node(node_data, parent="node_editor")

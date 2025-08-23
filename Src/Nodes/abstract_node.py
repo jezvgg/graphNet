@@ -30,6 +30,7 @@ class AbstractNode(ABC):
     logic: Callable
     docs: str
     logger: Logger
+    color: tuple[int, int, int, int] = (37, 37, 38, 255)
 
 
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \

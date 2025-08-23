@@ -1,10 +1,12 @@
 import keras
 
-from Src.Nodes import AbstractNode
+from Src.Nodes import DataNode
 
 
 
-class PredictNode(AbstractNode):
+# TODO: Переписать на SelfNode
+class PredictNode(DataNode):
+    color = (34, 255, 255, 255)
     logic: keras.models.Model.predict
 
 

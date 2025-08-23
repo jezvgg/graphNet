@@ -1,6 +1,3 @@
-from functools import wraps
-
-import dearpygui.dearpygui as dpg
 import keras
 
 from Src.Nodes import AbstractNode, LayerResult
@@ -9,6 +6,7 @@ from Src.Nodes import AbstractNode, LayerResult
 
 class CompileNode(AbstractNode):
     logic: keras.models.Model.compile
+    color = (0, 150, 0, 255)
 
 
     # TODO: Настроить правильные аннотации от logic

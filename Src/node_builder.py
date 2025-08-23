@@ -7,7 +7,7 @@ from keras import layers
 
 from Src.Enums.attr_type import AttrType
 from Src.Logging import Logger_factory, Logger
-from Src.Nodes import AbstractNode, InputLayerNode, DataNode
+from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
 
 
@@ -87,7 +87,7 @@ class NodeBuilder:
 
             for label, attribute in node.annotations.items():
                 if label == 'INPUT': continue
-                self.logger.info(f"Attribute label: {label}")
+                self.logger.debug(f"Attribute label: {label}")
                 attr = attribute.build(label=label, parent=node_id)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
@@ -95,6 +95,19 @@ class NodeBuilder:
 
             if node_data.output:
                 node_data.output.build(label="OUTPUT", parent=node_id)
+
+        with dpg.theme() as node_theme:
+            with dpg.theme_component(dpg.mvNode):
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBar, node.color, category=dpg.mvThemeCat_Nodes)
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, 
+                                    [min(color * 1.2, 255) for color in node.color],
+                                    category=dpg.mvThemeCat_Nodes)
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, 
+                                    [min(color * 1.25, 255) for color in node.color],
+                                    category=dpg.mvThemeCat_Nodes)
+
+        self.logger.debug([(color * 1.2) % 256 for color in node.color])
+        dpg.bind_item_theme(node_id, node_theme)
 
         return node_id
     
@@ -110,14 +123,16 @@ class NodeBuilder:
         Returns:
             str | int - индетификатор новой ноды
         '''
+        # TODO: Сделать типизированную передачу у shape TableDataNode
         layer = NodeAnnotation(
             label="Input",
             node_type=InputLayerNode, 
             logic = InputLayerNode.create_input,
             annotations = {
-                    "shape": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "shape": Parameter(AttrType.INPUT, ANode[Single[object]]),
                 },
-            input=False
+            input=False,
+            output=LayerNode
             )
 
         node_id = self.build_node(layer, parent=parent)

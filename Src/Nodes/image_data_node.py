@@ -1,11 +1,13 @@
 import numpy as np
 import keras
 
-from Src.Nodes import DataNode
+from Src.Nodes import ShapeNode
 
 
 
-class ImageDataNode(DataNode):
+class ImageDataNode(ShapeNode):
+    color = (255, 155, 0, 255)
+
 
     # TODO: 100% не работает, нужно будет починить
     @staticmethod

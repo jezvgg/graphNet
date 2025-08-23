@@ -6,7 +6,7 @@ from Src.Nodes import AbstractNode
 
 
 class FitNode(AbstractNode):
-    logic: "FitNode.fit"
+    color = (151, 0, 191, 255)
 
 
     @staticmethod

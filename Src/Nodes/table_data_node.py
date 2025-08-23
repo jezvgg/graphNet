@@ -1,10 +1,11 @@
 import numpy as np
 
-from Src.Nodes import DataNode
+from Src.Nodes import ShapeNode
 
 
 
-class TableDataNode(DataNode):
+class TableDataNode(ShapeNode):
+    color = (255, 144, 144, 255)
 
 
     @staticmethod

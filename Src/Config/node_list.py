@@ -26,9 +26,10 @@ node_list = {
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),
                         "shape": Parameter(AttrType.OUTPUT, 
                                            ASequence[AInteger, AInteger, AInteger],
-                                           backfield=DataNode.shape)  
+                                           backfield=ShapeNode.shape)  
                     },
-                input=False
+                input=False,
+                output=DataNode
             ),
             NodeAnnotation(
                 label="Images data",
@@ -39,13 +40,14 @@ node_list = {
                         "color_mode": Parameter(AttrType.INPUT, AEnum[ColorMode]),
                         "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
                         },
-                input=False
+                input=False,
+                output=DataNode
             )
         ],
         "Preprocessing Utils": [
             NodeAnnotation(
                 label="to categorical",
-                node_type= PipelineNode,
+                node_type= DataNode,
                 logic = keras.utils.to_categorical,
                 annotations = {
                         "num_classes": Parameter(AttrType.INPUT, AInteger)
@@ -137,8 +139,8 @@ node_list = {
                 node_type= FitNode,
                 logic = FitNode.fit,
                 annotations = {
-                        "x": Parameter(AttrType.INPUT, ANode[Single[DataNode | PipelineNode]]),
-                        "y": Parameter(AttrType.INPUT, ANode[Single[DataNode | PipelineNode]]),
+                        "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                        "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                         "epochs": Parameter(AttrType.INPUT, AInteger)
                     },
                 input = Single[CompileNode]
@@ -148,9 +150,10 @@ node_list = {
                 node_type= PredictNode,
                 logic = PredictNode.predict,
                 annotations = {
-                        "x": Parameter(AttrType.INPUT, ANode[Single[DataNode | PipelineNode]]),
+                        "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                     },
-                input = Single[FitNode]
+                input = Single[FitNode],
+                output = DataNode
             )
         ],
         "Utils": [
@@ -184,7 +187,7 @@ node_list = {
                 node_type = UtilsNode,
                 logic = np.savetxt,
                 annotations = {
-                    "X": Parameter(AttrType.INPUT, ANode[Single[DataNode | PipelineNode]]),
+                    "X": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                     "fname": Parameter(AttrType.INPUT, AString, default='result.txt')
                 },
                 input = False,

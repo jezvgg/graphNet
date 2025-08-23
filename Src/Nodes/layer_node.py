@@ -17,6 +17,7 @@ class LayerNode(AbstractNode):
     '''
     Класс хранящий данные, для связи нода с слоём нейроной сети.
     '''
+    color = (231, 21, 21, 255)
     inputs: set["LayerNode"]
     OUTPUT: LayerResult
 
