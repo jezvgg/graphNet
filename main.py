@@ -1,4 +1,5 @@
 import json
+import sys
 
 import dearpygui.dearpygui as dpg
 
@@ -9,8 +10,12 @@ from Src.node_editor import NodeEditor
 dpg.create_context()
 dpg.create_viewport(title='Custom Title')
 
+base_path = sys._MEIPASS if hasattr(sys, '_MEIPASS') else '.'
+config_path = f"{base_path}/Src/Logging/logger_config.json"
+font_path = f"{base_path}/notomono-regular.ttf"
 
-with open("Src/Logging/logger_config.json") as f:
+
+with open(config_path) as f:
     config = json.load(f)
 
 log_factory = Logger_factory(config)
