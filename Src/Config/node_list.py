@@ -193,7 +193,18 @@ node_list = {
                 },
                 input = False,
                 output = False
-            )
+            ),
+            NodeAnnotation(
+                label="Save model as JSON",
+                node_type = UtilsNode,
+                logic = UtilsNode.to_json,
+                annotations = {
+                    "model": Parameter(AttrType.INPUT, ANode[Single[CompileNode]]),
+                    "filename": Parameter(AttrType.INPUT, AString, default='model.json')
+                },
+                input = False,
+                output = False
+            ),
         ]
     }
 }
