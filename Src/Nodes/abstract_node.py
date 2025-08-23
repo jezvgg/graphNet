@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from abc import ABC
 from typing import Callable
 import inspect
+import traceback
 
 import dearpygui.dearpygui as dpg
 
@@ -28,13 +29,12 @@ class AbstractNode(ABC):
     annotations: dict[str, Parameter]
     logic: Callable
     docs: str
-    input: bool
-    output: bool
     logger: Logger
+    color: tuple[int, int, int, int] = (37, 37, 38, 255)
 
 
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \
-                 logic: Callable, docs: str = None, input = True, output = True):
+                 logic: Callable, docs: str = None):
         '''
         Нода (узел графа), класс который используется для сохранения связей в графе, а также информации о ноде. 
 
@@ -49,8 +49,6 @@ class AbstractNode(ABC):
         self.logic = logic
         self.incoming = {}
         self.outgoing = {}
-        self.input = input
-        self.output = output
         self.OUTPUT = None
 
         if not docs: docs = inspect.getdoc(self.logic)
@@ -79,7 +77,8 @@ class AbstractNode(ABC):
         Основной метод нодов, содержащий логику их работы. Тут создаются слои нейронной сети, проходит обучение и т.д. В зависимости от ноды, будет разная логика.
         '''
         if not kwargs: kwargs = {}
-        arguments = dpg.get_item_children(self.node_tag)[1]
+        args = []
+        arguments = dpg.get_item_children(self.node_tag, slot=1)
 
         self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
         self.logger.debug(f"Аргументы ноды - {arguments}")
@@ -88,15 +87,24 @@ class AbstractNode(ABC):
             name = dpg.get_item_label(argument)
 
             if name not in self.annotations or \
-            self.annotations[name].attr_type == AttrType.OUTPUT: continue
+            self.annotations[name].attr_type == AttrType.OUTPUT: 
+                continue
+
+            if name == 'INPUT':
+                args = self.annotations[name].get_value(argument)
+                if not isinstance(args, list): args = [args]
+                continue
+
+            self.logger.debug(f"Аннотация - {self.annotations[name]}")
 
             kwargs[name] = self.annotations[name].get_value(argument)
 
             self.logger.debug(kwargs)
+            self.logger.debug(args)
 
         try: 
-            self.OUTPUT = self.logic(**kwargs)
-            self.lower_error()
+            self.OUTPUT = self.logic(*args, **kwargs)
+            self.default_theme()
 
         except AttributeError as ex:
             self.raise_error(ex, "Некорректные данные для узла")
@@ -126,13 +134,21 @@ class AbstractNode(ABC):
             dpg.add_text(error_message)
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
+        self.logger.info(traceback.format_exc())
 
 
-    def lower_error(self):
+    def default_theme(self):
         with dpg.theme() as default_theme:
             with dpg.theme_component(dpg.mvNode):
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBar, self.color, category=dpg.mvThemeCat_Nodes)
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, 
+                                    [min(color * 1.2, 255) for color in self.color],
+                                    category=dpg.mvThemeCat_Nodes)
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, 
+                                    [min(color * 1.25, 255) for color in self.color],
+                                    category=dpg.mvThemeCat_Nodes)
                 dpg.add_theme_color(dpg.mvNodeCol_NodeOutline, (100, 100, 100, 255), category=dpg.mvThemeCat_Nodes)
-
+            
             with dpg.theme_component(dpg.mvTooltip):
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (78, 78, 78, 255), category=dpg.mvThemeCat_Core)
             

@@ -66,20 +66,20 @@ class test_compilation(DPGUnitTest):
         # Соединяем их в пайплайн
         self.node_editor.link_callback("node_editor", (get_attr("shape", dataX), get_attr("shape", input)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", input), get_attr("INPUT", dense)))
-        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataY), get_attr("x", categorical)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataY), get_attr("INPUT", categorical)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dense), get_attr("INPUT", compile)))
 
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataX), get_attr("x", fit)))
-        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", compile), get_attr("self", fit)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", compile), get_attr("INPUT", fit)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", categorical), get_attr("y", fit)))
 
-        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", fit), get_attr("self", predict)))
+        self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", fit), get_attr("INPUT", predict)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataX), get_attr("x", predict)))
         self.node_editor.link_callback("node_editor", (get_attr("OUTPUT", predict), get_attr("X", save)))
 
         # Задаём данные в ноды
-        assert AFile.set(dpg.get_item_children(get_attr("files", dataX), slot=1)[0], [Path("Tests/X.txt")])
-        assert AFile.set(dpg.get_item_children(get_attr("files", dataY), slot=1)[0], [Path("Tests/y.txt")])
+        assert AString.set(dpg.get_item_children(get_attr("files", dataX), slot=1)[0], "./Tests/X.txt")
+        assert AString.set(dpg.get_item_children(get_attr("files", dataY), slot=1)[0], "./Tests/y.txt")
         assert AInteger.set(dpg.get_item_children(get_attr("num_classes", categorical), slot=1)[0], 2)
         assert AInteger.set(dpg.get_item_children(get_attr("units", dense), slot=1)[0], 2)
         assert AEnum[Activations].set(dpg.get_item_children(get_attr("activation", dense), slot=1)[0], Activations.softmax)

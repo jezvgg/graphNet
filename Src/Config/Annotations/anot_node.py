@@ -1,20 +1,26 @@
+from dataclasses import dataclass
+
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
+from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
-from Src.Logging.logger_factory import Logger_factory
 
 
 
 
+@dataclass
 class ANode(Annotation):
+    node_type: type = object
+    single: bool = False
 
 
-    @staticmethod
-    def build(parent: int | str, *args, **kwargs):
-        kwargs = Annotation.check_kwargs(dpg.add_text, kwargs)
+    def __class_getitem__(cls, item):
+        if isinstance(item, Single): return ANode(item.node_type, True)
+        return ANode(item, False)
 
 
+    def build(self, parent: int | str, *args, **kwargs):
         if DPGType(dpg.get_item_type(parent)) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
@@ -23,15 +29,31 @@ class ANode(Annotation):
         kwargs = Annotation.check_kwargs(dpg.node_attribute, kwargs)
         kwargs['parent']  = new_parent
         kwargs['user_data'] = []
+        if 'attribute_type' not in kwargs.keys():
+            kwargs['attribute_type'] = dpg.mvNode_Attr_Input
 
-        with dpg.node_attribute(*args, **kwargs, attribute_type=dpg.mvNode_Attr_Input) as attr:
+        with dpg.node_attribute(*args, **kwargs) as attr:
             input_id = dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
+
+        if hasattr(self.node_type, 'color'):
+            with dpg.theme() as attr_theme:
+                with dpg.theme_component(dpg.mvNodeAttribute):
+                    dpg.add_theme_color(dpg.mvNodeCol_Pin, 
+                                        getattr(self.node_type, 'color'), 
+                                        category=dpg.mvThemeCat_Nodes)
+                    dpg.add_theme_color(dpg.mvNodeCol_PinHovered, 
+                                        [min(color * 1.2, 255) for color in getattr(self.node_type, 'color')],
+                                        category=dpg.mvThemeCat_Nodes)
+                    dpg.add_theme_color(dpg.mvNodeCol_Link, 
+                                        getattr(self.node_type, 'color'), 
+                                        category=dpg.mvThemeCat_Nodes)
+                    
+            dpg.bind_item_theme(attr, attr_theme)
 
         return input_id
     
 
-    @staticmethod
-    def get(input_id: int | str):
+    def get(self, input_id: int | str):
         from Src.Nodes import AbstractNode
 
         parent = dpg.get_item_parent(input_id)
@@ -48,14 +70,14 @@ class ANode(Annotation):
         results = []
         for field, node in node_in:
             if not hasattr(node, field):
-                raise Exception(f"Атрибут '{field}' не найден в объекте узла типа '{node.__class__.__name__}'.")
+                raise AttributeError(f"Атрибут '{field}' не найден в объекте узла типа '{node.__class__.__name__}'.")
 
             results.append(getattr(node, field))
 
-        if len(results) == 1: return results[0]
+        # TODO: Сделать raise AttributeException если results пустой
+        if self.single and results: return results[0]
         return results
     
 
-    @staticmethod
-    def set(input_id: str| int, value) -> bool:
+    def set(self, input_id: str| int, value) -> bool:
         return False 

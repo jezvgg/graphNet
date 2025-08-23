@@ -1,22 +1,19 @@
 from keras import layers
-import dearpygui.dearpygui as dpg
 
-from Src.Nodes import AbstractNode
-
+from Src.Nodes import LayerNode, LayerResult
 
 
-class InputLayerNode(AbstractNode):
+
+class InputLayerNode(LayerNode):
     '''
     Класс для связи данных и нейронной сети, реализует логику keras.Input.
     '''
-    logic: layers.Input
-    layer: layers.Input
-    inputs: set["InputLayerNode"]
+    OUTPUT: LayerResult
+    color = (231, 231, 21, 255)
 
 
-    def compile(self):
-        status = super().compile()
-        self.layer = self.OUTPUT
-        self.inputs = set([self])
-        return status
+    @staticmethod
+    def create_input(*args, **kwargs) -> LayerResult:
+        input_layer = layers.Input(**kwargs)
+        return LayerResult(input_layer, set([input_layer]))
         

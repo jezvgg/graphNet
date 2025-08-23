@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import dearpygui.dearpygui as dpg
 
 from Src.Enums.attr_type import AttrType
-from Src.Config.Annotations import Annotation
+from Src.Config.Annotations import Annotation, ANode
 from Src.Utils import Backfield
 
 
@@ -28,7 +28,12 @@ class Parameter:
         with dpg.node_attribute(*args, **attribute_kwargs, attribute_type=attribute_type) as attr:
             kwargs['parent'] = attr
             kwargs['width'] = Annotation.BASE_WIDTH
+
+            if (isinstance(self.hint, ANode) or self.hint is ANode) and \
+                attribute_type == dpg.mvNode_Attr_Output: 
+                kwargs['attribute_type'] = dpg.mvNode_Attr_Output
             if self.attr_type != AttrType.INPUT: kwargs['enabled'] = False
+
             input_id = self.hint.build(*args, **kwargs)
 
         if isinstance(self.backfield, Backfield): 

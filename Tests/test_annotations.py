@@ -105,15 +105,15 @@ class test_annotations(DPGUnitTest):
         with dpg.node_editor(parent = self.parent):
             with dpg.node():
                 with dpg.node_attribute() as attribute:
-                    input_id = ANode.build(parent = attribute)
+                    input_id = ANode[object].build(parent = attribute)
 
         assert isinstance(input_id, int | str) 
         assert input_id in dpg.get_all_items()
 
-        assert ANode.get(input_id) == []
+        assert ANode[object].get(input_id) == []
 
         # Тут не должно быть возможности поставить значение
-        assert ANode.set(input_id, None) == False
+        assert ANode[object].set(input_id, None) == False
 
 
     def test_ASequence(self):
