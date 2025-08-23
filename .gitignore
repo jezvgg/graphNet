@@ -8,3 +8,6 @@ stream
 ./*.txt
 ./*.csv
 ./*.dat
+dist
+build
+*.spec

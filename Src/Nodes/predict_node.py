@@ -1,14 +1,15 @@
 import keras
-import dearpygui.dearpygui as dpg
 
-from Src.Nodes import ParameterNode
-
+from Src.Nodes import DataNode
 
 
 
-class PredictNode(ParameterNode):
+# TODO: Переписать на SelfNode
+class PredictNode(DataNode):
+    color = (34, 255, 255, 255)
     logic: keras.models.Model.predict
 
 
-    def compile(self):
-        return super().compile(kwargs={"verbose": False})
+    @staticmethod
+    def predict(model: keras.models.Model, **kwargs):
+        return model.predict(**kwargs, verbose=False)

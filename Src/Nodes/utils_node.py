@@ -1,6 +1,6 @@
-from Src.Nodes import AbstractNode, CompileNode
+from Src.Nodes import AbstractNode
 
 
 
 class UtilsNode(AbstractNode):
-    incoming: list[CompileNode]
+    color = (144, 144, 255, 255)

@@ -1,4 +1,3 @@
-from typing import Literal
 import enum
 
 import dearpygui.dearpygui as dpg
