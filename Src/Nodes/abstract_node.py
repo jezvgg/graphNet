@@ -104,7 +104,7 @@ class AbstractNode(ABC):
 
         try: 
             self.OUTPUT = self.logic(*args, **kwargs)
-            self.lower_error()
+            self.default_theme()
 
         except AttributeError as ex:
             self.raise_error(ex, "Некорректные данные для узла")
@@ -137,11 +137,18 @@ class AbstractNode(ABC):
         self.logger.info(traceback.format_exc())
 
 
-    def lower_error(self):
+    def default_theme(self):
         with dpg.theme() as default_theme:
             with dpg.theme_component(dpg.mvNode):
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBar, self.color, category=dpg.mvThemeCat_Nodes)
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, 
+                                    [min(color * 1.2, 255) for color in self.color],
+                                    category=dpg.mvThemeCat_Nodes)
+                dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, 
+                                    [min(color * 1.25, 255) for color in self.color],
+                                    category=dpg.mvThemeCat_Nodes)
                 dpg.add_theme_color(dpg.mvNodeCol_NodeOutline, (100, 100, 100, 255), category=dpg.mvThemeCat_Nodes)
-
+            
             with dpg.theme_component(dpg.mvTooltip):
                 dpg.add_theme_color(dpg.mvThemeCol_Border, (78, 78, 78, 255), category=dpg.mvThemeCat_Core)
             

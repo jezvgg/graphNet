@@ -96,18 +96,7 @@ class NodeBuilder:
             if node_data.output:
                 node_data.output.build(label="OUTPUT", parent=node_id)
 
-        with dpg.theme() as node_theme:
-            with dpg.theme_component(dpg.mvNode):
-                dpg.add_theme_color(dpg.mvNodeCol_TitleBar, node.color, category=dpg.mvThemeCat_Nodes)
-                dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, 
-                                    [min(color * 1.2, 255) for color in node.color],
-                                    category=dpg.mvThemeCat_Nodes)
-                dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, 
-                                    [min(color * 1.25, 255) for color in node.color],
-                                    category=dpg.mvThemeCat_Nodes)
-
-        self.logger.debug([(color * 1.2) % 256 for color in node.color])
-        dpg.bind_item_theme(node_id, node_theme)
+        node.default_theme()
 
         return node_id
     
