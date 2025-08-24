@@ -210,7 +210,7 @@ class NodeEditor:
             node_id: str | int - индетификатор нода, которого нужно удалить (dpg.node)
         '''
         node: AbstractNode = dpg.get_item_user_data(node_id)
-        if len(dpg.get_item_children("node_editor", slot=1)) and \
+        if len(dpg.get_item_children("node_editor", slot=1)) == 1 and \
             dpg.get_item_children("node_editor", slot=1)[0] == node_id:
             node.raise_error("Нельзя удалять узел, когда он один на поле!", 
                              "Некорректное действие пользователя")

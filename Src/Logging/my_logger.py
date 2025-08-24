@@ -19,12 +19,12 @@ class Logger(logging.Logger):
 
     def _log(self, level, msg, args, exc_info = None, extra = None, stack_info = False, stacklevel = 1):
 
-        if level >= self.level:
-            dpg.push_container_stack(self.layout_tag)
-            text_id = dpg.add_text(msg, parent=self.layout_tag, wrap=512)
-            dpg.focus_item(self.layout_tag)
-            Timer(10, dpg.delete_item, args=[text_id]).start()
-            dpg.pop_container_stack()
+        # if level >= self.level:
+        #     dpg.push_container_stack(self.layout_tag)
+        #     text_id = dpg.add_text(msg, parent=self.layout_tag, wrap=512)
+        #     dpg.focus_item(self.layout_tag)
+        #     Timer(10, dpg.delete_item, args=[text_id]).start()
+        #     dpg.pop_container_stack()
 
 
         return super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel)
