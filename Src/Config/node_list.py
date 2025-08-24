@@ -189,8 +189,8 @@ node_list = {
                 logic=MetricNode.calculate,
                 annotations={
                     "metric": Parameter(AttrType.INPUT, AEnum[Metrics]),
-                    "y_true": Parameter(AttrType.INPUT, ANode),
-                    "y_pred": Parameter(AttrType.INPUT, ANode),
+                    "y_true": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "y_pred": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                     "data": Parameter(
                         AttrType.OUTPUT,
                         AFloat,
@@ -203,7 +203,7 @@ node_list = {
             NodeAnnotation(
                 label="Save data",
                 node_type = UtilsNode,
-                logic = lambda X, fname: np.savetxt(fname, [X] if not hasattr(X, '__len__') else X),
+                logic = UtilsNode.save_data,
                 annotations = {
                     "X": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                     "fname": Parameter(AttrType.INPUT, AString, default='result.txt')
