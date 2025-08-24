@@ -27,7 +27,7 @@ class MetricNode(DataNode):
 
         metric_fn.update_state(y_true,y_pred)
 
-        return float(metric_fn.result().numpy())
+        return [float(metric_fn.result().numpy())]
 
 
     def compile(self) -> bool:
@@ -38,5 +38,6 @@ class MetricNode(DataNode):
         if not status:
             return False
 
-        self.data = self.OUTPUT
+        self.data = self.OUTPUT[0]
+
         return status

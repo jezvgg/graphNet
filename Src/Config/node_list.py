@@ -192,18 +192,18 @@ node_list = {
                     "y_true": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                     "y_pred": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                     "data": Parameter(
-                        AttrType.OUTPUT,
+                        AttrType.STATIC,
                         AFloat,
                         backfield=MetricNode.data
                     )
                 },
                 input=False,
-                output=False
+                output=DataNode
             ),
             NodeAnnotation(
                 label="Save data",
                 node_type = UtilsNode,
-                logic = UtilsNode.save_data,
+                logic = np.savetxt,
                 annotations = {
                     "X": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                     "fname": Parameter(AttrType.INPUT, AString, default='result.txt')

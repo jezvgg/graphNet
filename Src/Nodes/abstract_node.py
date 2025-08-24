@@ -87,7 +87,7 @@ class AbstractNode(ABC):
             name = dpg.get_item_label(argument)
 
             if name not in self.annotations or \
-            self.annotations[name].attr_type == AttrType.OUTPUT: 
+            self.annotations[name].attr_type != AttrType.INPUT:
                 continue
 
             if name == 'INPUT':
