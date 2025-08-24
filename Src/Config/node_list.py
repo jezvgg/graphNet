@@ -184,6 +184,23 @@ node_list = {
                 output = False
             ),
             NodeAnnotation(
+                label="Calculate Metric",
+                node_type=MetricNode,
+                logic=MetricNode.calculate,
+                annotations={
+                    "metric": Parameter(AttrType.INPUT, AEnum[Metrics]),
+                    "y_true": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "y_pred": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "data": Parameter(
+                        AttrType.STATIC,
+                        AFloat,
+                        backfield=MetricNode.data
+                    )
+                },
+                input=False,
+                output=DataNode
+            ),
+            NodeAnnotation(
                 label="Save data",
                 node_type = UtilsNode,
                 logic = np.savetxt,
