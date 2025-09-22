@@ -11,7 +11,7 @@ class FitNode(AbstractNode):
 
     @staticmethod
     def fit(model: keras.models.Model, **kwargs):
-        with dpg.window(label="Обучение", modal=True, no_close=True) as popup:
+        with dpg.window(label="Обучение", modal=True, no_close=True,tag="fit_window") as popup:
             dpg.add_loading_indicator(width=100, height=100)
         
         model.fit(**kwargs, verbose=False)
