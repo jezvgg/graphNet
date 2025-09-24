@@ -1,4 +1,3 @@
-# ui.py
 import dearpygui.dearpygui as dpg
 import os
 from .core import FileDialogCore
