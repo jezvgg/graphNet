@@ -1,4 +1,3 @@
-# core.py
 import os
 from .state import FileDialogState
 from .config import FileDialogConfig

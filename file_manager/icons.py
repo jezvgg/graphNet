@@ -1,4 +1,3 @@
-# icons.py
 import dearpygui.dearpygui as dpg
 import os
 from pathlib import Path
