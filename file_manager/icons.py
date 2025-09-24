@@ -26,13 +26,13 @@ class IconManager:
             for name in icon_names:
                 file_path = self.image_dir.joinpath(f'{name}.png')
                 
+                width, height, data = 16, 16, placeholder_data
+                
                 if file_path.exists():
                     width, height, _, data = dpg.load_image(file_path.as_posix())
-                else:
-                    width, height, _, data = 16, 16, None, placeholder_data
-                # print(result)
+                    
                 dpg.add_static_texture(width=width, height=height, default_value=data, tag=name)
-                self.icons[name] = name  # можно расширить для загрузки из файлов
+                self.icons[name] = name
                 
                 
                 
