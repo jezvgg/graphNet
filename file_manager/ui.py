@@ -11,7 +11,6 @@ class FileDialogUI:
         self.config = config
         self.icon_manager = IconManager(Path("file_manager") / "images")
 
-        # Генерируем уникальный тег окна на основе config.tag
         self.window_tag = f"{config.tag}_window"
         self.PAYLOAD_TYPE = f'ws_{config.tag}'
 

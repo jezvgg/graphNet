@@ -28,7 +28,7 @@ class IconManager:
                 width, height, data = 16, 16, placeholder_data
                 
                 if file_path.exists():
-                    width, height, _, data = dpg.load_image(file_path.as_posix())
+                    width, height, _, data = dpg.load_image(str(file_path.resolve()))
                     
                 dpg.add_static_texture(width=width, height=height, default_value=data, tag=name)
                 self.icons[name] = name
