@@ -56,11 +56,12 @@ class FileDialogUI:
                 dpg.add_image(item.icon_tag)
                 dpg.add_menu_item(
                     label=item.label,
-                    callback=lambda s, a, u, p=item.path: self._on_shortcut_click(p)
+                    user_data={'path': item.path},
+                    callback=self._on_shortcut_click
                 )
 
-    def _on_shortcut_click(self, path: str):
-        self.core.state.current_path = path
+    def _on_shortcut_click(self, sender, app_data, user_data):
+        self.core.state.current_path = user_data['path']
         self.core.refresh_directory()
 
     def _build_toolbar(self):
