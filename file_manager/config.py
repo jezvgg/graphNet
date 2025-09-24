@@ -1,4 +1,3 @@
-# config.py
 from dataclasses import dataclass, field
 from typing import List, Optional, Callable
 import os
@@ -45,19 +44,21 @@ from pathlib import Path
 @dataclass
 class LinuxBasedConfig(BaseShortcutsConfig):
     def __init__(self):
-        home = str(Path.home())
+        home = Path.home()
         self.items = [
             ShortcutItem("home", "Home", home),
-            ShortcutItem("desktop", "Desktop", os.path.join(home, "Desktop")),
-            ShortcutItem("downloads", "Downloads", os.path.join(home, "Downloads")),
-            ShortcutItem("documents", "Documents", os.path.join(home, "Documents")),
-            ShortcutItem("picture_folder", "Pictures", os.path.join(home, "Pictures")),
-            ShortcutItem("music", "Music", os.path.join(home, "Music")),
-            ShortcutItem("videos", "Videos", os.path.join(home, "Videos")),
-            ShortcutItem("hd", "Root", "/"),
-            ShortcutItem("hd", "Media", "/media"),
-            ShortcutItem("hd", "Mnt", "/mnt"),
+            ShortcutItem("desktop", "Desktop", home / "Desktop"),
+            ShortcutItem("downloads", "Downloads", home / "Downloads"),
+            ShortcutItem("documents", "Documents", home / "Documents"),
+            ShortcutItem("picture_folder", "Pictures", home / "Pictures"),
+            ShortcutItem("music", "Music", home / "Music"),
+            ShortcutItem("videos", "Videos", home / "Videos"),
+            ShortcutItem("hd", "Root", Path("/")),
+            ShortcutItem("hd", "Media", Path("/media")),
+            ShortcutItem("hd", "Mnt", Path("/mnt")),
         ]
+        
+        self.items = filter(lambda x: x.path.exists(), self.items)
         
     
 import os
@@ -81,6 +82,8 @@ class WindowsBasedConfig(BaseShortcutsConfig):
             ShortcutItem("hd", "Local AppData", localappdata),
         ]
 
+        self.items = filter(lambda x: x.path.exist(), self.items)
+        
         # Добавляем доступные диски: C:\, D:\, ...
         import string
         for drive_letter in string.ascii_uppercase:
