@@ -89,7 +89,7 @@ class WindowsBasedConfig(BaseShortcutsConfig):
             drive = Path(f"{drive_letter}:\\")
             self.items.append(ShortcutItem("hd", f"{drive_letter}:", drive))
                 
-        self.items = filter(lambda x: x.path.exist(), self.items)
+        self.items = filter(lambda x: x.path.exists(), self.items)
                 
                 
 import platform
