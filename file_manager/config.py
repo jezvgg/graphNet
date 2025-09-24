@@ -66,18 +66,18 @@ import os
 @dataclass
 class WindowsBasedConfig(BaseShortcutsConfig):
     def __init__(self):
-        user_profile = os.environ.get("USERPROFILE", "C:\\")
-        appdata = os.environ.get("APPDATA", os.path.join(user_profile, "AppData"))
-        localappdata = os.environ.get("LOCALAPPDATA", os.path.join(user_profile, "AppData", "Local"))
+        user_profile = Path(os.environ.get("USERPROFILE", "C:\\"))
+        appdata = Path(os.environ.get("APPDATA", user_profile / "AppData"))
+        localappdata = os.environ.get("LOCALAPPDATA", user_profile / "AppData" / "Local")
 
         self.items = [
             ShortcutItem("home", "Home", user_profile),
-            ShortcutItem("desktop", "Desktop", os.path.join(user_profile, "Desktop")),
-            ShortcutItem("downloads", "Downloads", os.path.join(user_profile, "Downloads")),
-            ShortcutItem("documents", "Documents", os.path.join(user_profile, "Documents")),
-            ShortcutItem("picture_folder", "Pictures", os.path.join(user_profile, "Pictures")),
-            ShortcutItem("music", "Music", os.path.join(user_profile, "Music")),
-            ShortcutItem("videos", "Videos", os.path.join(user_profile, "Videos")),
+            ShortcutItem("desktop", "Desktop", user_profile / "Desktop"),
+            ShortcutItem("downloads", "Downloads", user_profile / "Downloads"),
+            ShortcutItem("documents", "Documents", user_profile / "Documents"),
+            ShortcutItem("picture_folder", "Pictures", user_profile / "Pictures"),
+            ShortcutItem("music", "Music", user_profile / "Music"),
+            ShortcutItem("videos", "Videos", user_profile / "Videos"),
             ShortcutItem("hd", "AppData", appdata),
             ShortcutItem("hd", "Local AppData", localappdata),
         ]
