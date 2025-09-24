@@ -82,15 +82,14 @@ class WindowsBasedConfig(BaseShortcutsConfig):
             ShortcutItem("hd", "Local AppData", localappdata),
         ]
 
-        self.items = filter(lambda x: x.path.exist(), self.items)
         
         # Добавляем доступные диски: C:\, D:\, ...
         import string
         for drive_letter in string.ascii_uppercase:
-            drive = f"{drive_letter}:\\"
-            if os.path.exists(drive):
-                self.items.append(ShortcutItem("hd", f"{drive_letter}:", drive))
+            drive = Path(f"{drive_letter}:\\")
+            self.items.append(ShortcutItem("hd", f"{drive_letter}:", drive))
                 
+        self.items = filter(lambda x: x.path.exist(), self.items)
                 
                 
 import platform
