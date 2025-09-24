@@ -132,7 +132,7 @@ class FileDialogCore:
             self._update_table(file_infos)
 
         except Exception as e:
-            logger.info(f"❌ Error refreshing directory: {e}")
+            print(f"❌ Error refreshing directory: {e}")
             self._update_table([])  # очищаем таблицу
     
     def _update_table(self, file_infos: List[dict]):
@@ -185,7 +185,7 @@ class FileDialogCore:
             import dearpygui.dearpygui as dpg
             dpg.set_value("ex_path_input", new_path)
         else:
-            logger.info(f"❌ Invalid path: {new_path}")
+            print(f"❌ Invalid path: {new_path}")
 
     def on_search(self, sender, app_data):
         """Обработчик поиска."""
@@ -245,7 +245,7 @@ class FileDialogCore:
 
         self._sync_selection_state()
 
-        logger.info(f"📁 Selected: {self.state.selected_files}")
+        print(f"📁 Selected: {self.state.selected_files}")
 
     def _on_file_double_click(self, sender, user_data):
         """Обработчик двойного клика: открывает папку или принимает файл."""
@@ -260,7 +260,7 @@ class FileDialogCore:
             self.refresh_directory()
             import dearpygui.dearpygui as dpg
             dpg.set_value("ex_path_input", str(path))
-            logger.info(f"📂 Opened folder: {path}")
+            print(f"📂 Opened folder: {path}")
         else:
             # Это файл — ведём себя как при нажатии OK
             if clicked_path not in self.state.selected_files:
@@ -330,4 +330,4 @@ class FileDialogCore:
         
         self.state.on_close = True
 
-        logger.info("📁 File dialog closed.")
+        print("📁 File dialog closed.")
