@@ -68,7 +68,7 @@ class WindowsBasedConfig(BaseShortcutsConfig):
     def __init__(self):
         user_profile = Path(os.environ.get("USERPROFILE", "C:\\"))
         appdata = Path(os.environ.get("APPDATA", user_profile / "AppData"))
-        localappdata = os.environ.get("LOCALAPPDATA", user_profile / "AppData" / "Local")
+        localappdata = Path(os.environ.get("LOCALAPPDATA", user_profile / "AppData" / "Local"))
 
         self.items = [
             ShortcutItem("home", "Home", user_profile),
