@@ -135,6 +135,8 @@ class AbstractNode(ABC):
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
         self.logger.info(traceback.format_exc())
 
+        if dpg.does_item_exist("fit_window"):
+                dpg.delete_item("fit_window")
 
     def default_theme(self):
         with dpg.theme() as default_theme:
