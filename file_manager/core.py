@@ -16,7 +16,6 @@ class FileDialogCore:
         self._table_tag = 'explorer'
         
         
-        
     def _get_file_info(self, path: Path) -> dict:
         """Возвращает словарь с информацией о файле/папке для отображения."""
         try:
@@ -161,8 +160,8 @@ class FileDialogCore:
                         )
 
                         with dpg.item_handler_registry() as handler:
-                            dpg.add_item_double_clicked_handler(callback=self._on_file_double_click, user_data={"path": info["path"], "index": idx})
-                            dpg.add_item_clicked_handler(callback=self._on_file_click, user_data={"path": info["path"], "index": idx})
+                            dpg.add_item_double_clicked_handler(callback=self._on_file_double_click, user_data={"path": info["path"], "index": idx, 'self': self})
+                            dpg.add_item_clicked_handler(callback=self._on_file_click, user_data={"path": info["path"], "index": idx, 'self': self})
 
                         dpg.bind_item_handler_registry(item, handler)
                     
@@ -279,33 +278,37 @@ class FileDialogCore:
             if not group:
                 continue
             for item_t in group:
-                gp = dpg.get_item_children(item_t, slot=1)
-                for item in gp:
-                    if dpg.get_item_type(item) == "mvAppItemType::mvSelectable":
-                        user_data = dpg.get_item_user_data(item)
-                        if isinstance(user_data, dict) and "path" in user_data:
-                            path = user_data["path"]
-                            dpg.set_value(item, path in self.state.selected_files)
-                        break
+                item = dpg.get_item_children(item_t, slot=1)[1]
+                print(dpg.get_item_type(item))
+                if dpg.get_item_type(item) == "mvAppItemType::mvSelectable":
+                    user_data = dpg.get_item_user_data(item)
+                    print(user_data)
+                    if isinstance(user_data, dict) and "path" in user_data:
+                        path = user_data["path"]
+                        print(path in self.state.selected_files)
+                        dpg.set_value(item, path in self.state.selected_files)
 
     def on_ok(self):
         # Фильтруем только нужные типы (если dirs_only=False — только файлы)
+        print(self.state.selected_files)
         if self.config.dirs_only:
             self._result = [p for p in self.state.selected_files if Path(p).is_dir()]
         else:
             self._result = [p for p in self.state.selected_files if not Path(p).is_dir()]
         
         if self.config.callback:
+            print("Callback call")
+            print(self._result)
             self.config.callback(self._result)
         
         self._result_ready = True
         self.close()
 
-    def on_cancel(self):
+    def on_cancel(self, callback):
         self.state.selected_files.clear()
         self._result = []  # пустой результат
-        if self.config.callback:
-            self.config.callback([])
+        if callback:
+            callback([])
         self._result_ready = True
         self.close()
                 

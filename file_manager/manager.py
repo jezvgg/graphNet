@@ -3,7 +3,7 @@
 from typing import Optional, List
 import dearpygui.dearpygui as dpg
 from .dialog import FileDialog
-
+from typing import Callable
 class FileDialogManager:
     _instance: Optional['FileDialogManager'] = None
     _dialog: Optional['FileDialog'] = None
@@ -21,6 +21,7 @@ class FileDialogManager:
     def _ensure_dialog(self):
         """Гарантирует, что диалог создан."""
         if self._dialog is None:
+            print("file dialog intializes")
             self._dialog = FileDialog()
 
     def show(
@@ -35,7 +36,7 @@ class FileDialogManager:
         default_path: str = None,
         filter_list: list = None,
         file_filter: str = ".*",
-        callback: callable = None,
+        callback: Callable = lambda: print("FUCK YOU"),
         show_dir_size: bool = False,
         allow_drag: bool = True,
         multi_selection: bool = True,

@@ -12,14 +12,16 @@ class FileDialog:
 
     def configure(self, **kwargs):
         """Перенастраивает диалог без пересоздания UI."""
-        self.config = FileDialogConfig(**kwargs)
-        self.state = FileDialogState()
-        self.core = FileDialogCore(self.config, self.state)
         # UI пересоздаётся только при первом show(), или можно обновить динамически
+        self.config = FileDialogConfig(**kwargs)
         if not hasattr(self, 'ui'):
+            self.state = FileDialogState()
+            self.core = FileDialogCore(self.config, self.state)
             self.ui = FileDialogUI(self.core, self.config)
         else:
             # Можно обновить UI (например, заголовок окна)
+            self.ui.config = self.config
+            self.core.config = self.config
             import dearpygui.dearpygui as dpg
             dpg.set_item_label(self.ui.window_tag, self.config.title)
             # Остальное состояние сбросится при refresh_directory()

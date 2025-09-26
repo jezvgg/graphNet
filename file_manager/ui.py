@@ -121,8 +121,15 @@ class FileDialogUI:
 
         with dpg.group(horizontal=True):
             dpg.add_spacer(width=630)
-            dpg.add_button(label="   OK   ", callback=self.core.on_ok)
-            dpg.add_button(label=" Cancel ", callback=self.core.on_cancel)
+            dpg.add_button(label="   OK   ", user_data=self, callback=self._on_ok)
+            dpg.add_button(label=" Cancel ", user_data=self, callback=self._on_cancel)
+
+    def _on_ok(self, sender, user_data):
+        user_data = dpg.get_item_user_data(sender)
+        user_data.core.on_ok()
+
+    def _on_cancel(self):
+        self.core.on_cancel()
 
     def show(self):
         dpg.show_item(self.window_tag)

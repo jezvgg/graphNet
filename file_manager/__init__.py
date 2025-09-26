@@ -7,7 +7,7 @@ import logging
 file_dialog = FileDialogManager()
 
 def show_file_dialog(**kwargs):
-    return file_dialog.show(**kwargs)
+    return file_dialog.show(callback=kwargs['callback'])
 
 def ask_open_file(**kwargs):
     kwargs.setdefault("multi_selection", False)
