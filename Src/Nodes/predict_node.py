@@ -1,12 +1,13 @@
 import keras
 
+from Src.Enums import Themes
 from Src.Nodes import DataNode
 
 
 
 # TODO: Переписать на SelfNode
 class PredictNode(DataNode):
-    color = (34, 255, 255, 255)
+    theme_name: Themes = Themes.PREDICT
     logic: keras.models.Model.predict
 
 

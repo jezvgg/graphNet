@@ -1,12 +1,13 @@
 import numpy as np
 import keras
 
+from Src.Enums import Themes
 from Src.Nodes import ShapeNode
 
 
 
 class ImageDataNode(ShapeNode):
-    color = (255, 155, 0, 255)
+    theme_name: Themes = Themes.IMAGE_DATA
 
 
     # TODO: 100% не работает, нужно будет починить

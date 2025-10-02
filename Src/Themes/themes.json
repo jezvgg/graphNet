@@ -1,0 +1,110 @@
+{
+  "default": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [50, 50, 50, 255],
+      "mvNodeCol_TitleBarHovered": [65, 65, 65, 255],
+      "mvNodeCol_TitleBarSelected": [75, 75, 75, 255]
+    },
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [50, 50, 50, 255],
+      "mvNodeCol_PinHovered": [75, 75, 75, 255],
+      "mvNodeCol_Link": [255, 111, 0, 255]
+    }
+  },
+  "error": {
+    "mvNode": {
+      "mvNodeCol_NodeOutline": [239, 83, 80, 255]
+    },
+    "mvTooltip": {
+      "mvThemeCol_Border": [239, 83, 80, 255]
+    }
+  },
+  "abstract": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [50, 50, 50, 255],
+      "mvNodeCol_TitleBarHovered": [65, 65, 65, 255],
+      "mvNodeCol_TitleBarSelected": [75, 75, 75, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [50, 50, 50, 255], "mvNodeCol_Link": [50, 50, 50, 255] }
+  },
+  "compile": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [102, 187, 106, 255],
+      "mvNodeCol_TitleBarHovered": [117, 202, 121, 255],
+      "mvNodeCol_TitleBarSelected": [128, 214, 132, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [102, 187, 106, 255], "mvNodeCol_Link": [102, 187, 106, 255] }
+  },
+  "data": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [171, 71, 188, 255],
+      "mvNodeCol_TitleBarHovered": [188, 86, 205, 255],
+      "mvNodeCol_TitleBarSelected": [200, 99, 219, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [171, 71, 188, 255], "mvNodeCol_Link": [171, 71, 188, 255] }
+  },
+  "fit": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [255, 111, 0, 255],
+      "mvNodeCol_TitleBarHovered": [255, 130, 25, 255],
+      "mvNodeCol_TitleBarSelected": [255, 145, 51, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 111, 0, 255], "mvNodeCol_Link": [255, 111, 0, 255] }
+  },
+  "layer": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [66, 165, 245, 255],
+      "mvNodeCol_TitleBarHovered": [83, 179, 247, 255],
+      "mvNodeCol_TitleBarSelected": [96, 188, 250, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [66, 165, 245, 255], "mvNodeCol_Link": [66, 165, 245, 255] }
+  },
+  "metric": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [41, 182, 246, 255],
+      "mvNodeCol_TitleBarHovered": [61, 194, 248, 255],
+      "mvNodeCol_TitleBarSelected": [77, 203, 250, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 202, 40, 255], "mvNodeCol_Link": [255, 202, 40, 255] }
+  },
+  "predict": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [41, 182, 246, 255],
+      "mvNodeCol_TitleBarHovered": [61, 194, 248, 255],
+      "mvNodeCol_TitleBarSelected": [77, 203, 250, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [41, 182, 246, 255], "mvNodeCol_Link": [41, 182, 246, 255] }
+  },
+  "shape": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [38, 166, 154, 255],
+      "mvNodeCol_TitleBarHovered": [55, 180, 168, 255],
+      "mvNodeCol_TitleBarSelected": [68, 191, 180, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [38, 166, 154, 255], "mvNodeCol_Link": [38, 166, 154, 255] }
+  },
+  "utils": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [120, 144, 156, 255],
+      "mvNodeCol_TitleBarHovered": [136, 160, 172, 255],
+      "mvNodeCol_TitleBarSelected": [148, 171, 183, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [120, 144, 156, 255], "mvNodeCol_Link": [120, 144, 156, 255] }
+  },
+  "table_data": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [236, 64, 122, 255],
+      "mvNodeCol_TitleBarHovered": [240, 83, 137, 255],
+      "mvNodeCol_TitleBarSelected": [245, 101, 151, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 144, 144, 255], "mvNodeCol_Link": [255, 144, 144, 255] }
+  },
+  "image_data": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [236, 64, 122, 255],
+      "mvNodeCol_TitleBarHovered": [240, 83, 137, 255],
+      "mvNodeCol_TitleBarSelected": [245, 101, 151, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [236, 64, 122, 255], "mvNodeCol_Link": [236, 64, 122, 255] }
+  }
+}

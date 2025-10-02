@@ -5,6 +5,7 @@ import dearpygui.dearpygui as dpg
 from Src.Config.Annotations.annotation import Annotation
 from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
+from Src.Themes import ThemeManager
 
 
 
@@ -27,7 +28,7 @@ class ANode(Annotation):
         new_parent = dpg.get_item_parent(parent)
         dpg.delete_item(parent)
         kwargs = Annotation.check_kwargs(dpg.node_attribute, kwargs)
-        kwargs['parent']  = new_parent
+        kwargs['parent'] = new_parent
         kwargs['user_data'] = []
         if 'attribute_type' not in kwargs.keys():
             kwargs['attribute_type'] = dpg.mvNode_Attr_Input
@@ -35,23 +36,12 @@ class ANode(Annotation):
         with dpg.node_attribute(*args, **kwargs) as attr:
             input_id = dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
 
-        if hasattr(self.node_type, 'color'):
-            with dpg.theme() as attr_theme:
-                with dpg.theme_component(dpg.mvNodeAttribute):
-                    dpg.add_theme_color(dpg.mvNodeCol_Pin, 
-                                        getattr(self.node_type, 'color'), 
-                                        category=dpg.mvThemeCat_Nodes)
-                    dpg.add_theme_color(dpg.mvNodeCol_PinHovered, 
-                                        [min(color * 1.2, 255) for color in getattr(self.node_type, 'color')],
-                                        category=dpg.mvThemeCat_Nodes)
-                    dpg.add_theme_color(dpg.mvNodeCol_Link, 
-                                        getattr(self.node_type, 'color'), 
-                                        category=dpg.mvThemeCat_Nodes)
-                    
-            dpg.bind_item_theme(attr, attr_theme)
+        if hasattr(self.node_type, 'theme_name'):
+            theme_to_apply = self.node_type.theme_name
+            ThemeManager.apply_theme(theme_to_apply, attr)
 
         return input_id
-    
+
 
     def get(self, input_id: int | str):
         from Src.Nodes import AbstractNode
@@ -65,7 +55,7 @@ class ANode(Annotation):
 
         node_in: list[tuple[str, AbstractNode]] = [(dpg.get_item_label(attribute),
                                                     dpg.get_item_user_data(dpg.get_item_parent(attribute)))
-                                                    for attribute in user_data]
+                                                   for attribute in user_data]
 
         results = []
         for field, node in node_in:
@@ -77,7 +67,7 @@ class ANode(Annotation):
         # TODO: Сделать raise AttributeException если results пустой
         if self.single and results: return results[0]
         return results
-    
 
-    def set(self, input_id: str| int, value) -> bool:
-        return False 
+
+    def set(self, input_id: str | int, value) -> bool:
+        return False

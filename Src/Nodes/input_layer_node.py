@@ -1,5 +1,6 @@
 from keras import layers
 
+from Src.Enums import Themes
 from Src.Nodes import LayerNode, LayerResult
 
 
@@ -9,7 +10,7 @@ class InputLayerNode(LayerNode):
     Класс для связи данных и нейронной сети, реализует логику keras.Input.
     '''
     OUTPUT: LayerResult
-    color = (231, 231, 21, 255)
+    theme_name: Themes = Themes.LAYER
 
 
     @staticmethod
