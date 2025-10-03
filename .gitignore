@@ -1,3 +1,123 @@
+# Файлы windows и linux
+
+.DS_Store
+.Trash-*
+.nfs*
+.fuse_hidden*
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Файлы бэкапов от различных редакторов
+*~
+*.bak
+*.swp
+
+# Pycharm
+.idea/
+*.iws
+
+# VSCode
+.vscode/*
+.history/
+*.vsix
+
+# Исключения VSCode
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Другие инструменты
+.ionide/
+.ropeproject/
+.spyderproject/
+.spyproject/
+atlassian-ide-plugin.xml
+
+
+# Виртуальное окружение
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+__pypackages__/
+
+# Кэш
+__pycache__/
+*.py[cod]
+*$py.class
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+cython_debug/
+
+# Файлы сборки
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+poetry.toml
+
+# Инструменты тестирования и покрытия кода
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# Jupyter
+.ipynb_checkpoints
+
+# Локализация
+*.mo
+*.pot
+
+# Логи
+*.log
+Logs/
+
+# Базы данных и настройки
+db.sqlite3
+db.sqlite3-journal
+instance/
+
+# Фреймворки
+.scrapy/
+.webassets-cache/
+celerybeat-schedule
+celerybeat.pid
+
+# Документация и настройки
+docs/_build/
+local_settings.py
+
+# Наши файлы
 __pycache__
 Src/Logging/logger_config_debug.json
 Logs/*
