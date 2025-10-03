@@ -1,6 +1,7 @@
+from Src.Enums import Themes
 from Src.Nodes import AbstractNode
 
 
 
 class DataNode(AbstractNode):
-    color = (224, 33, 144, 255)
+    theme_name: Themes = Themes.DATA

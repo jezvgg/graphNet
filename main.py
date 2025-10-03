@@ -4,6 +4,7 @@ import sys
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger_factory
+from Src.Themes import ThemeManager
 from Src.node_editor import NodeEditor
 
 
@@ -13,7 +14,7 @@ dpg.create_viewport(title='Custom Title')
 base_path = sys._MEIPASS if hasattr(sys, '_MEIPASS') else '.'
 config_path = f"{base_path}/Src/Logging/logger_config.json"
 font_path = f"{base_path}/notomono-regular.ttf"
-
+ThemeManager.load_themes(f"{base_path}/Src/Themes/themes.json")
 
 with open(config_path) as f:
     config = json.load(f)
@@ -21,6 +22,7 @@ with open(config_path) as f:
 log_factory = Logger_factory(config)
 node_editor = NodeEditor(minimap=True, minimap_location=dpg.mvNodeMiniMap_Location_TopRight)
 main_logger = log_factory("main")
+
 
 
 with dpg.font_registry():
@@ -39,5 +41,6 @@ dpg.show_viewport()
 dpg.set_primary_window("Prime", True)
 dpg.set_global_font_scale(1)
 dpg.start_dearpygui()
+
 
 dpg.destroy_context()

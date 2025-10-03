@@ -1,5 +1,6 @@
 import keras.metrics
 
+from Src.Enums import Themes
 from Src.Nodes import DataNode
 from Src.Utils import Backfield
 
@@ -10,7 +11,7 @@ class MetricNode(DataNode):
     Узел для вычисления метрики между двумя наборами данных
     '''
     data: float = Backfield()
-    color = (144, 144, 255, 255)
+    theme_name: Themes = Themes.METRIC
 
 
     @staticmethod

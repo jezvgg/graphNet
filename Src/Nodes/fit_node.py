@@ -2,12 +2,13 @@ import keras
 import dearpygui.dearpygui as dpg
 import numpy as np
 
+from Src.Enums import Themes
 from Src.Nodes import AbstractNode
 
 
 
 class FitNode(AbstractNode):
-    color = (151, 0, 191, 255)
+    theme_name: Themes = Themes.FIT
 
 
     @staticmethod
