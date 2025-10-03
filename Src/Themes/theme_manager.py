@@ -12,6 +12,11 @@ class ThemeManager:
     '''
     _themes_config: dict = {}
     _created_themes: dict = {}
+    _themes_categories: dict = {
+        "mvNodeCol":dpg.mvThemeCat_Nodes,
+        "mvPlotCol":dpg.mvThemeCat_Plots,
+        "mvThemeCol":dpg.mvThemeCat_Core
+    }
 
 
     @classmethod
@@ -26,22 +31,27 @@ class ThemeManager:
 
 
     @classmethod
-    def apply_theme(cls, theme_name: Themes, item_id: str | int):
+    def apply_theme(cls, theme_names: list[Themes], item_id: str | int):
         """
         Находит (или создает) и применяет тему к указанному элементу.
         В качестве идентификатора темы используется член Enum "Themes".
         args:
-            theme_name: Themes - тема для применения
+            theme_name: list[Themes] - темы для применения
             item_id: str | int - id объекта, к которому применяется тема
         """
-        if theme_name not in cls._themes_config:
-            theme_name = Themes.DEFAULT
+        theme_key = tuple(theme_names)
 
-        if theme_name not in cls._created_themes:
-            theme_data = cls._themes_config[theme_name]
+        if theme_key not in cls._created_themes:
+            merged_theme_data = {}
+            for theme_name in theme_names:
+                theme_data = cls._themes_config[theme_name]
+                for component_name, component_data in theme_data.items():
+                    if component_name not in merged_theme_data:
+                        merged_theme_data[component_name] = {}
+                    merged_theme_data[component_name].update(component_data)
 
             with dpg.theme() as theme_id:
-                for component_name, component_data in theme_data.items():
+                for component_name, component_data in merged_theme_data.items():
                     dpg_component = getattr(dpg, component_name)
                     if not dpg_component: continue
 
@@ -50,22 +60,10 @@ class ThemeManager:
                             dpg_color_attr = getattr(dpg, color_attr)
                             if not dpg_color_attr: continue
 
-                            category = cls._get_category_for_color(color_attr)
+                            category = cls._themes_categories[color_attr.split("_")[0]]
                             dpg.add_theme_color(dpg_color_attr, color_value, category=category)
 
-            cls._created_themes[theme_name] = theme_id
-        dpg.bind_item_theme(item_id, cls._created_themes[theme_name])
+            cls._created_themes[theme_key] = theme_id
 
+        dpg.bind_item_theme(item_id, cls._created_themes[theme_key])
 
-    @staticmethod
-    def _get_category_for_color(color_attr_name: str) -> int:
-        '''
-        Функция для выбора категории атрибута темы
-        args:
-            color_attr_name: str - название атрибута цвета объекта
-        '''
-        if color_attr_name.startswith("mvNodeCol"):
-            return dpg.mvThemeCat_Nodes
-        if color_attr_name.startswith("mvPlotCol"):
-            return dpg.mvThemeCat_Plots
-        return dpg.mvThemeCat_Core

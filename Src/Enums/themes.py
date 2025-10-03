@@ -4,10 +4,11 @@ class Themes(StrEnum):
     '''
     Enum для тем в приложении
     '''
-    # Global
+    # Node editor
     DEFAULT = "default"
     ERROR = "error"
 
+    # Nodes
     ABSTRACT = "abstract"
     COMPILE = "compile"
     DATA = "data"

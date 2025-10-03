@@ -37,8 +37,7 @@ class ANode(Annotation):
             input_id = dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
 
         if hasattr(self.node_type, 'theme_name'):
-            theme_to_apply = self.node_type.theme_name
-            ThemeManager.apply_theme(theme_to_apply, attr)
+            ThemeManager.apply_theme([self.node_type.theme_name], attr)
 
         return input_id
 

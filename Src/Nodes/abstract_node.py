@@ -119,7 +119,7 @@ class AbstractNode(ABC):
     
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
-        ThemeManager.apply_theme(Themes.ERROR,self.node_tag)
+        ThemeManager.apply_theme([self.theme_name,Themes.ERROR],self.node_tag)
 
         self._error_id = dpg.generate_uuid()
         with dpg.node_attribute(parent=self.node_tag, attribute_type=dpg.mvNode_Attr_Static):
@@ -136,7 +136,7 @@ class AbstractNode(ABC):
                 dpg.delete_item("fit_window")
 
     def default_theme(self):
-        ThemeManager.apply_theme(self.theme_name,self.node_tag)
+        ThemeManager.apply_theme([self.theme_name],self.node_tag)
 
         if self._error_id and dpg.does_item_exist(self._error_id): 
             dpg.delete_item(dpg.get_item_parent(self._error_id))
