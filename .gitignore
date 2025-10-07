@@ -1,7 +1,6 @@
 __pycache__
 Src/Logging/logger_config_debug.json
 Logs/*
-*.png
 .*
 smth.py
 stream
