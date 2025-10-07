@@ -289,27 +289,19 @@ class FileDialogCore:
                         dpg.set_value(item, path in self.state.selected_files)
 
     def on_ok(self):
-        # Фильтруем только нужные типы (если dirs_only=False — только файлы)
-        print(self.state.selected_files)
         if self.config.dirs_only:
             self._result = [p for p in self.state.selected_files if Path(p).is_dir()]
         else:
             self._result = [p for p in self.state.selected_files if not Path(p).is_dir()]
-        
-        if self.config.callback:
-            print("Callback call")
-            print(self._result)
-            self.config.callback(self._result)
-        
         self._result_ready = True
+        
         self.close()
 
-    def on_cancel(self, callback):
+    def on_cancel(self):
         self.state.selected_files.clear()
         self._result = []  # пустой результат
-        if callback:
-            callback([])
         self._result_ready = True
+
         self.close()
                 
         
@@ -329,6 +321,10 @@ class FileDialogCore:
         import dearpygui.dearpygui as dpg
         dpg.hide_item(self.config.tag + "_window")
         # self.state.selected_files.clear()
+        if self.config.callback:
+            print("Callback call")
+            print(self._result)
+            self.config.callback(self._result)
         
         self.state.on_close = True
 

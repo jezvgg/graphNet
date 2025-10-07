@@ -128,8 +128,9 @@ class FileDialogUI:
         user_data = dpg.get_item_user_data(sender)
         user_data.core.on_ok()
 
-    def _on_cancel(self):
-        self.core.on_cancel()
+    def _on_cancel(self, sender, user_data):
+        user_data = dpg.get_item_user_data(sender)
+        user_data.core.on_cancel()
 
     def show(self):
         dpg.show_item(self.window_tag)
