@@ -40,26 +40,26 @@ class ThemeManager:
 
 
     @classmethod
-    def apply_theme(cls, theme_names: list[Themes], item_id: str | int):
+    def apply_theme(cls, item_id: str | int, theme_names: list[Themes]):
         """
         Находит (или создает) и применяет тему к указанному элементу.
         В качестве идентификатора темы используется член Enum "Themes".
         args:
-            theme_names: list[Themes] - темы для применения
             item_id: str | int - id объекта, к которому применяется тема
+            theme_names: list[Themes] - темы для применения
         """
         cls._item_themes[item_id] = theme_names
         cls._update_item_theme(item_id)
 
 
     @classmethod
-    def add_theme(cls, theme_names: list[Themes], item_id: str | int):
+    def add_theme(cls, item_id: str | int, theme_names: list[Themes]):
         """
         Прибавляет тему к наложенным на элемент темам.
 
         args:
-            theme_names: list[Themes] - темы для добавления
             item_id: str | int - id объекта, для прибавления темы
+            theme_names: list[Themes] - темы для добавления
         """
         current_themes = cls._item_themes.get(item_id, [])
 
@@ -91,7 +91,7 @@ class ThemeManager:
     @classmethod
     def get_theme(cls, theme_names: list[Themes]):
         '''
-        Возвращает id искомой темы темы
+        Возвращает id искомой темы
         args:
             theme_names: list[Themes] - темы для поиска
         '''
