@@ -1,13 +1,13 @@
 import keras
 
+from Src.Enums import Themes
 from Src.Nodes import AbstractNode, LayerResult
 
 
 
 class CompileNode(AbstractNode):
     logic: keras.models.Model.compile
-    color = (0, 150, 0, 255)
-
+    theme_name: Themes = Themes.COMPILE
 
     # TODO: Настроить правильные аннотации от logic
     @staticmethod
