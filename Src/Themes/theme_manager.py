@@ -42,17 +42,17 @@ class ThemeManager:
 
         with dpg.theme() as theme_id:
             for comp, data in merged.items():
-                dpg_comp = getattr(dpg, comp)
-                if not dpg_comp:
+                if not (dpg_comp := getattr(dpg, comp)):
                     continue
 
                 with dpg.theme_component(dpg_comp):
                     for attr, value in data.items():
-                        if dpg_attr := getattr(dpg, attr):
-                            category = cls._themes_categories.get(
-                                attr.split("_")[0], dpg.mvThemeCat_Core
-                            )
-                            dpg.add_theme_color(dpg_attr, value, category=category)
+                        if not (dpg_attr := getattr(dpg, attr)):
+                            continue
+                        category = cls._themes_categories.get(
+                            attr.split("_")[0], dpg.mvThemeCat_Core
+                        )
+                        dpg.add_theme_color(dpg_attr, value, category=category)
 
         cls._created_themes[theme_key] = theme_id
 
@@ -104,7 +104,7 @@ class ThemeManager:
             item_id: str | int - id объекта, для прибавления темы
             *theme_names: Themes - темы для добавления
         """
-        cls._item_themes[item_id].update(theme_names)
+        cls._item_themes[item_id] |= set(theme_names)
         cls.__update_item_theme(item_id)
 
 
@@ -116,7 +116,7 @@ class ThemeManager:
             item_id: str | int - идентификатор объекта, у которого удаляется тема
             *theme_names: Themes - темы для удаления
         """
-        cls._item_themes[item_id].difference_update(theme_names)
+        cls._item_themes[item_id] -= set(theme_names)
         cls.__update_item_theme(item_id)
 
 

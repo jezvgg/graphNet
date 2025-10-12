@@ -19,7 +19,6 @@ class test_ThemeManager(DPGUnitTest):
         Загружает темы перед выполнением тестов.
         """
         super().setUpClass()
-        ThemeManager.load_themes("Tests/themes.json")
 
 
     def test_load_themes(self):
