@@ -119,7 +119,7 @@ class AbstractNode(ABC):
     
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
-        ThemeManager.apply_theme([self.theme_name,Themes.ERROR],self.node_tag)
+        ThemeManager.add_theme([Themes.ERROR],self.node_tag)
 
         self._error_id = dpg.generate_uuid()
         with dpg.node_attribute(parent=self.node_tag, attribute_type=dpg.mvNode_Attr_Static):
