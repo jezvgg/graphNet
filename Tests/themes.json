@@ -1,0 +1,32 @@
+{
+  "default": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [50, 50, 50, 255]
+    },
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [50, 50, 50, 255]
+    },
+    "mvPlot": {
+      "mvPlotCol_Line": [100, 100, 100, 255]
+    },
+    "mvTheme": {
+      "mvThemeCol_Text": [255, 255, 255, 255]
+    }
+  },
+  "error": {
+    "mvNode": {
+      "mvNodeCol_NodeOutline": [239, 83, 80, 255]
+    },
+    "mvTooltip": {
+      "mvThemeCol_Border": [239, 83, 80, 255]
+    }
+  },
+  "compile": {
+    "mvNode": {
+      "mvNodeCol_NodeOutline": [0, 83, 80, 255]
+    },
+    "mvTooltip": {
+      "mvThemeCol_Border": [0, 83, 80, 255]
+    }
+  }
+}
