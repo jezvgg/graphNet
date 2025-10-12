@@ -36,7 +36,7 @@ class test_ThemeManager(DPGUnitTest):
         with dpg.window():
             button_id = dpg.add_button(label="Test Button")
 
-        ThemeManager.apply_theme(button_id, [Themes.ERROR])
+        ThemeManager.apply_theme(button_id, Themes.ERROR)
 
         theme_key = (Themes.ERROR,)
         assert theme_key in ThemeManager._created_themes
@@ -52,8 +52,8 @@ class test_ThemeManager(DPGUnitTest):
         with dpg.window():
             button_id = dpg.add_button(label="Test Button")
 
-        ThemeManager.apply_theme(button_id, [Themes.DEFAULT])
-        ThemeManager.add_theme(button_id, [Themes.ERROR])
+        ThemeManager.apply_theme(button_id, Themes.DEFAULT)
+        ThemeManager.add_theme(button_id, Themes.ERROR)
 
         assert Themes.DEFAULT in ThemeManager._item_themes[button_id]
         assert Themes.ERROR in ThemeManager._item_themes[button_id]
@@ -67,8 +67,8 @@ class test_ThemeManager(DPGUnitTest):
         with dpg.window():
             button_id = dpg.add_button(label="Test Button")
 
-        ThemeManager.apply_theme(button_id, [Themes.DEFAULT, Themes.ERROR, Themes.COMPILE])
-        ThemeManager.remove_theme(button_id, [Themes.ERROR])
+        ThemeManager.apply_theme(button_id, Themes.DEFAULT, Themes.ERROR, Themes.COMPILE)
+        ThemeManager.remove_theme(button_id, Themes.ERROR)
 
         item_themes = ThemeManager._item_themes.get(button_id, [])
         assert Themes.DEFAULT in item_themes
@@ -76,7 +76,7 @@ class test_ThemeManager(DPGUnitTest):
         assert Themes.COMPILE in item_themes
         assert len(item_themes) == 2
 
-        ThemeManager.remove_theme(button_id, [Themes.DEFAULT, Themes.COMPILE])
+        ThemeManager.remove_theme(button_id, Themes.DEFAULT, Themes.COMPILE)
         assert dpg.get_item_theme(button_id) == None
 
 
@@ -84,10 +84,10 @@ class test_ThemeManager(DPGUnitTest):
         """
         Проверяет получение (и кэширование) тем.
         """
-        theme_id_1 = ThemeManager.get_theme([Themes.DATA])
-        assert (Themes.DATA,) in ThemeManager._created_themes
+        theme_id_1 = ThemeManager.get_theme(Themes.COMPILE)
+        assert (Themes.COMPILE,) in ThemeManager._created_themes
 
-        theme_id_2 = ThemeManager.get_theme([Themes.DATA])
+        theme_id_2 = ThemeManager.get_theme(Themes.COMPILE)
         assert theme_id_1 == theme_id_2
 
 
@@ -99,7 +99,7 @@ class test_ThemeManager(DPGUnitTest):
             with dpg.node_editor():
                 node_id = dpg.add_node(label="Test Node")
 
-        ThemeManager.apply_theme(node_id,[Themes.DEFAULT, Themes.ERROR])
+        ThemeManager.apply_theme(node_id,Themes.DEFAULT, Themes.ERROR)
 
         theme_key = (Themes.DEFAULT, Themes.ERROR)
         assert theme_key in ThemeManager._created_themes

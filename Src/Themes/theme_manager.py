@@ -1,157 +1,135 @@
 import json
-from collections import OrderedDict
+from collections import defaultdict
+from typing import Any
 
 import dearpygui.dearpygui as dpg
 
 from Src.Enums import Themes
 
 
+
+
 class ThemeManager:
-    '''
-    Менеджер тем для графического редактора
-    Работает с енум классом "Themes"
-    '''
-    _themes_config: dict = {}
-    _created_themes: dict = {}
-    _item_themes: dict[int | str, list[Themes]] = {}
-    _themes_categories: dict = {
+    """
+    Менеджер тем для графического редактора.
+    Работает с енум классом "Themes".
+    """
+    _themes_config: dict[str, dict[str, dict[str, Any]]] = {}
+    _created_themes: dict[tuple[Themes], int | str] = {}
+    _item_themes: dict[int | str, set[Themes]] = {}
+    _themes_categories = {
         "mvNodeCol": dpg.mvThemeCat_Nodes,
         "mvPlotCol": dpg.mvThemeCat_Plots,
-        "mvThemeCol": dpg.mvThemeCat_Core
+        "mvThemeCol": dpg.mvThemeCat_Core,
     }
-    _dpg_attrs: dict = {
-        "FrameRounding": "frame_rounding",
-        "FramePadding": "frame_padding",
-        "ItemSpacing": "item_spacing",
-        "WindowRounding": "window_rounding",
-        "PopupRounding": "popup_rounding",
-    }
+
+
+    @classmethod
+    def __create_theme(cls, *theme_names: Themes):
+        """
+        Создает тему по параметрам указанных тем.
+        Темы, идущие позже в списке, перезаписывают стили предыдущих.
+        args:
+            *theme_names: Themes - список тем, используемых для создания
+        """
+        theme_key = tuple(sorted(theme_names))
+
+        merged = defaultdict(dict)
+        for theme_name in theme_key:
+            for comp, data in cls._themes_config[theme_name].items():
+                merged[comp] |= data
+
+
+        with dpg.theme() as theme_id:
+            for comp, data in merged.items():
+                dpg_comp = getattr(dpg, comp)
+                if not dpg_comp:
+                    continue
+
+                with dpg.theme_component(dpg_comp):
+                    for attr, value in data.items():
+                        if dpg_attr := getattr(dpg, attr):
+                            category = cls._themes_categories.get(
+                                attr.split("_")[0], dpg.mvThemeCat_Core
+                            )
+                            dpg.add_theme_color(dpg_attr, value, category=category)
+
+        cls._created_themes[theme_key] = theme_id
+
+
+    @classmethod
+    def __update_item_theme(cls, item_id: str | int):
+        """
+        Собирает все темы для элемента, создает одну объединенную тему и применяет ее.
+        args:
+            item_id: str | int - идентификатор объекта
+        """
+        theme_names = cls._item_themes.get(item_id)
+        if not theme_names:
+            dpg.bind_item_theme(item_id, 0)  # 0 - дефолтная тема
+            return
+
+        dpg.bind_item_theme(item_id, cls.get_theme(*theme_names))
 
 
     @classmethod
     def load_themes(cls, theme_path: str):
         """
-        Загружает конфигурацию тем из JSON-файла
+        Загружает конфигурацию тем из JSON-файла.
         args:
             theme_path: str - Путь до файла конфига
         """
-        with open(theme_path, 'r') as f:
+        with open(theme_path, "r") as f:
             cls._themes_config = json.load(f)
 
 
     @classmethod
-    def apply_theme(cls, item_id: str | int, theme_names: list[Themes]):
+    def apply_theme(cls, item_id: str | int, *theme_names: Themes):
         """
         Находит (или создает) и применяет тему к указанному элементу.
         В качестве идентификатора темы используется член Enum "Themes".
         args:
             item_id: str | int - id объекта, к которому применяется тема
-            theme_names: list[Themes] - темы для применения
+            *theme_names: Themes - темы для применения
         """
-        cls._item_themes[item_id] = theme_names
-        cls._update_item_theme(item_id)
+        cls._item_themes[item_id] = set(theme_names)
+        cls.__update_item_theme(item_id)
 
 
     @classmethod
-    def add_theme(cls, item_id: str | int, theme_names: list[Themes]):
+    def add_theme(cls, item_id: str | int, *theme_names: Themes):
         """
         Прибавляет тему к наложенным на элемент темам.
-
         args:
             item_id: str | int - id объекта, для прибавления темы
-            theme_names: list[Themes] - темы для добавления
+            *theme_names: Themes - темы для добавления
         """
-        current_themes = cls._item_themes.get(item_id, [])
-
-        for theme in theme_names:
-            if theme not in current_themes:
-                current_themes.append(theme)
-
-        cls._item_themes[item_id] = current_themes
-        cls._update_item_theme(item_id)
+        cls._item_themes[item_id].update(theme_names)
+        cls.__update_item_theme(item_id)
 
 
     @classmethod
-    def remove_theme(cls, item_id: str | int, theme_names: list[Themes]):
+    def remove_theme(cls, item_id: str | int, *theme_names: Themes):
         """
         Удаляет указанные темы из списка тем элемента.
-
         args:
             item_id: str | int - идентификатор объекта, у которого удаляется тема
-            theme_names: list[Themes] - темы для удаления
+            *theme_names: Themes - темы для удаления
         """
-        current_themes = cls._item_themes.get(item_id, [])
-
-        new_themes = [theme for theme in current_themes if theme not in theme_names]
-
-        cls._item_themes[item_id] = new_themes
-        cls._update_item_theme(item_id)
+        cls._item_themes[item_id].difference_update(theme_names)
+        cls.__update_item_theme(item_id)
 
 
     @classmethod
-    def get_theme(cls, theme_names: list[Themes]):
-        '''
-        Возвращает id искомой темы
-        args:
-            theme_names: list[Themes] - темы для поиска
-        '''
-        theme_key = tuple(theme_names)
-
-        if not theme_key in cls._created_themes:
-            cls._create_theme(theme_names)
-
-        return cls._created_themes[theme_key]
-
-    @classmethod
-    def _update_item_theme(cls, item_id: str | int):
+    def get_theme(cls, *theme_names: Themes) -> int:
         """
-        Собирает все темы для элемента из _item_themes,
-        создает одну объединенную тему и применяет ее.
-
+        Возвращает id искомой темы.
         args:
-            item_id: str | int - идентификатор объекта
+            *theme_names: Themes - темы для поиска
         """
-        theme_names = cls._item_themes.get(item_id, [])
-        if not theme_names:
-            dpg.bind_item_theme(item_id, 0) # 0 - дефолтная тема
-            return
-
-        theme_key = tuple(theme_names)
+        theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
 
         if theme_key not in cls._created_themes:
-            cls._create_theme(theme_names)
+            cls.__create_theme(*theme_names)
 
-        dpg.bind_item_theme(item_id, cls._created_themes[theme_key])
-
-
-    @classmethod
-    def _create_theme(cls, theme_names: list[Themes]):
-        '''
-        Создает тему по параметрам указанных тем.
-        Темы, идущие позже в списке, перезаписывают стили предыдущих.
-        args:
-            theme_names: list[Themes] - список тем, используемых для создания
-        '''
-        theme_key = tuple(theme_names)
-        merged = OrderedDict()
-
-        for theme_name in theme_names:
-            if theme_name in cls._themes_config:
-                for comp, data in cls._themes_config[theme_name].items():
-                    if comp not in merged:
-                        merged[comp] = {}
-                    merged[comp].update(data)
-
-        with dpg.theme() as theme_id:
-            for comp, data in merged.items():
-                dpg_comp = getattr(dpg, comp, None)
-                if dpg_comp:
-                    with dpg.theme_component(dpg_comp):
-                        for attr, value in data.items():
-                            dpg_attr = getattr(dpg, attr, None)
-                            if dpg_attr:
-                                category = cls._themes_categories.get(attr.split("_")[0], dpg.mvThemeCat_Core)
-                                dpg.add_theme_color(dpg_attr, value, category=category)
-
-        cls._created_themes[theme_key] = theme_id
-
+        return cls._created_themes[theme_key]
