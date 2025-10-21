@@ -1,8 +1,6 @@
-from itertools import chain
 from dataclasses import dataclass
 
 from keras import layers
-import dearpygui.dearpygui as dpg
 
 from Src.Enums import Themes
 from Src.Nodes import AbstractNode

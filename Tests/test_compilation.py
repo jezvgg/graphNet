@@ -41,7 +41,7 @@ class test_compilation(DPGUnitTest):
             "Compile": node_list["Training"]["General"][0],
             "Fit": node_list["Training"]["General"][1],
             "Predict": node_list["Training"]["General"][2],
-            "Save": node_list["Training"]["Utils"][2]
+            "Save": node_list["Training"]["Utils"][3]
         }
         get_attr = lambda attr_name, node_id: [attribute for attribute in dpg.get_item_children(node_id, slot=1) \
                                                for field in dpg.get_item_children(attribute, slot=1)\

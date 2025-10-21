@@ -12,15 +12,6 @@ class test_ThemeManager(DPGUnitTest):
     Проверка менеджера тем
     '''
 
-
-    @classmethod
-    def setUpClass(cls):
-        """
-        Загружает темы перед выполнением тестов.
-        """
-        super().setUpClass()
-
-
     def test_load_themes(self):
         """
         Проверяет, что конфигурация тем успешно загружена.
