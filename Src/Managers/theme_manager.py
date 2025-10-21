@@ -1,6 +1,7 @@
 import json
 from collections import defaultdict
 from typing import Any
+from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
@@ -73,7 +74,7 @@ class ThemeManager:
 
 
     @classmethod
-    def load_themes(cls, theme_path: str):
+    def load_themes(cls, theme_path: Path):
         """
         Загружает конфигурацию тем из JSON-файла.
         args:

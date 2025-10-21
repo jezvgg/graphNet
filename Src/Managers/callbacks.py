@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import dearpygui.dearpygui as dpg
 
-from Src.Events.event_manager import Event_manager
+from Src.Managers.event_manager import Event_manager
 from Src.Enums.callbacktype import CallbackType
 from Src.Logging import Logger_factory,Logger
 

@@ -5,7 +5,7 @@ import dearpygui.dearpygui as dpg
 from Src.Config.Annotations.annotation import Annotation
 from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
-from Src.Themes import ThemeManager
+from Src.Managers import ThemeManager
 
 
 
