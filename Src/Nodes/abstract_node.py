@@ -9,7 +9,7 @@ import dearpygui.dearpygui as dpg
 from Src.Logging import Logger_factory, Logger
 from Src.Config.parameter import Parameter, AttrType
 from Src.Enums import Themes
-from Src.Themes import ThemeManager
+from Src.Managers import ThemeManager
 
 
 
