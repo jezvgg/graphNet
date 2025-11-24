@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from keras import layers
 import dearpygui.dearpygui as dpg
 
+from Src.Enums import Themes
 from Src.Nodes import AbstractNode
 
 
@@ -17,7 +18,7 @@ class LayerNode(AbstractNode):
     '''
     Класс хранящий данные, для связи нода с слоём нейроной сети.
     '''
-    color = (231, 21, 21, 255)
+    theme_name: Themes = Themes.LAYER
     inputs: set["LayerNode"]
     OUTPUT: LayerResult
 
@@ -37,7 +38,6 @@ class LayerNode(AbstractNode):
         Компанует выход который должен быть у Layer,
         чтоб не городить костыли с обработкой inputs
         '''
-        print(kwargs)
-        print()
+        
         return LayerResult(layer=layer(**kwargs)(*[arg.layer for arg in args]), 
                             inputs=set().union(*[arg.inputs for arg in args]))

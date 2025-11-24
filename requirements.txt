@@ -1,4 +1,0 @@
-dearpygui==2.0.0
-tensorflow==2.17.1
-numpy==1.26.4
-pillow==11.1.0
