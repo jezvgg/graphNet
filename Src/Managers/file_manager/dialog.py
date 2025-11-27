@@ -1,25 +1,47 @@
-# file_manager/dialog.py
 from typing import List, Callable, Optional, Tuple
+
 from pathlib import Path
-from .file_dialog_controller import FileDialogController
-from .state import FileDialogState
-from .file_scanner import FileScanner
+
+from .controller import FileDialogController
+from .scanner import FileScanner
 from .ui import FileDialogUI
 from .icon_handler import IconHandler
 
+
+
+
 class FileDialog:
-    """Современный файловый диалог без синглтона и конфигурационного объекта.
+    """Main facade class for the file dialog system.
     
-    Все параметры хранятся напрямую в экземпляре класса.
+    Provides a unified interface for creating and managing file dialogs:
     
-    Режимы работы:
-    1. Асинхронный (callback):
-        dialog = FileDialog(callback=lambda res: ...)
+    **Asynchronous mode** (callback-based):
+        ```python
+        dialog = FileDialog(callback=lambda result: print(f"Selected: {result}"))
         dialog.show()
+        ```
     
-    2. Синхронный (блокирующий):
-        dialog = FileDialog()
-        result = dialog.show_and_get_result()
+    Attributes:
+        title: Dialog window title.
+        tag: Base identifier for Dear PyGui widgets.
+        width: Initial dialog width in pixels.
+        height: Initial dialog height in pixels.
+        min_size: Minimum allowed size (width, height).
+        dirs_only: If True, only directories can be selected.
+        default_path: Initial directory path. Defaults to user home directory.
+        filter_list: Available file extension filters.
+        file_filter: Currently selected file filter.
+        callback: Function called when selection is confirmed.
+        show_dir_size: Whether to display directory sizes (not implemented).
+        allow_drag: Whether drag-and-drop is enabled (not implemented).
+        multi_selection: Whether multiple files can be selected.
+        show_shortcuts_menu: Whether to show platform-specific shortcuts sidebar.
+        no_resize: Whether to disable window resizing.
+        modal: Whether dialog blocks interaction with other windows.
+        show_hidden_files: Whether to show hidden files/directories.
+        user_style: Reserved for future UI theming (not implemented).
+        controller: Business logic controller instance.
+        ui: User interface component instance.
     """
     
     def __init__(
@@ -45,7 +67,32 @@ class FileDialog:
         user_style: int = 0,
         icon_handler: Optional[IconHandler] = None
     ):
-        # === Храним все параметры напрямую ===
+        """Initializes a new file dialog instance.
+        
+        Creates all necessary dependencies and sets up the UI. Parameters are stored directly
+        on the instance rather than in a separate configuration object.
+        
+        Args:
+            title: Window title text.
+            tag: Base identifier for Dear PyGui widgets (suffixes will be added).
+            width: Initial window width in pixels.
+            height: Initial window height in pixels.
+            min_size: Minimum allowed window dimensions (width, height).
+            dirs_only: If True, only directories can be selected; files are ignored.
+            default_path: Initial directory to display. If None, uses user's home directory.
+            filter_list: List of available file filters (e.g., [".*", ".txt", ".py"]).
+            file_filter: Initially selected file filter. Defaults to ".*" (all files).
+            callback: Function to call when selection is confirmed. Receives list of paths.
+            show_dir_size: Whether to calculate and show directory sizes (computationally expensive).
+            allow_drag: Whether to enable drag-and-drop functionality (reserved for future).
+            multi_selection: Whether multiple files/directories can be selected.
+            show_shortcuts_menu: Whether to display the platform-specific shortcuts sidebar.
+            no_resize: If True, disables window resizing by the user.
+            modal: If True, blocks interaction with other application windows.
+            show_hidden_files: Whether to show hidden files (dotfiles on Unix, hidden on Windows).
+            user_style: Reserved for future theming support (0=default, 1=dark, etc.).
+            icon_handler: Custom icon handler. If None, creates default handler with built-in icons.
+        """
         self.title = title
         self.tag = tag
         self.width = width
@@ -65,36 +112,41 @@ class FileDialog:
         self.show_hidden_files = show_hidden_files
         self.user_style = user_style
         
-        # === Инициализация остального состояния ===
         self._result_ready = False
         self._result: List[str] = []
         
-        # === Сборка зависимостей ===
         self._setup_dependencies(icon_handler)
 
     def _setup_dependencies(self, icon_handler: Optional[IconHandler]):
-        """Собирает зависимости для диалога без использования конфигурационного объекта."""
+        """Initializes and wires together all internal dependencies.
         
-        # FileScanner получает только необходимые параметры
+        Creates the scanner, controller, and UI components with appropriate parameters.
+        This method is called during initialization and should not be called externally.
+        
+        Args:
+            icon_handler: Optional custom icon handler. If None, creates a default handler
+                pointing to the built-in assets/icons directory.
+        
+        Note:
+            The icon handler path is resolved relative to this module's location.
+            Icons are loaded immediately to prevent UI delays later.
+        """
         scanner = FileScanner(
             show_hidden=self.show_hidden_files,
             dirs_only=self.dirs_only
         )
         
-        # Controller получает только бизнес-параметры
         self.controller = FileDialogController(
             scanner=scanner,
             callback=self._handle_callback,
             dirs_only=self.dirs_only
         )
         
-        # IconHandler: используем внешний или создаём по умолчанию
-        icon_handler = icon_handler or IconHandler(
-            Path(__file__).parent.parent / "assets" / "icons"
-        )
-        icon_handler.load_icons()  # загружаем один раз при инициализации
+        if icon_handler is None:
+            icon_path = Path(__file__).parent.parent.parent.parent / "Assets" / "icons"
+            icon_handler = IconHandler(icon_path)
+        icon_handler.load_icons()  
         
-        # UI получает только UI-специфичные параметры
         self.ui = FileDialogUI(
             controller=self.controller,
             title=self.title,
@@ -109,27 +161,47 @@ class FileDialog:
         )
 
     def _handle_callback(self, result: List[str]):
-        """Обработчик результата из контроллера."""
+        """Internal callback handler for controller confirmation events.
+        
+        Stores the result and sets the ready flag for synchronous mode.
+        Invokes the user-provided callback if available.
+        
+        Args:
+            result: List of selected file/directory paths from the controller.
+        """
         self._result = result
         self._result_ready = True
         if self.callback:
             self.callback(result)
 
     def show(self):
-        """Показать диалог в асинхронном режиме."""
+        """Displays the dialog window in asynchronous mode.
+        
+        The dialog appears immediately and runs in the background. Results are delivered
+        via the callback function when the user confirms selection.
+        
+        Note:
+            In Dear PyGui applications, this typically doesn't block the main thread
+            because Dear PyGui processes events in its own render loop.
+        """
         self.ui.show()
-
-    def show_and_get_result(self) -> List[str]:
-        """Показать диалог и дождаться результата (блокирующий режим)."""
-        self.show()
-        while not self._result_ready:
-            import dearpygui.dearpygui as dpg
-            dpg.split_frame()
-        return self._result
 
     @staticmethod
     def _default_filter_list() -> List[str]:
-        """Статический метод для получения фильтров по умолчанию."""
+        """Returns the default list of file extension filters.
+        
+        Provides common file types grouped by category for the file type dropdown.
+        
+        Returns:
+            List of file extension filters including:
+              - ".*" for all files
+              - Text files (.txt)
+              - Scripts (.py)
+              - Images (.png, .jpg, .jpeg, .gif, .bmp)
+              - Documents (.pdf, .doc, .docx)
+              - Spreadsheets (.xls, .xlsx)
+              - Archives (.zip, .rar, .7z)
+        """
         return [
             ".*", ".txt", ".py", ".png", ".jpg", ".jpeg", ".gif", ".bmp", 
             ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".rar", ".7z"
