@@ -4,15 +4,19 @@ import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations.annotation import Annotation
 from Src.Enums import DPGType
-from file_manager import show_file_dialog, file_dialog
-from file_manager.core import FileDialogCore
-class AFile(Annotation):
+from Src.Managers.file_manager.dialog import FileDialog
 
+
+
+
+class AFile(Annotation):
 
     @staticmethod
     def build(*args, **kwargs):
         kwargs = Annotation.check_kwargs(dpg.node_attribute, kwargs)
         group_id = dpg.generate_uuid()
+
+        file_dialog = FileDialog(title="Open File", callback=lambda x: on_file_selected(group_id, x))
 
 
         def on_file_selected(sender, app_data):
@@ -23,7 +27,7 @@ class AFile(Annotation):
 
         def on_button_click(sender, app_data, user_data):
             # user_data здесь — group_id
-            show_file_dialog(callback=lambda x: on_file_selected(group_id, x))
+            file_dialog.show()
             
         with dpg.group(*args, **kwargs, tag=group_id, user_data=None) as item:
             dpg.add_button(
