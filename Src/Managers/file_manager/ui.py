@@ -123,7 +123,6 @@ class FileDialogUI:
 
         self._update_table(files)
         self._sync_selection()
-        
 
     
     def _on_path_enter(self, sender, app_data):
@@ -246,41 +245,29 @@ class FileDialogUI:
             This method assumes the file_list_cache in the controller is up to date
             and matches the current table contents.
         """
-        print("Entered _sync_selection")
         rows = dpg.get_item_children(self._table_tag, slot=1)
         for row_idx, row in enumerate(rows):
-            print("="*40)
-            print("Row", dpg.get_item_info(row))
             cells = dpg.get_item_children(row, slot=1)
             if not cells:
                 continue
-            print("Cells", cells)
             
             first_cell = cells[0]
             group_items = dpg.get_item_children(
                 dpg.get_item_children(first_cell, slot=1)[0], 
                 slot=1)
 
-            print("Group_items_0", dpg.get_item_info(group_items[0]))
-            print("Group_items_1", dpg.get_item_info(group_items[1]))
             if len(group_items) < 2:
                 continue
             
             selectable = group_items[1]
-            print("Selectable", dpg.get_item_info(selectable))
 
             if dpg.get_item_type(selectable) == "mvAppItemType::mvSelectable":
                 if row_idx < len(self.controller.file_list_cache):
                     file_info = self.controller.file_list_cache[row_idx]
                     path = file_info["path"]
-                    print(f"Selected files at refresh: {self.controller.selected_files}")
-                    print(f"Entered path: {path}")
                     is_selected = path in self.controller.selected_files
-                    print("Selected:",is_selected)
-                    print("Before:", dpg.get_value(selectable))
                     dpg.set_value(selectable, is_selected)
                     dpg.set_value(selectable, is_selected)
-                    print("After:",dpg.get_value(selectable))
 
 
     def _update_table(self, files: List[FileItem]):

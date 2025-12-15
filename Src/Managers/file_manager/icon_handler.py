@@ -1,10 +1,10 @@
+from typing import Dict, Set, Final
+from pathlib import Path
+import logging
+
 import dearpygui.dearpygui as dpg
 
-from typing import Dict, Set, Final
-
-from pathlib import Path
-
-import logging
+from Src.Utils import singleton
 
 
 
@@ -36,6 +36,7 @@ FOLDER_ICON: Final[str] = "folder"
 logger = logging.getLogger(__name__)
 
 
+@singleton
 class IconHandler:
     """Handles loading, registration, and resolution of icons for Dear PyGui.
 
@@ -60,8 +61,9 @@ class IconHandler:
         self.image_dir: Path = image_dir
         self.registered_icons: Dict[str, str] = {}  # name → tag (same)
         self._placeholder_data: Final[list] = [255, 255, 255, 255] * 4  # 2x2 white
+        self.__load_icons()
 
-    def load_icons(self) -> None:
+    def __load_icons(self) -> None:
         """Load and register all icons from `ICON_NAMES`.
 
         For each name in `ICON_NAMES`:

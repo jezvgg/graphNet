@@ -185,9 +185,13 @@ class FileDialogController:
             self.selected_files ^= {path}
             return
         
-        if shift_pressed and self.anchor_index and clicked_index:
+        if shift_pressed and \
+            self.anchor_index is not None and \
+                clicked_index is not None:
             start = min(self.anchor_index, clicked_index)
             end = max(self.anchor_index, clicked_index)
+            print(start)
+            print(end)
             new_selection = [
                 self.file_list_cache[i]["path"]
                 for i in range(start, end + 1)

@@ -6,10 +6,11 @@ from .controller import FileDialogController
 from .scanner import FileScanner
 from .ui import FileDialogUI
 from .icon_handler import IconHandler
+from Src.Utils import singleton
 
 
 
-
+@singleton
 class FileDialog:
     """Main facade class for the file dialog system.
     
@@ -145,7 +146,6 @@ class FileDialog:
         if icon_handler is None:
             icon_path = Path(__file__).parent.parent.parent.parent / "Assets" / "icons"
             icon_handler = IconHandler(icon_path)
-        icon_handler.load_icons()  
         
         self.ui = FileDialogUI(
             controller=self.controller,
