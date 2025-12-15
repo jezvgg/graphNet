@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 import numpy as np
 
+from Src.Enums import Themes
 from Src.Utils import Backfield
 from Src.Nodes import DataNode
 
@@ -13,7 +14,7 @@ class ShapeNode(DataNode):
     Нода, которая содержит в себе данные. (файлы или табличные)
     '''
     shape: tuple[int] = Backfield()
-    color = (0, 191, 191, 255)
+    theme_name: Themes = Themes.SHAPE
     OUTPUT: np.ndarray
     
 

@@ -1,7 +1,5 @@
 import logging
 from datetime import datetime
-import json
-import logging
 import sys
 from pathlib import Path
 
@@ -103,7 +101,7 @@ class Logger_factory(object):
         Args:
             parent_window: str | int - индетификатор родительского окна
         '''
-        from Src.Events.callbacks import DPGCallback
+        from Src.Managers.callbacks import DPGCallback
 
         dpg.show_item(self.__console_tag)
 

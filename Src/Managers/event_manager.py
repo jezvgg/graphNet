@@ -1,6 +1,6 @@
 from typing import Callable
 
-from Src.Logging import Logger_factory,Logger
+from Src.Logging import Logger_factory, Logger
 
 
 
@@ -15,7 +15,7 @@ class Event_manager:
     """
 
     _events: dict[str, list[Callable]] = {}
-    logger: Logger = Logger_factory.from_instance()('events')
+    # logger: Logger = Logger_factory.from_instance()('events')
 
 
     @classmethod

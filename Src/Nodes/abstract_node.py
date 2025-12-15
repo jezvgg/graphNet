@@ -8,6 +8,10 @@ import dearpygui.dearpygui as dpg
 
 from Src.Logging import Logger_factory, Logger
 from Src.Config.parameter import Parameter, AttrType
+from Src.Enums import Themes
+from Src.Managers import ThemeManager
+
+
 
 
 class AbstractNode(ABC):
@@ -30,7 +34,7 @@ class AbstractNode(ABC):
     logic: Callable
     docs: str
     logger: Logger
-    color: tuple[int, int, int, int] = (37, 37, 38, 255)
+    theme_name: Themes = Themes.ABSTRACT
 
 
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \
@@ -115,14 +119,7 @@ class AbstractNode(ABC):
     
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
-        with dpg.theme() as error_theme:
-            with dpg.theme_component(dpg.mvNode):
-                dpg.add_theme_color(dpg.mvNodeCol_NodeOutline, (175, 0, 0, 255), category=dpg.mvThemeCat_Nodes)
-
-            with dpg.theme_component(dpg.mvTooltip):
-                dpg.add_theme_color(dpg.mvThemeCol_Border, (175, 0, 0, 255), category=dpg.mvThemeCat_Core)
-
-        dpg.bind_item_theme(self.node_tag, error_theme)
+        ThemeManager.add_theme(self.node_tag,Themes.ERROR)
 
         self._error_id = dpg.generate_uuid()
         with dpg.node_attribute(parent=self.node_tag, attribute_type=dpg.mvNode_Attr_Static):
@@ -139,21 +136,7 @@ class AbstractNode(ABC):
                 dpg.delete_item("fit_window")
 
     def default_theme(self):
-        with dpg.theme() as default_theme:
-            with dpg.theme_component(dpg.mvNode):
-                dpg.add_theme_color(dpg.mvNodeCol_TitleBar, self.color, category=dpg.mvThemeCat_Nodes)
-                dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, 
-                                    [min(color * 1.2, 255) for color in self.color],
-                                    category=dpg.mvThemeCat_Nodes)
-                dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, 
-                                    [min(color * 1.25, 255) for color in self.color],
-                                    category=dpg.mvThemeCat_Nodes)
-                dpg.add_theme_color(dpg.mvNodeCol_NodeOutline, (100, 100, 100, 255), category=dpg.mvThemeCat_Nodes)
-            
-            with dpg.theme_component(dpg.mvTooltip):
-                dpg.add_theme_color(dpg.mvThemeCol_Border, (78, 78, 78, 255), category=dpg.mvThemeCat_Core)
-            
-        dpg.bind_item_theme(self.node_tag, default_theme)
+        ThemeManager.apply_theme(self.node_tag,self.theme_name)
 
         if self._error_id and dpg.does_item_exist(self._error_id): 
             dpg.delete_item(dpg.get_item_parent(self._error_id))
