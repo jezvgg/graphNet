@@ -148,6 +148,7 @@ class FileDialogController:
             ctrl_pressed: Whether Ctrl key was pressed during click.
             shift_pressed: Whether Shift key was pressed during click.
         """
+        print(path)
         now = time.time()
         
         if now - self.last_click_time < 0.5 and self.last_clicked_path == path:
@@ -171,22 +172,20 @@ class FileDialogController:
             return
         
         if ctrl_pressed:
-            new_selection = set(self.selected_files)
-            if path in new_selection:
-                new_selection.remove(path)
+            if path in self.selected_files:
                 if self.last_selected_index == clicked_index:
                     self.last_selected_index = None
                 if self.anchor_index == clicked_index:
                     self.anchor_index = None
             else:
-                new_selection.add(path)
                 self.last_selected_index = clicked_index
                 if self.anchor_index is None:
                     self.anchor_index = clicked_index
-            self.selected_files = new_selection
+
+            self.selected_files ^= {path}
             return
         
-        if shift_pressed and self.anchor_index is not None and clicked_index is not None:
+        if shift_pressed and self.anchor_index and clicked_index:
             start = min(self.anchor_index, clicked_index)
             end = max(self.anchor_index, clicked_index)
             new_selection = [
@@ -196,6 +195,7 @@ class FileDialogController:
             ]
             self.selected_files = set(new_selection)
             self.last_selected_index = clicked_index
+
 
     def handle_double_click(self, path: str):
         """Processes double-click action on file or directory.
