@@ -10,6 +10,7 @@ from Src.Logging import Logger_factory, Logger
 from Src.Config.parameter import Parameter, AttrType
 from Src.Enums import Themes
 from Src.Managers import ThemeManager
+from Src.Exceptions import NetworkException
 
 
 
@@ -109,6 +110,10 @@ class AbstractNode(ABC):
 
         except AttributeError as ex:
             self.raise_error(ex, "Некорректные данные для узла")
+            return False
+
+        except NetworkException as ex:
+            self.raise_error(ex, "Сетевая ошибка")
             return False
         
         except Exception as ex:

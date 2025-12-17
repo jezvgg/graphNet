@@ -7,7 +7,7 @@ import numpy as np
 from Src.Enums import Themes
 from Src.Nodes import DataNode
 
-keras.src.callbacks.History
+keras.datasets
 
 @dataclass
 class HistoryModel(keras.src.models.functional.Functional):

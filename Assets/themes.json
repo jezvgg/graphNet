@@ -195,5 +195,13 @@
       "mvNodeCol_TitleBarSelected": [245, 101, 151, 255]
     },
     "mvNodeAttribute": { "mvNodeCol_Pin": [236, 64, 122, 255], "mvNodeCol_Link": [236, 64, 122, 255] }
+  },
+  "dataset": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [236, 64, 122, 255],
+      "mvNodeCol_TitleBarHovered": [240, 83, 137, 255],
+      "mvNodeCol_TitleBarSelected": [245, 101, 151, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [236, 64, 122, 255], "mvNodeCol_Link": [236, 64, 122, 255] }
   }
 }

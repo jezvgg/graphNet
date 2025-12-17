@@ -42,7 +42,21 @@ node_list = {
                         },
                 input=False,
                 output=DataNode
-            )
+            ),
+            NodeAnnotation(
+                label="Load Dataset",
+                node_type= DatasetNode,
+                logic = DatasetNode.load_data,
+                annotations = {
+                        "dataset": Parameter(AttrType.INPUT, AEnum[Datasets]),
+                        "X_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                        "y_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                        "X_test": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                        "y_test": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                        },
+                input=False,
+                output=False
+            ),
         ],
         "Preprocessing Utils": [
             NodeAnnotation(
