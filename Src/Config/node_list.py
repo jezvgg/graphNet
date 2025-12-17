@@ -141,7 +141,8 @@ node_list = {
                 annotations = {
                         "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                         "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
-                        "epochs": Parameter(AttrType.INPUT, AInteger)
+                        "epochs": Parameter(AttrType.INPUT, AInteger),
+                        "history": Parameter(AttrType.OUTPUT, ANode[DataNode])  
                     },
                 input = Single[CompileNode]
             ),

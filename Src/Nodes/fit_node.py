@@ -1,18 +1,33 @@
+from dataclasses import dataclass
+
 import keras
 import dearpygui.dearpygui as dpg
 import numpy as np
 
 from Src.Enums import Themes
-from Src.Nodes import AbstractNode
+from Src.Nodes import DataNode
+
+keras.src.callbacks.History
+
+@dataclass
+class HistoryModel(keras.src.models.functional.Functional):
+    my_history: keras.callbacks.History
 
 
-
-class FitNode(AbstractNode):
+class FitNode(DataNode):
     theme_name: Themes = Themes.FIT
+    history: np.ndarray
+
+
+    def compile(self):
+        status = super().compile()
+        if not status: return False
+        self.history: np.ndarray = np.array(self.OUTPUT.history.history['loss'])
+        return status
 
 
     @staticmethod
-    def fit(model: keras.models.Model, **kwargs):
+    def fit(model: keras.models.Model, **kwargs) -> HistoryModel:
         if kwargs['epochs']<=0:
             raise AttributeError("Колличество эпох должно быть больше нуля!")
         
@@ -28,7 +43,7 @@ class FitNode(AbstractNode):
         with dpg.window(label="Обучение", modal=True, no_close=True,tag="fit_window") as popup:
             dpg.add_loading_indicator(width=100, height=100)
         
-        model.fit(**kwargs, verbose=False)
+        history = model.fit(**kwargs, verbose=False)
 
         dpg.delete_item(popup)
 
