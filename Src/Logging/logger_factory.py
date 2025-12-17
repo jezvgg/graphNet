@@ -5,7 +5,6 @@ from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
-from Src.Logging import Logger
 
 
 class Logger_factory(object):
@@ -21,6 +20,17 @@ class Logger_factory(object):
     __layout_tag: str | int
     _instance = None
     _loggers = {}
+
+    base_path = Path(sys._MEIPASS if hasattr(sys, '_MEIPASS') else '.')
+
+
+    @staticmethod
+    def open_config(path: Path):
+        path = Logger_factory.base_path / path
+        config = {}
+        if config_debug_path.exists():
+            config = json.load(config_debug_path.open())
+        return config
 
 
     @classmethod
@@ -71,7 +81,7 @@ class Logger_factory(object):
             logger = Logger_factory._loggers[logger_name]
             if not config: return logger
         else:
-            logger = Logger(logger_name, layout_tag=self.__console_tag)
+            logger = logging.Logger(logger_name)
             Logger_factory._loggers[logger_name] = logger
 
         config = self.config | config
