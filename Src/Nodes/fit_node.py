@@ -16,12 +16,6 @@ class FitNode(AbstractNode):
         if kwargs['epochs']<=0:
             raise AttributeError("Колличество эпох должно быть больше нуля!")
         
-        if not(kwargs['x'].shape[0] and kwargs['x'].shape[1]):
-            raise AttributeError('Не верная размерность или пустуе данные X!')
-        
-        if not(kwargs['y'].shape[0] and kwargs['y'].shape[1]) :
-            raise AttributeError('Не верная размерность или пустуе данные Y!')
-        
         if kwargs['x'].shape[0]!=kwargs['y'].shape[0]:
             raise AttributeError('Размерности X и Y не совпадают!')
         

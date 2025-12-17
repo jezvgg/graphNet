@@ -20,7 +20,6 @@ node_list = {
                 node_type = TableDataNode,
                 logic = TableDataNode.open_data,
                 annotations = {
-                        # "files": Parameter(AttrType.INPUT, AFile),
                         "files": Parameter(AttrType.INPUT, AString),
                         "delimiter": Parameter(AttrType.INPUT, AEnum[Delimiters]),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
@@ -37,7 +36,7 @@ node_list = {
                 node_type= ImageDataNode,
                 logic = ImageDataNode.open_data,
                 annotations = {
-                        "files": Parameter(AttrType.INPUT, AFile),
+                        "files": Parameter(AttrType.INPUT, AString),
                         "color_mode": Parameter(AttrType.INPUT, AEnum[ColorMode]),
                         "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
                         },

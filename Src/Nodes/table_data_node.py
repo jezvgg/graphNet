@@ -10,7 +10,7 @@ class TableDataNode(ShapeNode):
 
 
     @staticmethod
-    def open_data(files: dict, *args, **kwargs):
+    def open_data(files: str, *args, **kwargs):
         if not files: 
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
         
