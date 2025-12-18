@@ -6,7 +6,7 @@ import traceback
 
 import dearpygui.dearpygui as dpg
 
-from Src.Logging import Logger_factory, Logger
+from Src.Logging import logging, Logger
 from Src.Config.parameter import Parameter, AttrType
 from Src.Enums import Themes
 from Src.Managers import ThemeManager
@@ -59,7 +59,7 @@ class AbstractNode(ABC):
         if not docs: docs = inspect.getdoc(self.logic)
         self.docs = docs
 
-        self.logger = Logger_factory.from_instance()("nodes")
+        self.logger = logging()("nodes")
 
 
     def __repr__(self) -> str:

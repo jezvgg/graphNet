@@ -34,10 +34,10 @@ class FitNode(DataNode):
         if kwargs['x'].shape[0]!=kwargs['y'].shape[0]:
             raise AttributeError('Размерности X и Y не совпадают!')
         
-        if not np.issubdtype(kwargs['x'].dtype, np.floating) or np.isnan(kwargs['x']).any() :
+        if np.isnan(kwargs['x']).any() :
             raise AttributeError('Данные содержат неверный формат X!')
         
-        if not np.issubdtype(kwargs['y'].dtype, np.floating) or np.isnan(kwargs['y']).any():
+        if np.isnan(kwargs['y']).any():
             raise AttributeError('Данные содержат неверный формат Y!')
 
         with dpg.window(label="Обучение", modal=True, no_close=True,tag="fit_window") as popup:

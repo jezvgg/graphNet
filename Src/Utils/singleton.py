@@ -1,8 +1,12 @@
+from functools import wraps
+
 
 def singleton(cls):
-    instance_map = {}
     
-    if cls not in instance_map:
-        instance_map = cls()
-    
-    return instance_map[cls]
+    @wraps(cls)
+    def wrapper(*args, **kwargs):
+        if not hasattr(cls, '__instance'):
+            setattr(cls, '__instance', cls(*args, **kwargs))
+        return getattr(cls, '__instance')
+
+    return wrapper

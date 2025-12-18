@@ -6,7 +6,7 @@ import dearpygui.dearpygui as dpg
 from keras import layers
 
 from Src.Enums.attr_type import AttrType
-from Src.Logging import Logger_factory, Logger
+from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
 
@@ -32,7 +32,7 @@ class NodeBuilder:
         Args:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
         '''
-        self.logger = Logger_factory.from_instance()("nodes")
+        self.logger = logging()("nodes")
         self.delete_callback = delete_callback
         self.node_list = node_list
 

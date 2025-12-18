@@ -1,13 +1,14 @@
 from dataclasses import dataclass
-import subprocess
+import socket 
 
 import keras.datasets
 import numpy as np
 
 from Src.Enums import Themes
-from Src.Nodes import DataNode
+from Src.Nodes import ShapeNode
 from Src.Utils import Backfield
 from Src.Exceptions import NetworkException
+from Src.Logging import logging
 
 
 @dataclass(init=True)
@@ -16,9 +17,10 @@ class Dataset:
     y_train: np.ndarray
     X_test: np.ndarray
     y_test: np.ndarray
+    shape: tuple[int]
 
 
-class DatasetNode(DataNode):
+class DatasetNode(ShapeNode):
     '''
     Узел для вычисления метрики между двумя наборами данных
     '''
@@ -27,24 +29,26 @@ class DatasetNode(DataNode):
     y_train: np.ndarray
     X_test: np.ndarray
     y_test: np.ndarray
+    logger = logging()('functions')
 
 
     @staticmethod
-    def load_data(dataset:str) -> Dataset:
+    def open_data(dataset:str) -> Dataset:
         '''
         Скачивает указанный датасет из Keras.
 
         Args:
             metric: Название датасета (например, 'boston_housing').
         '''
-        if (ping:=subprocess.run(['ping', '8.8.8.8'], capture_output=True)).returncode != 0:
-            raise NetworkException(f"{ping.stderr[6:].decode()}Вероятнее всего, нет подключения к интернету.")
+        try: socket.create_connection(("www.geeksforgeeks.org", 80)) 
+        except OSError as err: 
+            raise NetworkException(f'{err}.\nСкорее всего отсутствует подключение к интернету.')
 
         dataset = getattr(keras.datasets, dataset)
-
+        DatasetNode.logger.info(f"Датасет {dataset} начинает загрузку")
         (X_train, y_train), (X_test, y_test) = dataset.load_data()
-
-        return Dataset(X_train, y_train, X_test, y_test)
+        DatasetNode.logger.info(f"Датасет загрузился - ({X_train.shape}, {y_train.shape}), ({X_test.shape}, {y_test.shape})")
+        return Dataset(X_train, y_train, X_test, y_test, X_train.shape)
 
 
     def compile(self) -> bool:

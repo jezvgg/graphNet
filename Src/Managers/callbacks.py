@@ -5,7 +5,7 @@ import dearpygui.dearpygui as dpg
 
 from Src.Managers.event_manager import Event_manager
 from Src.Enums.callbacktype import CallbackType
-from Src.Logging import Logger_factory,Logger
+from Src.Logging import logging
 
 
 
@@ -32,7 +32,7 @@ class DPGCallback:
             item_id: Идентификатор элемента DearPyGui
         """
         self.__item_id = item_id
-        self.logger: Logger = Logger_factory.from_instance()('events')
+        self.logger: Logger = logging.from_instance()('events')
         
         self.__prev_values = {
             CallbackType.VALUE: None,

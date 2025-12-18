@@ -2,5 +2,5 @@
     "level": 30,
     "filename": "Logs/log_{curdata}.log",
     "format": "%(asctime)s - %(module)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
-    "datefmt": "%D.%M.%Y:%H.%M.%S" 
+    "datefmt": "%H.%M.%S" 
 }
