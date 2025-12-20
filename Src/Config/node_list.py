@@ -360,7 +360,18 @@ node_list = {
                 logic = keras.saving.save_model,
                 annotations = {
                         "model": Parameter(AttrType.INPUT, ANode[Single[FitNode]]),
-                        "filepath": Parameter(AttrType.INPUT, AString)
+                        "filepath": Parameter(AttrType.INPUT, AString, default='model.keras')
+                    },
+                input = False,
+                output = False
+            ),
+            NodeAnnotation(
+                label="Save model as TFJS",
+                node_type= UtilsNode,
+                logic = UtilsNode.as_tfjs,
+                annotations = {
+                        "model": Parameter(AttrType.INPUT, ANode[Single[FitNode]]),
+                        "filepath": Parameter(AttrType.INPUT, AString, default='model')
                     },
                 input = False,
                 output = False
