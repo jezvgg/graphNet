@@ -7,11 +7,6 @@ import numpy as np
 from Src.Enums import Themes
 from Src.Nodes import DataNode
 
-keras.datasets
-
-@dataclass
-class HistoryModel(keras.src.models.functional.Functional):
-    my_history: keras.callbacks.History
 
 
 class FitNode(DataNode):
@@ -27,17 +22,17 @@ class FitNode(DataNode):
 
 
     @staticmethod
-    def fit(model: keras.models.Model, **kwargs) -> HistoryModel:
+    def fit(model: keras.models.Model, **kwargs) -> keras.Model:
         if kwargs['epochs']<=0:
             raise AttributeError("Колличество эпох должно быть больше нуля!")
         
         if kwargs['x'].shape[0]!=kwargs['y'].shape[0]:
             raise AttributeError('Размерности X и Y не совпадают!')
         
-        if np.isnan(kwargs['x']).any() :
+        if kwargs['x'].dtype == np.object_ or np.isnan(kwargs['x']).any() :
             raise AttributeError('Данные содержат неверный формат X!')
         
-        if np.isnan(kwargs['y']).any():
+        if kwargs['y'].dtype == np.object_ or np.isnan(kwargs['y']).any():
             raise AttributeError('Данные содержат неверный формат Y!')
 
         with dpg.window(label="Обучение", modal=True, no_close=True,tag="fit_window") as popup:

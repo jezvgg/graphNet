@@ -9,6 +9,5 @@ dependencies = [
     "numpy<2.2.0",
     "pillow>=12.0.0",
     "pydot>=4.0.1",
-    "tensorflow>=2.19.0",
-    "tensorflowjs==4.22",
+    "tensorflow>=2.19.0"
 ]

@@ -12,26 +12,23 @@ from Src.Utils import singleton
 
 
 @singleton
-class Logger_factory(object):
+class Logger_factory:
     '''
     Класс для логирования, синглтон.
 
     Attributes:
         config: dict - конфигурация для создания логгеров.
     '''
+    BASE_PATH = Path(sys._MEIPASS if hasattr(sys, '_MEIPASS') else '.')
+
     config: dict
-    __console_tag: str | int
-    __stage_tag: str | int
-    __layout_tag: str | int
-    _instance = None
     _loggers = {}
 
-    base_path = Path(sys._MEIPASS if hasattr(sys, '_MEIPASS') else '.')
 
-
+    # @classmethod
     @staticmethod
     def open_config(path: Path, exist_ok=True):
-        path = Logger_factory.base_path / path
+        path = Logger_factory.BASE_PATH / path
         config = {}
         if path.exists():
             config = json.load(path.open())

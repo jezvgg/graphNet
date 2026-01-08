@@ -17,8 +17,8 @@ node_list = {
         "Import data": [
             NodeAnnotation(
                 label = "Tables data",
-                node_type = TableDataNode,
-                logic = TableDataNode.open_data,
+                node_type = ShapeNode,
+                logic = ShapeNode.open_table_data,
                 annotations = {
                         "files": Parameter(AttrType.INPUT, AString),
                         "delimiter": Parameter(AttrType.INPUT, AEnum[Delimiters]),
@@ -33,8 +33,8 @@ node_list = {
             ),
             NodeAnnotation(
                 label="Images data",
-                node_type= ImageDataNode,
-                logic = ImageDataNode.open_data,
+                node_type= ShapeNode,
+                logic = ShapeNode.open_image_data,
                 annotations = {
                         "files": Parameter(AttrType.INPUT, AString),
                         "color_mode": Parameter(AttrType.INPUT, AEnum[ColorMode]),
@@ -361,17 +361,6 @@ node_list = {
                 annotations = {
                         "model": Parameter(AttrType.INPUT, ANode[Single[FitNode]]),
                         "filepath": Parameter(AttrType.INPUT, AString, default='model.keras')
-                    },
-                input = False,
-                output = False
-            ),
-            NodeAnnotation(
-                label="Save model as TFJS",
-                node_type= UtilsNode,
-                logic = UtilsNode.as_tfjs,
-                annotations = {
-                        "model": Parameter(AttrType.INPUT, ANode[Single[FitNode]]),
-                        "filepath": Parameter(AttrType.INPUT, AString, default='model')
                     },
                 input = False,
                 output = False
