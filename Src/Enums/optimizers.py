@@ -12,5 +12,5 @@ class Optimizers(Enum):
     ADAGRAD = "adagrad"
     ADAMAX = "adamax"
     NADAM = "nadam"
-    FLTR = "ftrl"
+    FTRL = "ftrl"
     ADAMW = "adamw"
