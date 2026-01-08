@@ -1,31 +1,41 @@
 import logging
+from logging import Logger
 from datetime import datetime
 import sys
 from pathlib import Path
+import json
 
 import dearpygui.dearpygui as dpg
 
-from Src.Logging import Logger
+from Src.Utils import singleton
 
 
-class Logger_factory(object):
+
+@singleton
+class Logger_factory:
     '''
     Класс для логирования, синглтон.
 
     Attributes:
         config: dict - конфигурация для создания логгеров.
     '''
+    BASE_PATH = Path(sys._MEIPASS if hasattr(sys, '_MEIPASS') else '.')
+
     config: dict
-    __console_tag: str | int
-    __stage_tag: str | int
-    __layout_tag: str | int
-    _instance = None
     _loggers = {}
 
 
-    @classmethod
-    def from_instance(cls) -> "Logger_factory":
-        return cls._instance
+    # @classmethod
+    @staticmethod
+    def open_config(path: Path, exist_ok=True):
+        path = Logger_factory.BASE_PATH / path
+        config = {}
+        if path.exists():
+            config = json.load(path.open())
+        elif not exist_ok: 
+            raise FileExistsError(f"Обязательный конфигурационный файл отсутствует: {path}")
+
+        return config
 
 
     def __init__(self, config: dict[str, str|int]) -> "Logger_factory":
@@ -38,22 +48,10 @@ class Logger_factory(object):
         if 'filename' in config: 
             config['filename'] = config['filename'].format(curdata=datetime.now().strftime(config['datefmt']))
 
-        Path.mkdir(Path(config['filename']).parent, exist_ok=True)
+        Path(config['filename']).parent.mkdir(exist_ok=True)
 
         self.config = config
         logging.basicConfig(**self.config)
-
-
-        self.__console_tag = dpg.generate_uuid()
-        self.__stage_tag = dpg.generate_uuid()
-
-        with dpg.stage(tag=self.__stage_tag):
-            with dpg.window(tag=self.__console_tag, autosize=True, \
-                            pos=(dpg.get_viewport_width(), 0), \
-                            no_background=True, no_collapse=True, no_move=True, no_resize=True, no_title_bar=True):
-                pass
-
-        Logger_factory._instance = self
 
 
     def __call__(self, logger_name: str, config: dict = {}) -> logging.Logger:
@@ -67,12 +65,13 @@ class Logger_factory(object):
         Returns:
             Logger - экземпляр логировщика
         '''
-        if logger_name in Logger_factory._loggers: 
-            logger = Logger_factory._loggers[logger_name]
-            if not config: return logger
-        else:
-            logger = Logger(logger_name, layout_tag=self.__console_tag)
+        if logger_name not in Logger_factory._loggers: 
+            logger = logging.Logger(logger_name)
             Logger_factory._loggers[logger_name] = logger
+
+        logger = Logger_factory._loggers[logger_name]
+
+        if not config: return logger
 
         config = self.config | config
             
@@ -84,7 +83,7 @@ class Logger_factory(object):
             handler = logging.FileHandler(config['filename'].format(curdata=f"{logger_name}_{datetime.now().strftime(config['datefmt'])}"))
 
         if 'format' in config and handler:
-            handler.setFormatter(logging.Formatter(config['format']))
+            handler.setFormatter(logging.Formatter(config['format'].format(group=logger_name)))
 
         if handler: logger.addHandler(handler)
 
@@ -92,38 +91,3 @@ class Logger_factory(object):
             logger.setLevel(config['level'])
             
         return logger        
-    
-
-    def show(self, parent: str | int):
-        '''
-        Установить окно, в котором будет отображаться логи. (Справа сверху)
-
-        Args:
-            parent_window: str | int - индетификатор родительского окна
-        '''
-        from Src.Managers.callbacks import DPGCallback
-
-        dpg.show_item(self.__console_tag)
-
-        resize_callback = DPGCallback(parent)
-        resize_callback.add_state_callback("rect_size", self.resize)
-
-        with dpg.handler_registry():
-            dpg.add_mouse_move_handler(callback=resize_callback.check)
-
-
-    def hide(self):
-        '''
-        Скрыть окно логов.
-        '''
-        dpg.hide_item(self.__console_tag)
-
-
-    def resize(self):
-        '''
-        Переместить консоль в верхний правый угол
-        '''
-        dpg.set_item_pos(self.__console_tag, (dpg.get_viewport_width()-dpg.get_item_width(self.__console_tag), 0))
-
-
-    

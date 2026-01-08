@@ -5,5 +5,5 @@ class Padding(Enum):
     """
     Enum для типов padding в Keras слоях
     """
-    valid = "valid"
-    same = "same"
+    VALID = "valid"
+    SAME = "same"

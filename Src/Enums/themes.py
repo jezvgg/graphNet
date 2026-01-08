@@ -20,3 +20,4 @@ class Themes(StrEnum):
     UTILS = "utils"
     TABLE_DATA = "table_data"
     IMAGE_DATA = "image_data"
+    DATASET = 'dataset'

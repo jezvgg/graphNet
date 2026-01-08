@@ -17,10 +17,9 @@ node_list = {
         "Import data": [
             NodeAnnotation(
                 label = "Tables data",
-                node_type = TableDataNode,
-                logic = TableDataNode.open_data,
+                node_type = ShapeNode,
+                logic = ShapeNode.open_table_data,
                 annotations = {
-                        # "files": Parameter(AttrType.INPUT, AFile),
                         "files": Parameter(AttrType.INPUT, AString),
                         "delimiter": Parameter(AttrType.INPUT, AEnum[Delimiters]),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
@@ -34,18 +33,33 @@ node_list = {
             ),
             NodeAnnotation(
                 label="Images data",
-                node_type= ImageDataNode,
-                logic = ImageDataNode.open_data,
+                node_type= ShapeNode,
+                logic = ShapeNode.open_image_data,
                 annotations = {
-                        "files": Parameter(AttrType.INPUT, AFile),
+                        "files": Parameter(AttrType.INPUT, AString),
                         "color_mode": Parameter(AttrType.INPUT, AEnum[ColorMode]),
                         "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
                         },
                 input=False,
                 output=DataNode
-            )
+            ),
+            NodeAnnotation(
+                label="Load Dataset",
+                node_type= DatasetNode,
+                logic = DatasetNode.open_data,
+                annotations = {
+                        "dataset": Parameter(AttrType.INPUT, AEnum[Datasets]),
+                        "X_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                        "y_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                        "X_test": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                        "y_test": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
+                        },
+                input=False,
+                output=False
+            ),
         ],
-        "Preprocessing Utils": [
+        "Processing Utils": [
             NodeAnnotation(
                 label="to categorical",
                 node_type= DataNode,
@@ -54,7 +68,14 @@ node_list = {
                         "num_classes": Parameter(AttrType.INPUT, AInteger)
                     },
                 input=Single[DataNode]
-            )
+            ),
+            NodeAnnotation(
+                label="from categorical",
+                node_type= DataNode,
+                logic = lambda x: np.argmax(x, axis=-1).reshape(-1, 1),
+                annotations = {},
+                input=Single[DataNode]
+            ),
         ]
     },
     "Neural Network Layers":
@@ -66,26 +87,157 @@ node_list = {
                 node_type= LayerNode,
                 logic = LayerNode.layer(layers.Dense),
                 annotations = {
-                        "units": Parameter(AttrType.INPUT, AInteger),
+                        "units": Parameter(AttrType.INPUT, AInteger, default=1),
                         "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
                         "use_bias": Parameter(AttrType.INPUT, ABoolean)
                     },
                 input=LayerNode
-            )
+            ),
+            NodeAnnotation(
+                label= "Activation",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.Activation),
+                annotations = {
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "Dropout",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.Dropout),
+                annotations = {
+                        "rate": Parameter(AttrType.INPUT, AFloat, default=0.8),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "BatchNormalization",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.BatchNormalization),
+                annotations = {},
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "LayerNormalization",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.LayerNormalization),
+                annotations = {},
+                input=LayerNode
+            ),
         ],
         "Convolutional":
         [
+            NodeAnnotation(
+                label= "Conv1D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.Conv1D),
+                annotations = {
+                        "filters": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean),
+                    },
+                input=LayerNode
+            ),
             NodeAnnotation(
                 label= "Conv2D",
                 node_type= LayerNode,
                 logic = LayerNode.layer(layers.Conv2D),
                 annotations = {
-                        "filters": Parameter(AttrType.INPUT, AInteger),
-                        "kernel_size": Parameter(AttrType.INPUT, AInteger),
-                        "strides": Parameter(AttrType.INPUT, AInteger),
+                        "filters": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
                         "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
                         "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
                         "use_bias": Parameter(AttrType.INPUT, ABoolean),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "Conv3D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.Conv3D),
+                annotations = {
+                        "filters": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "DepthwiseConv1D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.DepthwiseConv1D),
+                annotations = {
+                        "filters": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "depth_multiplier": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "DepthwiseConv2D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.DepthwiseConv2D),
+                annotations = {
+                        "filters": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "depth_multiplier": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "SeparableConv1D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.SeparableConv1D),
+                annotations = {
+                        "filters": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "depth_multiplier": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "SeparableConv2D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.SeparableConv1D),
+                annotations = {
+                        "filters": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "depth_multiplier": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "MaxPooling1D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.MaxPooling1D),
+                annotations = {
+                        "pool_size": Parameter(AttrType.INPUT, AInteger, default=2),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
                     },
                 input=LayerNode
             ),
@@ -94,14 +246,58 @@ node_list = {
                 node_type= LayerNode,
                 logic = LayerNode.layer(layers.MaxPooling2D),
                 annotations = {
-                        "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger]),
-                        "strides": Parameter(AttrType.INPUT, AInteger),
+                        "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger], default=(2,2)),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "MaxPooling3D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.MaxPooling3D),
+                annotations = {
+                        "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger, AInteger], default=(2,2,2)),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "AveragePooling1D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.AveragePooling1D),
+                annotations = {
+                        "pool_size": Parameter(AttrType.INPUT, AInteger, default=2),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "AveragePooling2D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.AveragePooling2D),
+                annotations = {
+                        "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger], default=(2,2)),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                    },
+                input=LayerNode
+            ),
+            NodeAnnotation(
+                label= "AveragePooling3D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.AveragePooling3D),
+                annotations = {
+                        "pool_size": Parameter(AttrType.INPUT, ASequence[AInteger, AInteger, AInteger], default=(2,2,2)),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
                         "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
                     },
                 input=LayerNode
             )
         ],
-        "Etc":[
+        "Operations":[
             NodeAnnotation(
                 label="Concatenate",
                 node_type= LayerNode,
@@ -131,7 +327,6 @@ node_list = {
                 annotations = {
                         "optimizer": Parameter(AttrType.INPUT, AEnum[Optimizers]),
                         "loss": Parameter(AttrType.INPUT, AEnum[Losses]),
-                        # "metrics": MetricNode
                     },
                 input=LayerNode
             ),
@@ -142,7 +337,8 @@ node_list = {
                 annotations = {
                         "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                         "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
-                        "epochs": Parameter(AttrType.INPUT, AInteger)
+                        "epochs": Parameter(AttrType.INPUT, AInteger),
+                        "history": Parameter(AttrType.OUTPUT, ANode[DataNode])  
                     },
                 input = Single[CompileNode]
             ),
@@ -164,7 +360,7 @@ node_list = {
                 logic = keras.saving.save_model,
                 annotations = {
                         "model": Parameter(AttrType.INPUT, ANode[Single[FitNode]]),
-                        "filepath": Parameter(AttrType.INPUT, AString)
+                        "filepath": Parameter(AttrType.INPUT, AString, default='model.keras')
                     },
                 input = False,
                 output = False
