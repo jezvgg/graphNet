@@ -1,23 +1,43 @@
-from keras import layers
+from itertools import chain
+from dataclasses import dataclass
 
+from keras import layers
+import dearpygui.dearpygui as dpg
+
+from Src.Enums import Themes
 from Src.Nodes import AbstractNode
 
+
+@dataclass
+class LayerResult:
+    layer: layers.Layer
+    inputs: set[layers.InputLayer]
 
 
 class LayerNode(AbstractNode):
     '''
     Класс хранящий данные, для связи нода с слоём нейроной сети.
     '''
-
-    def compile(self):
-        self.layer: layers.Layer = super().compile()
-
-        input_layers = [node.layer for node in self.incoming]
-        if len(input_layers) == 1: input_layers = input_layers[0]
-
-        self.layer = self.layer(input_layers)
-
-        return self.layer
+    theme_name: Themes = Themes.LAYER
+    inputs: set["LayerNode"]
+    OUTPUT: LayerResult
 
 
+    @staticmethod
+    def layer(layer: layers.Layer):
+        '''
+        Фабрика функций, для новых INPUT \ OUTPUT,
+        чтоб INPUT мог приходить как args
+        '''
+        return lambda *args, **kwargs: LayerNode.compile_layer(layer, *args, **kwargs)
+    
 
+    @staticmethod
+    def compile_layer(layer: layers.Layer, *args: LayerResult, **kwargs):
+        '''
+        Компанует выход который должен быть у Layer,
+        чтоб не городить костыли с обработкой inputs
+        '''
+        
+        return LayerResult(layer=layer(**kwargs)(*[arg.layer for arg in args]), 
+                            inputs=set().union(*[arg.inputs for arg in args]))

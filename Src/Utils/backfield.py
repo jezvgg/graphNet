@@ -9,7 +9,7 @@ class Backfield:
 
 
     def __init__(self, value = None, callback: Callable = lambda x:x):
-        self.callback = callback
+        self.callback = lambda x:x
         self = value
 
 

@@ -1,0 +1,90 @@
+{
+  "default": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [50, 50, 50, 255]
+    },
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [50, 50, 50, 255]
+    },
+    "mvPlot": {
+      "mvPlotCol_Line": [100, 100, 100, 255]
+    },
+    "mvTheme": {
+      "mvThemeCol_Text": [255, 255, 255, 255]
+    }
+  },
+  "error": {
+    "mvNode": {
+      "mvNodeCol_NodeOutline": [239, 83, 80, 255]
+    },
+    "mvTooltip": {
+      "mvThemeCol_Border": [239, 83, 80, 255]
+    }
+  },
+  "abstract": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [50, 50, 50, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [50, 50, 50, 255], "mvNodeCol_Link": [50, 50, 50, 255] }
+  },
+  "compile": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [102, 187, 106, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [102, 187, 106, 255], "mvNodeCol_Link": [102, 187, 106, 255] }
+  },
+  "data": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [171, 71, 188, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [171, 71, 188, 255], "mvNodeCol_Link": [171, 71, 188, 255] }
+  },
+  "fit": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [255, 111, 0, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 111, 0, 255], "mvNodeCol_Link": [255, 111, 0, 255] }
+  },
+  "layer": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [66, 165, 245, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [66, 165, 245, 255], "mvNodeCol_Link": [66, 165, 245, 255] }
+  },
+  "metric": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [41, 182, 246, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 202, 40, 255], "mvNodeCol_Link": [255, 202, 40, 255] }
+  },
+  "predict": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [41, 182, 246, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [41, 182, 246, 255], "mvNodeCol_Link": [41, 182, 246, 255] }
+  },
+  "shape": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [38, 166, 154, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [38, 166, 154, 255], "mvNodeCol_Link": [38, 166, 154, 255] }
+  },
+  "utils": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [120, 144, 156, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [120, 144, 156, 255], "mvNodeCol_Link": [120, 144, 156, 255] }
+  },
+  "table_data": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [236, 64, 122, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 144, 144, 255], "mvNodeCol_Link": [255, 144, 144, 255] }
+  },
+  "image_data": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [236, 64, 122, 255]
+    },
+    "mvNodeAttribute": { "mvNodeCol_Pin": [236, 64, 122, 255], "mvNodeCol_Link": [236, 64, 122, 255] }
+  }
+}

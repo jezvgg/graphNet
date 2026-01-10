@@ -1,9 +1,15 @@
 from pathlib import Path
+import enum
 
 import dearpygui.dearpygui as dpg
 
 from Src.Config.Annotations import *
 from Tests.DPG_test import DPGUnitTest
+
+
+class TestEnum(enum.Enum):
+    FIRST = 'first'
+    SECOND = 'second'
 
 
 class test_annotations(DPGUnitTest):
@@ -75,9 +81,9 @@ class test_annotations(DPGUnitTest):
 
         example = "Example"
         assert AString.set(input_id, example) == True
-        assert AInteger.get(input_id) == example
+        assert AString.get(input_id) == example
 
-        assert AInteger.set(input_id, 1.5) == False
+        assert AString.set(input_id, 1.5) == False
 
 
     def test_AFile(self):
@@ -86,7 +92,7 @@ class test_annotations(DPGUnitTest):
         assert isinstance(input_id, int | str) 
         assert input_id in dpg.get_all_items()
 
-        assert AFile.get(input_id) == [Path.home()]
+        assert AFile.get(input_id) == None
 
         assert AFile.set(input_id, [Path.cwd()]) == True 
         assert AFile.get(input_id) == [Path.cwd()]
@@ -99,15 +105,15 @@ class test_annotations(DPGUnitTest):
         with dpg.node_editor(parent = self.parent):
             with dpg.node():
                 with dpg.node_attribute() as attribute:
-                    input_id = ANode.build(parent = attribute)
+                    input_id = ANode[object].build(parent = attribute)
 
         assert isinstance(input_id, int | str) 
         assert input_id in dpg.get_all_items()
 
-        assert ANode.get(input_id) == []
+        assert ANode[object].get(input_id) == []
 
         # Тут не должно быть возможности поставить значение
-        assert ANode.set(input_id, None) == False
+        assert ANode[object].set(input_id, None) == False
 
 
     def test_ASequence(self):
@@ -124,6 +130,23 @@ class test_annotations(DPGUnitTest):
         assert ASequence[AInteger, AInteger].set(input_id, 1) == False
         assert ASequence[AInteger, AInteger].set(input_id, (1, 1, 1)) == False
 
+    def test_AEnum(self):
+        annotation = AEnum[TestEnum]
+
+        combo_id = annotation.build(parent=self.parent)
+
+        assert isinstance(combo_id, int | str)
+        assert combo_id in dpg.get_all_items()
+
+        assert TestEnum(annotation.get(combo_id)) == TestEnum.FIRST
+
+        assert annotation.set(combo_id, TestEnum.SECOND) == True
+        assert TestEnum(annotation.get(combo_id)) == TestEnum.SECOND
+
+        assert annotation.set(combo_id, "Invalid value") == False
+        assert annotation.set(combo_id, 123) == False
+
+        assert TestEnum(annotation.get(combo_id)) == TestEnum.SECOND
     
 
     

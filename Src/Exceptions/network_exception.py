@@ -1,0 +1,4 @@
+
+
+class NetworkException(Exception):
+    pass

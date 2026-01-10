@@ -3,8 +3,6 @@ from enum import Enum
 import dearpygui.dearpygui as dpg
 
 
-
-
 class EventType(Enum):
     """
     Перечисление типов событий, сопоставленных с соответствующими
@@ -36,3 +34,12 @@ class EventType(Enum):
 
     # Обработчик для viewport'а
     VIEWPORT_RESIZE = dpg.set_viewport_resize_callback
+
+
+ITEM_EVENTS = (EventType.CLICK, EventType.DOUBLE_CLICK, EventType.FOCUS,
+                   EventType.HOVER, EventType.VISIBLE, EventType.ACTIVATED,
+                   EventType.DEACTIVATED, EventType.EDITED, EventType.RESIZED)
+
+GLOBAL_EVENTS = (EventType.KEY_PRESS, EventType.KEY_RELEASE, EventType.KEY_DOWN, 
+                 EventType.MOUSE_CLICK, EventType.MOUSE_DOUBLE_CLICK, EventType.MOUSE_DOWN,
+                 EventType.MOUSE_RELEASE, EventType.MOUSE_MOVE, EventType.MOUSE_DRAG)

@@ -6,7 +6,7 @@ from Src.Enums.attr_type import AttrType
 from Tests.DPG_test import DPGUnitTest
 
 
-class test_annotations(DPGUnitTest):
+class test_parameter(DPGUnitTest):
 
     def test_Parameter(self):
         param = Parameter(AttrType.INPUT, AInteger, default=5)

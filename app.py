@@ -2,10 +2,10 @@ import json
 
 import dearpygui.dearpygui as dpg
 
-from Src.Logging.logger_factory import Logger_factory
+from Src.Logging import logging
 from Src.node_editor import NodeEditor
 from Src.size_manager import SizeManager
-from Src.Events import EventManager
+from Src.Managers import EventManager
 
 
 
@@ -40,15 +40,12 @@ class App:
         self.initial_global_scale = initial_global_scale
         self.global_scale_limits = global_scale_limits
 
-        self.logger_factory = None
-        self.main_logger = None
+        self.logger = None
         self.size_manager = None
         self.node_editor = None
 
         self._setup_dpg()
         self._setup_logging()
-
-        EventManager.set_logger(self.logger_factory("EventManager"))
 
         self._setup_sizing_and_fonts()
         self._create_ui()
@@ -63,19 +60,25 @@ class App:
 
     def _setup_logging(self):
         """Настраивает систему логирования."""
-        with open(self.logger_config_path) as f:
-            log_config = json.load(f)
+        logging(logging.open_config("Assets/logger_config.json", False))
 
-        self.logger_factory = Logger_factory(log_config)
-        self.main_logger = self.logger_factory("main")
-        self.main_logger.info("Система логирования инициализирована.")
+        debug_config = logging.open_config('Assets/logger_debug.json')
+        group_config = logging.open_config('Assets/logger_group.json')
+        stream_config = logging.open_config('Assets/logger_stream.json')
+
+        self.logger = logging()('main', group_config)
+        logging()('nodes', group_config | debug_config)
+        logging()('functions', group_config | debug_config)
+        logging()('events', group_config | debug_config)
+
+        self.logger.info("Система логирования инициализирована.")
 
 
     def _setup_sizing_and_fonts(self):
         """Инициализирует менеджер размеров и загружает шрифты."""
         self.size_manager = SizeManager(
             font_limits=list(self.font_limits),
-            initial_node_font_size=self.initial_node_font_size,
+            initial_object_font_size=self.initial_node_font_size,
             initial_global_scale=self.initial_global_scale,
             global_scale_limits=list(self.global_scale_limits)
         )
@@ -84,7 +87,7 @@ class App:
 
         with dpg.font_registry():
             self.size_manager.load_fonts(fonts_to_load)
-        self.main_logger.info("Шрифты загружены.")
+        self.logger.info("Шрифты загружены.")
 
         dpg.set_viewport_resize_callback(callback=self._on_viewport_resize_callback)
         with dpg.handler_registry():
@@ -114,7 +117,7 @@ class App:
     def _create_ui(self):
         """Создает основной интерфейс приложения."""
         self.node_editor = NodeEditor(
-            size_manager=self.size_manager,
+            _=self.size_manager,
             minimap=True,
             minimap_location=dpg.mvNodeMiniMap_Location_TopRight
         )
@@ -124,7 +127,7 @@ class App:
             self.logger_factory.show("Prime")
 
         dpg.set_primary_window("Prime", True)
-        self.main_logger.info("UI создан.")
+        self.logger.info("UI создан.")
 
 
     def _mouse_wheel_zoom_callback(self, sender: str | int, app_data: float):
@@ -151,6 +154,6 @@ class App:
     def run(self):
         """Запускает главный цикл приложения."""
         dpg.show_viewport()
-        self.main_logger.warning("Приложение запущено.")
+        self.logger.warning("Приложение запущено.")
         dpg.start_dearpygui()
         dpg.destroy_context()

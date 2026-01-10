@@ -1,6 +1,8 @@
-from Src.Config.Annotations.annotation import Annotation
-
 import dearpygui.dearpygui as dpg
+
+from Src.Config.Annotations.annotation import Annotation
+from Src.Enums import DPGType
+
 
 
 
@@ -14,11 +16,16 @@ class ABoolean(Annotation):
 
     @staticmethod
     def get(input_id: int | str):
+        if DPGType(dpg.get_item_type(input_id)) != DPGType.CHECKBOX:
+            raise Exception(f"Incompatable item for ABoolean.get - {dpg.get_item_type(input_id)}")
+        
         return dpg.get_value(input_id)
     
 
     @staticmethod
     def set(input_id: str| int, value: bool) -> bool:
-        if not isinstance(value, bool): return False
+        if not isinstance(value, bool) or DPGType(dpg.get_item_type(input_id)) != DPGType.CHECKBOX:
+            return False
+        
         dpg.set_value(input_id, value)
         return True
