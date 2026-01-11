@@ -1,11 +1,12 @@
 import json
+from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import logging
 from Src.node_editor import NodeEditor
 from Src.size_manager import SizeManager
-from Src.Managers import EventManager
+from Src.Managers import EventManager, ThemeManager
 
 
 
@@ -22,6 +23,7 @@ class App:
             title: str,
             logger_config_path: str,
             font_path: str,
+            themes_path: str,
             initial_app_font_size: int,
             initial_node_font_size: int,
             font_limits: tuple[int, int],
@@ -43,6 +45,7 @@ class App:
         self.logger = None
         self.size_manager = None
         self.node_editor = None
+        self.theme_manager = ThemeManager(Path(themes_path))
 
         self._setup_dpg()
         self._setup_logging()
@@ -124,7 +127,6 @@ class App:
 
         with dpg.window(tag="Prime"):
             self.node_editor.show("Prime")
-            self.logger_factory.show("Prime")
 
         dpg.set_primary_window("Prime", True)
         self.logger.info("UI создан.")

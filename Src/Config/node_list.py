@@ -10,7 +10,6 @@ from Src.Config.node_annotation import NodeAnnotation
 from Src.Config.Annotations import *
 
 
-# TODO Сделать сериализацию в JSON?
 node_list = {
     "Data & Preprocessing":
     {

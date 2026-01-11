@@ -11,6 +11,7 @@ from Src.Config.parameter import Parameter, AttrType
 from Src.Enums import Themes
 from Src.Managers import ThemeManager
 from Src.Exceptions import NetworkException
+from Src.Utils import lateinit
 
 
 
@@ -25,6 +26,7 @@ class AbstractNode(ABC):
         outgoing: list[Node] - связи с нодами, к которым подключенна эта нода. (Уходящие)
     '''
     __error_message: str = None
+    __themes: ThemeManager = lateinit(ThemeManager)
     _error_id: int | str = None
 
     node_tag: str | int
@@ -124,7 +126,7 @@ class AbstractNode(ABC):
     
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
-        ThemeManager.add_theme(self.node_tag,Themes.ERROR)
+        self.__themes.add(self.node_tag, Themes.ERROR)
 
         self._error_id = dpg.generate_uuid()
         with dpg.node_attribute(parent=self.node_tag, attribute_type=dpg.mvNode_Attr_Static):
@@ -142,7 +144,7 @@ class AbstractNode(ABC):
 
 
     def default_theme(self):
-        ThemeManager.apply_theme(self.node_tag,self.theme_name)
+        self.__themes.apply(self.node_tag,self.theme_name)
 
         if self._error_id and dpg.does_item_exist(self._error_id): 
             dpg.delete_item(dpg.get_item_parent(self._error_id))

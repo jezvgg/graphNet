@@ -6,14 +6,20 @@ from Src.Config.Annotations.annotation import Annotation
 from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
 from Src.Managers import ThemeManager
+from Src.Utils import lateinit
 
 
 
 
-@dataclass
 class ANode(Annotation):
+    __themes = lateinit(ThemeManager)
     node_type: type = object
     single: bool = False
+    
+
+    def __init__(self, node_type: type = object, single: bool = False):
+        self.node_type = node_type
+        self.single = single
 
 
     def __class_getitem__(cls, item):
@@ -37,7 +43,7 @@ class ANode(Annotation):
             input_id = dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
 
         if hasattr(self.node_type, 'theme_name'):
-            ThemeManager.apply_theme(attr, self.node_type.theme_name)
+            self.__themes.apply(attr, self.node_type.theme_name)
 
         return input_id
 
