@@ -7,6 +7,8 @@ from Src.Logging import logging, Logger
 from Src.Config.node_list import node_list, NodeAnnotation
 from Src.Config.Annotations import ANode
 from Src.Utils import lateinit
+from Src.Managers import EventManager
+from Src.Enums import EventType
 
 
 
@@ -21,12 +23,13 @@ class NodeEditor:
     '''
     __logger: Logger = lateinit(logging(), 'main')
     builder: NodeBuilder
+    events: EventManager = lateinit(EventManager)
     __stage_tag: str | int
     __group_tag: str | int
     __start_nodes: list[AbstractNode]
 
 
-    def __init__(self, _, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         '''
         Вызвать окно, для создания графа. 
 
@@ -38,8 +41,7 @@ class NodeEditor:
         self.__group_tag = dpg.generate_uuid()
         self.__start_nodes = []
 
-        # TODO: Поменять на EventManager
-        dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
+        self.events.add(EventType.VIEWPORT_RESIZE, self.on_viewport_resize_callback)
 
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа

@@ -1,26 +1,35 @@
-from functools import wraps, update_wrapper
-from typing import Callable, Hashable, Iterable
+from functools import wraps, update_wrapper, partial
+from typing import Callable, Hashable, Iterable, get_args
 from collections import defaultdict
+from functools import singledispatchmethod
 
 
 
-# TODO: Сделать более стабильно работащим
 class factorymethod:
     '''
-    Декоратор - диспатчеризатор для реализации фабрик
+    Декоратор - диспатчеризатор по значению первого аргумента метода
     '''
     default_func: Callable
     registry: dict[Hashable, Callable]
 
 
     def __init__(self, default_func: Callable):
-        self.default_func = staticmethod(default_func)
+        self.default_func = default_func
         self.registry = defaultdict(lambda: self.default_func)
         update_wrapper(self, self.default_func)
 
 
     def __call__(self, *args, **kwargs):
-        return self.registry[args[0]](*args, **kwargs)
+        return self.registry[args[1]](*args, **kwargs)
+
+    
+    def __get__(self, instance, owner):
+        if instance is None: return self
+
+        bound_call = partial(self.__call__, instance)
+        update_wrapper(bound_call, self.default_func)
+        bound_call.register = self.register
+        return bound_call
 
 
     def register(self, arguments: Iterable[Hashable] | Hashable):
@@ -28,12 +37,8 @@ class factorymethod:
         
         def decorator(func: Callable):
 
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                return func(*args, **kwargs)
-            
             for argument in arguments:
                 self.registry[argument] = func
 
-            return wrapper
+            return func
         return decorator

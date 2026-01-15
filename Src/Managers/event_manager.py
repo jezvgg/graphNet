@@ -43,8 +43,8 @@ class EventManager:
     @add.register(EventType.VIEWPORT_RESIZE)
     def add_viewport_handler(self, event_type: EventType, handler: Callable = None):
         '''Регестрирует обработчики связанные с экраном вывода.'''
-        event_type(handler)
-        self._logger.info(f"Обработчик '{event_type}' установлен для viewport")
+        event_type(callback=handler)
+        self.__logger.info(f"Обработчик '{event_type}' установлен для viewport")
 
 
     @add.register(GLOBAL_EVENTS)
@@ -54,7 +54,7 @@ class EventManager:
         '''Регестрирует глобальные обработчики.'''
         global_registry = self.__get_global_registry()
         event_type(parent=global_registry, callback=handler, user_data=user_data)
-        self._logger.info(f"Глобальный обработчик '{event_type}' добавлен")
+        self.__logger.info(f"Глобальный обработчик '{event_type}' добавлен")
 
 
     def clear(self, item_id: str | int):

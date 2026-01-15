@@ -5,8 +5,8 @@ import dearpygui.dearpygui as dpg
 
 from Src.Logging import logging
 from Src.node_editor import NodeEditor
-from Src.size_manager import SizeManager
-from Src.Managers import EventManager, ThemeManager
+from Src.Managers import EventManager, ThemeManager, FontManager
+from Src.Enums import EventType
 
 
 
@@ -16,6 +16,9 @@ class App:
     Основной класс приложения, который отвечает за
     создание UI и запуск главного цикла DearPyGui.
     """
+    font_manager: FontManager
+    theme_manager: ThemeManager
+    event_manager: EventManager
 
 
     def __init__(
@@ -24,33 +27,24 @@ class App:
             logger_config_path: str,
             font_path: str,
             themes_path: str,
-            initial_app_font_size: int,
-            initial_node_font_size: int,
-            font_limits: tuple[int, int],
-            initial_global_scale: float,
-            global_scale_limits: tuple[float, float]
     ):
         """
         Инициализирует приложение
         """
         self.title = title
         self.logger_config_path = logger_config_path
-        self.font_path = font_path
-        self.initial_app_font_size = initial_app_font_size
-        self.initial_node_font_size = initial_node_font_size
-        self.font_limits = font_limits
-        self.initial_global_scale = initial_global_scale
-        self.global_scale_limits = global_scale_limits
 
         self.logger = None
         self.size_manager = None
         self.node_editor = None
-        self.theme_manager = ThemeManager(Path(themes_path))
 
-        self._setup_dpg()
         self._setup_logging()
+        self._setup_dpg()
 
-        self._setup_sizing_and_fonts()
+        self.font_manager = FontManager(Path(font_path))
+        self.theme_manager = ThemeManager(Path(themes_path))
+        self.event_manager = EventManager()
+
         self._create_ui()
 
 
@@ -73,54 +67,14 @@ class App:
         logging()('nodes', group_config | debug_config)
         logging()('functions', group_config | debug_config)
         logging()('events', group_config | debug_config)
+        logging()('managers', group_config | debug_config)
 
         self.logger.info("Система логирования инициализирована.")
-
-
-    def _setup_sizing_and_fonts(self):
-        """Инициализирует менеджер размеров и загружает шрифты."""
-        self.size_manager = SizeManager(
-            font_limits=list(self.font_limits),
-            initial_object_font_size=self.initial_node_font_size,
-            initial_global_scale=self.initial_global_scale,
-            global_scale_limits=list(self.global_scale_limits)
-        )
-
-        fonts_to_load = self._build_font_list()
-
-        with dpg.font_registry():
-            self.size_manager.load_fonts(fonts_to_load)
-        self.logger.info("Шрифты загружены.")
-
-        dpg.set_viewport_resize_callback(callback=self._on_viewport_resize_callback)
-        with dpg.handler_registry():
-            dpg.add_mouse_wheel_handler(callback=self._mouse_wheel_zoom_callback)
-
-
-    def _build_font_list(self) -> list:
-        """Собирает список шрифтов для загрузки на основе конфигурации."""
-        fonts = [
-            {
-                "path": self.font_path,
-                "size": self.initial_app_font_size,
-                "dpg_tag": "app_font_default",
-                "make_default": True
-            }
-        ]
-        min_size, max_size = self.font_limits
-        for size in range(min_size, max_size + 1):
-            fonts.append({
-                "path": self.font_path,
-                "size": size,
-                "dpg_tag": f"font_{size}"
-            })
-        return fonts
 
 
     def _create_ui(self):
         """Создает основной интерфейс приложения."""
         self.node_editor = NodeEditor(
-            _=self.size_manager,
             minimap=True,
             minimap_location=dpg.mvNodeMiniMap_Location_TopRight
         )
@@ -129,33 +83,18 @@ class App:
             self.node_editor.show("Prime")
 
         dpg.set_primary_window("Prime", True)
+        # Убрать когда будет сделана нормальная работа дефолтного шрифта
+        self.font_manager.set("Prime")
+        self.event_manager.add(
+            EventType.MOUSE_CLICK,
+            lambda sender, app_data: self.font_manager.increase("Prime")
+            )
         self.logger.info("UI создан.")
-
-
-    def _mouse_wheel_zoom_callback(self, sender: str | int, app_data: float):
-        """
-        Callback для масштабирования с помощью колеса мыши.
-        Масштабирует редактор узлов, если курсор над редактором и зажат Shift.
-        В противном случае масштабирует всё приложение, если зажат Shift.
-        """
-        if not dpg.is_key_down(dpg.mvKey_LShift):
-            return
-
-        if dpg.is_item_hovered('node_editor'):
-            self.size_manager.resize_node_editor('node_editor', app_data)
-        else:
-            self.size_manager.resize_global(app_data)
-
-
-    def _on_viewport_resize_callback(self, sender, app_data):
-        """Callback для изменения размера node_editor'a"""
-        if dpg.does_item_exist('node_editor'):
-            dpg.configure_item('node_editor', height=dpg.get_viewport_height() * 0.9)
 
 
     def run(self):
         """Запускает главный цикл приложения."""
         dpg.show_viewport()
-        self.logger.warning("Приложение запущено.")
+        self.logger.info("Приложение запущено.")
         dpg.start_dearpygui()
         dpg.destroy_context()
