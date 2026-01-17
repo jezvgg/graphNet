@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import dearpygui.dearpygui as dpg
 
 from Src.Managers.font_manager.font import FontUnit
-from Src.Utils import singleton, lateinit
+from Src.Utils import singleton, lateinit, get_children
 from Src.Logging import logging
 
 
@@ -15,6 +15,7 @@ from Src.Logging import logging
 @singleton
 class FontManager:
     __logger = lateinit(logging(), 'managers')
+    __registry: str | int
     fonts: dict[str, dict[int, FontUnit]]
     default: str | int
 
@@ -38,7 +39,7 @@ class FontManager:
             for size, curr_id, next_id in zip(font_config['sizes'][1:], font_ids[:-1], font_ids[1:]):
                 
                 font: FontUnit = dpg.get_item_user_data(curr_id)
-                next_font = FontUnit(font_config['path'], font_config['hints'], 
+                next_font = FontUnit(Path(font_config['path']).resolve(), font_config['hints'], 
                                      font_name, size, next_id, prev = font)
                 font.next = next_font
                 self.fonts[font_name][size] = font
@@ -48,14 +49,17 @@ class FontManager:
                 self.__logger.error(f"Конфигурация шрифтов имеет несколько стандартных шрифтов! Установите один.")
 
             self.default = self.fonts[font_name][font_config.get('default_size', 14)]
-            dpg.bind_font(self.default)
-        
+            dpg.bind_font(self.default.id)
         self.__logger.info("Шрифты инициализированы!")
 
 
-    def increase(self, item: str | int):
-        font: FontUnit = dpg.get_item_user_data(dpg.get_item_font(item))
-        dpg.bind_item_font(item, font.next.id)
+    def increase(self, id: str | int, children: bool = True):
+        items = {id}
+        if children: items|= get_children(id)
+        
+        for item in items:
+            font: FontUnit = dpg.get_item_user_data(dpg.get_item_font(item) or self.default.id)
+            dpg.bind_item_font(item, font.next.id)
 
 
     def reduce(self, item: str | int):

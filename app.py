@@ -39,20 +39,16 @@ class App:
         self.node_editor = None
 
         self._setup_logging()
-        self._setup_dpg()
+        dpg.create_context()
+        dpg.create_viewport(title=self.title)
 
         self.font_manager = FontManager(Path(font_path))
         self.theme_manager = ThemeManager(Path(themes_path))
         self.event_manager = EventManager()
 
-        self._create_ui()
-
-
-    def _setup_dpg(self):
-        """Настраивает контекст и вьюпорт DearPyGui."""
-        dpg.create_context()
-        dpg.create_viewport(title=self.title)
         dpg.setup_dearpygui()
+
+        self._create_ui()
 
 
     def _setup_logging(self):
