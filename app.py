@@ -82,10 +82,22 @@ class App:
         # Убрать когда будет сделана нормальная работа дефолтного шрифта
         self.font_manager.set("Prime")
         self.event_manager.add(
-            EventType.MOUSE_CLICK,
-            lambda sender, app_data: self.font_manager.increase("Prime")
+            EventType.MOUSE_WHEEL,
+            self.__size_increase
             )
         self.logger.info("UI создан.")
+
+    
+    def __size_increase(self, sender, app_data: int):
+        sizing_method = self.font_manager.increase if app_data > 0 else self.font_manager.reduce
+        if dpg.is_key_down(dpg.mvKey_LControl) or dpg.is_key_down(dpg.mvKey_RControl):
+            sizing_method("Prime")
+            return
+
+        if dpg.is_item_hovered("node_editor"):
+            sizing_method("node_editor")
+            return
+
 
 
     def run(self):

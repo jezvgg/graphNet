@@ -42,4 +42,5 @@ ITEM_EVENTS = (EventType.CLICK, EventType.DOUBLE_CLICK, EventType.FOCUS,
 
 GLOBAL_EVENTS = (EventType.KEY_PRESS, EventType.KEY_RELEASE, EventType.KEY_DOWN, 
                  EventType.MOUSE_CLICK, EventType.MOUSE_DOUBLE_CLICK, EventType.MOUSE_DOWN,
-                 EventType.MOUSE_RELEASE, EventType.MOUSE_MOVE, EventType.MOUSE_DRAG)
+                 EventType.MOUSE_RELEASE, EventType.MOUSE_MOVE, EventType.MOUSE_DRAG,
+                 EventType.MOUSE_WHEEL)

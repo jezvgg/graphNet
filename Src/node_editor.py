@@ -65,7 +65,7 @@ class NodeEditor:
         self.on_viewport_resize_callback()
 
 
-    def on_viewport_resize_callback(self, **kwargs):
+    def on_viewport_resize_callback(self, *args, **kwargs):
         '''
         Callback для изменения размера node_editor'a
         '''

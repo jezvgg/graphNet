@@ -53,22 +53,30 @@ class FontManager:
         self.__logger.info("Шрифты инициализированы!")
 
 
-    def increase(self, id: str | int, children: bool = True):
+    def __set(self, id: str | int, font: FontUnit, children: bool = True):
         items = {id}
         if children: items|= get_children(id)
-        
+
         for item in items:
-            font: FontUnit = dpg.get_item_user_data(dpg.get_item_font(item) or self.default.id)
-            dpg.bind_item_font(item, font.next.id)
+            dpg.bind_item_font(item, font.id)
 
 
-    def reduce(self, item: str | int):
-        font: FontUnit = dpg.get_item_user_data(dpg.get_item_font(item))
-        dpg.bind_item_font(item, font.prev.id)
+    def get(self, item: str | int):
+        return dpg.get_item_user_data(dpg.get_item_font(item) or self.default.id)
 
 
-    def set(self, item: str | int, font_name: str = None, size: int = None):
+    def increase(self, item: str | int, children: bool = True):
+        font: FontUnit = self.get(item)
+        self.__set(item, font.next, children)
+
+
+    def reduce(self, item: str | int, children: bool = True):
+        font: FontUnit = self.get(item)
+        self.__set(item, font.prev, children)
+
+
+    def set(self, item: str | int, font_name: str = None, size: int = None, children: bool = True):
         font_name = font_name or self.default.name
         font_size = size or self.default.size
-        font = self.fonts[font_name][font_size]
-        dpg.bind_item_font(item, font.id)
+        font: FontUnit = self.fonts[font_name][font_size]
+        self.__set(item, font, children)
