@@ -5,7 +5,7 @@ import dearpygui.dearpygui as dpg
 
 from Src.Logging import logging
 from Src.node_editor import NodeEditor
-from Src.Managers import EventManager, ThemeManager, FontManager
+from Src.Managers import EventManager, ThemeManager, FontManager, SizeManager
 from Src.Enums import EventType
 
 
@@ -19,6 +19,7 @@ class App:
     font_manager: FontManager
     theme_manager: ThemeManager
     event_manager: EventManager
+    size_manager: SizeManager
 
 
     def __init__(
@@ -45,6 +46,7 @@ class App:
         self.font_manager = FontManager(Path(font_path))
         self.theme_manager = ThemeManager(Path(themes_path))
         self.event_manager = EventManager()
+        self.size_manager = SizeManager()
 
         dpg.setup_dearpygui()
 
@@ -79,8 +81,7 @@ class App:
             self.node_editor.show("Prime")
 
         dpg.set_primary_window("Prime", True)
-        # Убрать когда будет сделана нормальная работа дефолтного шрифта
-        self.font_manager.set("Prime")
+
         self.event_manager.add(
             EventType.MOUSE_WHEEL,
             self.__size_increase
@@ -89,14 +90,16 @@ class App:
 
     
     def __size_increase(self, sender, app_data: int):
-        sizing_method = self.font_manager.increase if app_data > 0 else self.font_manager.reduce
+        sizing_method = self.size_manager.increase if app_data > 0 else self.size_manager.reduce
+        height, width = self.size_manager.get_bbox("node_editor")
         if dpg.is_key_down(dpg.mvKey_LControl) or dpg.is_key_down(dpg.mvKey_RControl):
             sizing_method("Prime")
-            return
 
-        if dpg.is_item_hovered("node_editor"):
-            sizing_method("node_editor")
-            return
+        elif dpg.is_item_hovered("node_editor"):
+            ratio = sizing_method("node_editor")
+            self.node_editor.zoom(ratio)
+        
+        self.size_manager.set_bbox("node_editor", height, width)
 
 
 

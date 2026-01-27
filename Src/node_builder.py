@@ -8,8 +8,9 @@ from keras import layers
 from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
-from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
+from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single, Annotation
 from Src.Utils import lateinit
+from Src.Managers import SizeManager, FontManager
 
 
 
@@ -24,6 +25,8 @@ class NodeBuilder:
     node_list: dict[str, dict[str, list[NodeAnnotation]]]
     delete_callback: Callable
     logger: Logger = lateinit(logging(), "nodes")
+    font_manager: FontManager = lateinit(FontManager)
+    size_manager: SizeManager = lateinit(SizeManager)
 
 
     def __init__(self, 
@@ -82,6 +85,7 @@ class NodeBuilder:
                 node_data.input.build(label="INPUT", parent=node_id)
                 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
+                dpg.add_spacer(width=Annotation.BASE_WIDTH)
                 with dpg.tree_node(label="Docs"):
                     dpg.add_text(node.docs)
 
@@ -95,6 +99,11 @@ class NodeBuilder:
 
             if node_data.output:
                 node_data.output.build(label="OUTPUT", parent=node_id)
+
+        font = self.font_manager.get("node_editor")
+        default_font = self.font_manager.get(node_id)
+        self.font_manager.set(node_id, font.name, font.size)
+        self.size_manager.transform(node_id, font.size / default_font.size, True)
 
         node.default_theme()
 

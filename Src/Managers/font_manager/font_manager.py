@@ -61,22 +61,25 @@ class FontManager:
             dpg.bind_item_font(item, font.id)
 
 
-    def get(self, item: str | int):
+    def get(self, item: str | int) -> FontUnit:
         return dpg.get_item_user_data(dpg.get_item_font(item) or self.default.id)
 
 
-    def increase(self, item: str | int, children: bool = True):
+    def increase(self, item: str | int, children: bool = True) -> FontUnit:
         font: FontUnit = self.get(item)
         self.__set(item, font.next, children)
+        return font.next
 
 
-    def reduce(self, item: str | int, children: bool = True):
+    def reduce(self, item: str | int, children: bool = True) -> FontUnit:
         font: FontUnit = self.get(item)
         self.__set(item, font.prev, children)
+        return font.prev
 
 
-    def set(self, item: str | int, font_name: str = None, size: int = None, children: bool = True):
+    def set(self, item: str | int, font_name: str = None, size: int = None, children: bool = True) -> FontUnit:
         font_name = font_name or self.default.name
         font_size = size or self.default.size
         font: FontUnit = self.fonts[font_name][font_size]
         self.__set(item, font, children)
+        return font

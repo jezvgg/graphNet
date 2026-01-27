@@ -9,6 +9,7 @@ from Src.Config.Annotations import ANode
 from Src.Utils import lateinit
 from Src.Managers import EventManager
 from Src.Enums import EventType
+from Src.Nodes.abstract_node import AbstractNode
 
 
 
@@ -246,3 +247,28 @@ class NodeEditor:
         Спрятать элемент
         '''
         dpg.move_item(self.__group_tag, parent=self.__stage_tag)
+
+
+    def zoom(self, ratio: float):
+        zoom_ratio = ratio - 1
+        
+        nodes = dpg.get_item_children("node_editor", slot=1)
+
+        pos = dpg.get_mouse_pos(local=False)
+        ref_node = dpg.get_item_children("node_editor", slot=1)[0]
+        ref_screen_pos = dpg.get_item_rect_min(ref_node)
+        ref_grid_pos = dpg.get_item_pos(ref_node)
+
+        NODE_PADDING = (8, 8)
+
+        pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
+        pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
+        print(pos)
+        for node_id in nodes:
+            if not isinstance(dpg.get_item_user_data(node_id), AbstractNode): continue
+            
+            node_pos = dpg.get_item_pos(node_id)
+            print(node_pos)
+            node_pos[0] += (node_pos[0] - pos[0]) * zoom_ratio
+            node_pos[1] += (node_pos[1] - pos[1]) * zoom_ratio
+            dpg.set_item_pos(node_id, node_pos)

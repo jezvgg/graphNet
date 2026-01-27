@@ -45,7 +45,6 @@ class EventManager:
 
 
     def __raise_calls(self, calls: list[Callable], *args, **kwargs):
-        print(args, kwargs)
         for call in calls: call(*args, **kwargs)
 
 
