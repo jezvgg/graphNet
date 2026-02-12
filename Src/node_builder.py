@@ -179,10 +179,15 @@ class NodeBuilder:
             dpg.add_button(label="Close", callback=lambda: dpg.configure_item(error_window, show=False))
 
         # TODO: Прикрепить модальное окно на середину при изменении размера
-        dpg.set_item_pos(error_window, [
-            (dpg.get_viewport_width() - dpg.get_item_width(error_window)) // 4,
-            (dpg.get_viewport_height() - dpg.get_item_height(error_window)) // 3
-        ])
+        def resize_window():
+            dpg.set_item_pos(error_window, [
+                (dpg.get_viewport_width() - dpg.get_item_width(error_window)) // 4,
+                (dpg.get_viewport_height() - dpg.get_item_height(error_window)) // 3
+            ])
+
+        resize_window()
+
+        dpg.set_viewport_resize_callback(resize_window)
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
         
