@@ -169,8 +169,8 @@ class NodeBuilder:
         return visited
     
 
-    def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
-        with dpg.window(label="Непревиденная ошибка", modal=True, no_title_bar=True, \
+    def raise_error(self, error_message: str, error_message_type: str = "Unknown Error"):
+        with dpg.window(tag='error_window', label="Непревиденная ошибка", modal=True, no_title_bar=True, \
                         no_resize=True, no_move=True) as error_window:
             dpg.add_text("Произошла непредвиденная ошибка, сообщите пожалуйста разработчикам.")
             dpg.add_text(f"{error_message_type}:")
@@ -179,11 +179,22 @@ class NodeBuilder:
             dpg.add_button(label="Close", callback=lambda: dpg.configure_item(error_window, show=False))
 
         # TODO: Прикрепить модальное окно на середину при изменении размера
-        dpg.set_item_pos(error_window, [
-            (dpg.get_viewport_width() - dpg.get_item_width(error_window)) // 4,
-            (dpg.get_viewport_height() - dpg.get_item_height(error_window)) // 3
-        ])
 
-        self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
+        dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback_error_message)
+
+        self.logger.warning(f"Error catched ({error_message_type}): {error_message}")
+
+        self.on_viewport_resize_callback_error_message()
+
+
+    def on_viewport_resize_callback_error_message(self, **kwargs):
+        '''
+        Callback для перемещения модального окна на середину при изменении размера
+        '''
+        if dpg.does_item_exist('error_window'):
+            dpg.set_item_pos('error_window', [
+                (dpg.get_viewport_width() - dpg.get_item_width('error_window')) // 3,
+                (dpg.get_viewport_height() - dpg.get_item_height('error_window')) // 3
+            ])
         
 
