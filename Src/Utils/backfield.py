@@ -5,12 +5,14 @@ from typing import Callable, Any
 class Backfield:
     owner: str
     name: str
-    callback: Callable
 
 
-    def __init__(self, value = None, callback: Callable = lambda x:x):
-        self.callback = lambda x:x
+    def __init__(self, value = None):
         self = value
+
+
+    def bind(self, instance, callback: Callable):
+        setattr(instance, f"_{self.name}_callback", callback)
 
 
     def __set_name__(self, owner, name):
@@ -24,5 +26,5 @@ class Backfield:
     
 
     def __set__(self, instance, value) -> None:
-        self.callback(value)
+        getattr(instance, f"_{self.name}_callback")(value)
         setattr(instance, self.name, value)

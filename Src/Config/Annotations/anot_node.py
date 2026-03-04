@@ -22,7 +22,7 @@ class ANode(Annotation):
 
 
     def build(self, parent: int | str, *args, **kwargs):
-        if DPGType(dpg.get_item_type(parent)) != DPGType.NODE_ATTRIBUTE:
+        if DPGType(parent) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
         new_parent = dpg.get_item_parent(parent)
@@ -47,7 +47,7 @@ class ANode(Annotation):
 
         parent = dpg.get_item_parent(input_id)
 
-        if DPGType(dpg.get_item_type(parent)) != DPGType.NODE_ATTRIBUTE:
+        if DPGType(parent) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent of item {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
         user_data = dpg.get_item_user_data(parent)

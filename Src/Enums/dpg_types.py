@@ -1,5 +1,7 @@
 from enum import Enum
 
+import dearpygui.dearpygui as dpg
+
 
 
 
@@ -7,6 +9,11 @@ class DPGType(Enum):
     """
     Enum для элементов dearpygui
     """
+
+    @classmethod
+    def _missing_(cls, value: str | int):
+        return cls(dpg.get_item_type(value))
+    
     # Основные виджеты
     BUTTON = 'mvAppItemType::mvButton'
     CHECKBOX = 'mvAppItemType::mvCheckbox'
