@@ -1,4 +1,3 @@
-import keras
 from subprocess import Popen, PIPE
 import numpy as np
 
@@ -43,7 +42,27 @@ class TrainTestSplitNode(DataNode):
         y_train, y_test = y[n_train], y[n_test]
         return X_train, X_test, y_train, y_test if y is not None else X_train, X_test
 
-        
+    def compile(self) -> bool:
+        status = super().compile()
+        if not status:
+            return False
 
+        try:
+            result = self.OUTPUT
+            if not isinstance(result, tuple):
+                raise AttributeError("split вернул некорректный формат")
 
-        return
+            if len(result) == 2:
+                self.X_train, self.X_test = result
+                self.y_train = self.y_test = None
+            elif len(result) == 4:
+                self.X_train, self.X_test, self.y_train, self.y_test = result
+            else:
+                raise AttributeError("split вернул некорректное количество выходов")
+
+        except Exception as ex:
+            self.raise_error(ex, "Ошибка при split")
+            return False
+
+        return status
+
