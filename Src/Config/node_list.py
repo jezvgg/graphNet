@@ -76,6 +76,18 @@ node_list = {
                 annotations = {},
                 input=Single[DataNode]
             ),
+            NodeAnnotation(
+                label="Train test split",   
+                node_type= TrainTestSplitNode,
+                logic = TrainTestSplitNode.split,
+                annotations = {
+                        "test_size": Parameter(AttrType.INPUT, AFloat, default=0.25),
+                        "train_size": Parameter(AttrType.INPUT, AFloat | AInteger, default=None)
+                    },      
+                input=Single[DataNode],
+                output=DataNode 
+
+            ),
         ]
     },
     "Neural Network Layers":
