@@ -9,7 +9,7 @@ from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
-
+from Src.Utils.list_node_item import ListNodeItem
 
 
 class NodeBuilder:
@@ -55,10 +55,10 @@ class NodeBuilder:
                         with dpg.tree_node(label=subanchor) as tree_subanchor:
 
                             for node in self.node_list[anchor][subanchor]:
-                                btn = dpg.add_button(label=node.label, user_data=node)
-                                
-                                with dpg.drag_payload(parent=btn, drag_data=btn):
-                                    dpg.add_text(node.label)
+                                # btn = dpg.add_button(label=node.label, user_data=node)
+                                btn = ListNodeItem(node_data = node, parent = tree_subanchor)
+                                # with dpg.drag_payload(parent=btn, drag_data=btn):
+                                #     dpg.add_text(node.label)
 
         return list
 
