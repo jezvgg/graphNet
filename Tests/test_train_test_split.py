@@ -18,7 +18,12 @@ class TestTrainTestSplitNode(unittest.TestCase):
         np.testing.assert_array_equal(X_test,  [[3, 4], [1, 2]])
         np.testing.assert_array_equal(y_train, [1, 0])
         np.testing.assert_array_equal(y_test,  [1, 0])
-
-
+    def test_mismatched_lengths(self):
+        x = np.array([[1,2],[3,4],[5,9]])
+        y = np.array([0])
+        with self.assertRaises(ValueError) as e:
+            
+            TrainTestSplitNode.split(x,y,test_size=0.25,random_state=42)
+        print(e.exception)
 if __name__ == "__main__":
     unittest.main()
