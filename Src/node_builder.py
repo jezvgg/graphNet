@@ -55,10 +55,7 @@ class NodeBuilder:
                         with dpg.tree_node(label=subanchor) as tree_subanchor:
 
                             for node in self.node_list[anchor][subanchor]:
-                                # btn = dpg.add_button(label=node.label, user_data=node)
-                                btn = ListNodeItem(node_data = node, parent = tree_subanchor)
-                                # with dpg.drag_payload(parent=btn, drag_data=btn):
-                                #     dpg.add_text(node.label)
+                                ListNodeItem(node_data = node, parent = tree_subanchor)
 
         return list
 
