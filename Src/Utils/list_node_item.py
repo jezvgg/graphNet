@@ -3,7 +3,8 @@ import dearpygui.dearpygui as dpg
 
 from Src.Config.node_annotation import NodeAnnotation
 from Src.Managers import ThemeManager
-from Src.Config.Annotations import AEnum, ABoolean, AInteger, ANode
+from Src.Config.Annotations import AEnum, ABoolean, AInteger, AFloat, AString, ANode
+
 
 BUTTON_HEIGHT = 32
 LINE_HEIGHT = 30
@@ -49,14 +50,33 @@ class ListNodeItem:
 
           text = dpg.add_text("Docs", indent = 4)
           with dpg.drag_payload(parent = text, drag_data = window):
-              dpg.add_text(node_data.label)
+             dpg.add_text(node_data.label)
             
           for label, parameter in node_data.annotations.items():
-              text = dpg.add_text(label, indent = 4)
-              with dpg.drag_payload(parent = text, drag_data = window):
-                dpg.add_text(node_data.label)
+            if label == 'INPUT': continue
+            if isinstance(parameter.hint, ANode): continue
+            if isinstance(parameter.hint, AEnum):
+              dpg.add_combo(
+                  label=label,
+                  items=parameter.hint.items,
+                  default_value=parameter.hint.items[0] if parameter.hint.items else "",
+                  width=100,
+                  enabled=False
+              )
+            elif parameter.hint is ABoolean:
+                dpg.add_checkbox(label=label, enabled=False)
+            elif parameter.hint is AInteger:
+                dpg.add_input_int(label=label, width=50, enabled=False)
+            elif parameter.hint is AFloat:
+                dpg.add_input_float(label=label, width=50, enabled=False)
+            elif parameter.hint is AString:
+                dpg.add_input_text(label=label, width=50, enabled=False)
+            else:
+                text = dpg.add_text(label, indent=4)
+                with dpg.drag_payload(parent=text, drag_data=window):
+                    dpg.add_text(node_data.label)
 
           if node_data.output:
-              text = dpg.add_text("OUTPUT", indent = 4)
-              with dpg.drag_payload(parent = text, drag_data = window):
-                  dpg.add_text(node_data.label)
+            text = dpg.add_text("OUTPUT", indent = 4)
+            with dpg.drag_payload(parent = text, drag_data = window):
+                dpg.add_text(node_data.label)
