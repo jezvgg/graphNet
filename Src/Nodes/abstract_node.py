@@ -87,9 +87,9 @@ class AbstractNode(ABC):
         Выводит сообщение в окно сборки модели. По умолчанию выводится "Сборка ноды <__str__>".
         '''
         if message is not None:
-            dpg.add_text(message, parent="compile_window")
+            AbstractNode.add_message_to_compile_window_static(message)
         else:
-            dpg.add_text(f"Сборка ноды {self}", parent="compile_window")
+            AbstractNode.add_message_to_compile_window_static(f"Сборка ноды {self}")
 
 
     def compile(self, kwargs: dict = None) -> bool:
