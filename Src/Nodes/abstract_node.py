@@ -135,6 +135,14 @@ class AbstractNode(ABC):
             dpg.add_text(f"Сборка ноды {self}", parent="compile_window")
 
 
+    @staticmethod
+    def add_message_to_compile_window_static(message: str):
+        '''
+        Выводит сообщение в окно сборки модели.
+        '''
+        dpg.add_text(message, parent="compile_window")
+
+
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
         ThemeManager.add_theme(self.node_tag,Themes.ERROR)
 
