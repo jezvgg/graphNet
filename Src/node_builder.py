@@ -139,6 +139,9 @@ class NodeBuilder:
         self.logger.info("Началась сборка графа.")
         status = True
 
+        with dpg.window(label="Сборка модели", width=800, height=500, modal=True, no_close=True, tag="compile_window") as popup:
+            dpg.add_loading_indicator(width=100, height=100)
+
         while queue:
             self.logger.debug(f"Текущая очередь - {queue}")
             current_node = queue.pop(0)
@@ -166,6 +169,8 @@ class NodeBuilder:
 
                 visited.add(current_node)
 
+        dpg.delete_item(popup)
+        
         return visited
     
 
