@@ -74,6 +74,24 @@ class AbstractNode(ABC):
         return self.node_tag
 
 
+    @staticmethod
+    def add_message_to_compile_window_static(message: str):
+        '''
+        Выводит сообщение в окно сборки модели.
+        '''
+        dpg.add_text(message, parent="compile_window")
+
+
+    def add_message_to_compile_window(self, message: str = None):
+        '''
+        Выводит сообщение в окно сборки модели. По умолчанию выводится "Сборка ноды <__str__>".
+        '''
+        if message is not None:
+            dpg.add_text(message, parent="compile_window")
+        else:
+            dpg.add_text(f"Сборка ноды {self}", parent="compile_window")
+
+
     def compile(self, kwargs: dict = None) -> bool:
         '''
         Основной метод нодов, содержащий логику их работы. Тут создаются слои нейронной сети, проходит обучение и т.д. В зависимости от ноды, будет разная логика.
@@ -123,24 +141,6 @@ class AbstractNode(ABC):
             return False
             
         return True
-
-
-    def add_message_to_compile_window(self, message: str = None):
-        '''
-        Выводит сообщение в окно сборки модели. По умолчанию выводится "Сборка ноды <__str__>".
-        '''
-        if message is not None:
-            dpg.add_text(message, parent="compile_window")
-        else:
-            dpg.add_text(f"Сборка ноды {self}", parent="compile_window")
-
-
-    @staticmethod
-    def add_message_to_compile_window_static(message: str):
-        '''
-        Выводит сообщение в окно сборки модели.
-        '''
-        dpg.add_text(message, parent="compile_window")
 
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
