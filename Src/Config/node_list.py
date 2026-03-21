@@ -3,6 +3,7 @@ import numpy as np
 from keras import layers
 import keras
 
+from Src.Enums.text_output_mode import TextOutputMode
 from Src.Enums import *
 from Src.Nodes import *
 from Src.Config.parameter import Parameter
@@ -52,6 +53,22 @@ node_list = {
                     "NFFT": Parameter(AttrType.INPUT, AInteger, default=1024),
                     "noverlap": Parameter(AttrType.INPUT, AInteger, default=512),
                     "max_duration_sec": Parameter(AttrType.INPUT, AFloat, default=5.0),
+                    "shape": Parameter(AttrType.OUTPUT, 
+                                       ASequence[AInteger, AInteger],
+                                       backfield=ShapeNode.shape)
+                },
+                input=False,
+                output=DataNode
+            ),
+            NodeAnnotation(
+                label="Text data",
+                node_type=ShapeNode,
+                logic=ShapeNode.open_text_data,
+                annotations={
+                    "files": Parameter(AttrType.INPUT, AString),
+                    "max_tokens": Parameter(AttrType.INPUT, AInteger, default=20000),
+                    "output_sequence_length": Parameter(AttrType.INPUT, AInteger, default=200),
+                    "output_mode": Parameter(AttrType.INPUT, AEnum[TextOutputMode], default=TextOutputMode.INT),
                     "shape": Parameter(AttrType.OUTPUT, 
                                        ASequence[AInteger, AInteger],
                                        backfield=ShapeNode.shape)
