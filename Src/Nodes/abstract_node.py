@@ -85,6 +85,8 @@ class AbstractNode(ABC):
         self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
         self.logger.debug(f"Аргументы ноды - {arguments}")
 
+        self.add_message_to_compile_window()
+
         for argument in arguments:
             name = dpg.get_item_label(argument)
 
@@ -121,7 +123,17 @@ class AbstractNode(ABC):
             return False
             
         return True
-    
+
+
+    def add_message_to_compile_window(self, message: str = None):
+        '''
+        Выводит сообщение в окно сборки модели. По умолчанию выводится "Сборка ноды <__str__>".
+        '''
+        if message is not None:
+            dpg.add_text(message, parent="compile_window")
+        else:
+            dpg.add_text(f"Сборка ноды {self}", parent="compile_window")
+
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
         ThemeManager.add_theme(self.node_tag,Themes.ERROR)
