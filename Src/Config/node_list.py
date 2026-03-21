@@ -44,6 +44,22 @@ node_list = {
                 output=DataNode
             ),
             NodeAnnotation(
+                label="Audio data",
+                node_type=ShapeNode,
+                logic=ShapeNode.open_audio_data,
+                annotations={
+                    "files": Parameter(AttrType.INPUT, AString),
+                    "NFFT": Parameter(AttrType.INPUT, AInteger, default=1024),
+                    "noverlap": Parameter(AttrType.INPUT, AInteger, default=512),
+                    "max_duration_sec": Parameter(AttrType.INPUT, AFloat, default=5.0),
+                    "shape": Parameter(AttrType.OUTPUT, 
+                                       ASequence[AInteger, AInteger],
+                                       backfield=ShapeNode.shape)
+                },
+                input=False,
+                output=DataNode
+            ),
+            NodeAnnotation(
                 label="Load Dataset",
                 node_type= DatasetNode,
                 logic = DatasetNode.open_data,
