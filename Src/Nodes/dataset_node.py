@@ -53,12 +53,11 @@ class DatasetNode(ShapeNode):
     @staticmethod
     def split_Xy(data:np.ndarray ):
          data = np.ndarray(data) if data is not None else Exception()
-         if data.ndim() > 2: raise ValueError()
+         if data.ndim() > 2 or data.shape[1] < 2: raise ValueError()
          X = np.data[:,:-1]
          y =np.data[:,-1]
          return X ,y
 
-        
 
     @staticmethod
     def _size_to_int(size,n_samples):
@@ -79,8 +78,8 @@ class DatasetNode(ShapeNode):
         if y is not None and y.shape[0] != n_samples:
             raise ValueError("Количество образцов в x и y должно быть одинаковым")
         
-        test_size = Dataset._size_to_int(test_size,n_samples) if test_size is not None else n_samples - train_size
-        train_size = Dataset._size_to_int(train_size,n_samples) if train_size is not None else n_samples - test_size
+        test_size = DatasetNode._size_to_int(test_size,n_samples) if test_size is not None else n_samples - train_size
+        train_size = DatasetNode._size_to_int(train_size,n_samples) if train_size is not None else n_samples - test_size
 
         
         test_size = test_size or n_samples - (test_size or train_size - n_samples*0.75)
