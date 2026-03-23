@@ -50,6 +50,17 @@ class DatasetNode(ShapeNode):
         DatasetNode.logger.info(f"Датасет загрузился - ({X_train.shape}, {y_train.shape}), ({X_test.shape}, {y_test.shape})")
         return Dataset(X_train, y_train, X_test, y_test, X_train.shape)
     
+    @staticmethod
+    def split_Xy(data:np.ndarray ):
+         data = np.ndarray(data) if data is not None else Exception()
+         if data.ndim() == 2: raise ValueError()
+         X = np.delete(data, -1,axis=1)
+         y =np.data[: -1]
+         return X ,y
+
+
+
+        
 
     @staticmethod
     def _size_to_int(size,n_samples):
