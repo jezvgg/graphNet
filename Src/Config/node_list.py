@@ -78,16 +78,27 @@ node_list = {
             ),
             NodeAnnotation(
                 label="Train test split",   
-                node_type= TrainTestSplitNode,
-                logic = TrainTestSplitNode.split,
+                node_type= DatasetNode,
+                logic = DatasetNode.split,
                 annotations = {
                         "test_size": Parameter(AttrType.INPUT, AFloat, default=0.25),
-                        "train_size": Parameter(AttrType.INPUT, AFloat | AInteger, default=None)
+                        "train_size": Parameter(AttrType.INPUT, AFloat, default=None)
                     },      
-                input=Single[DataNode],
+                input=False,
                 output=DataNode 
 
             ),
+            NodeAnnotation(
+                label="Split X/y",
+                node_type=DatasetNode,           
+                logic=DatasetNode.split_Xy,
+                annotations={
+                 "X": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                 "y": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                 },
+                input=Single[DataNode],           
+                output=False                      
+)
         ]
     },
     "Neural Network Layers":
