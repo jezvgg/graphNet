@@ -53,12 +53,10 @@ class DatasetNode(ShapeNode):
     @staticmethod
     def split_Xy(data:np.ndarray ):
          data = np.ndarray(data) if data is not None else Exception()
-         if data.ndim() == 2: raise ValueError()
-         X = np.delete(data, -1,axis=1)
-         y =np.data[: -1]
+         if data.ndim() > 2: raise ValueError()
+         X = np.data[:,:-1]
+         y =np.data[:,-1]
          return X ,y
-
-
 
         
 
