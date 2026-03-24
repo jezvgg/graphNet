@@ -51,26 +51,49 @@ class DatasetNode(ShapeNode):
         return Dataset(X_train, y_train, X_test, y_test, X_train.shape)
     
     @staticmethod
-    def split_Xy(data:np.ndarray ):
-         data = np.ndarray(data) if data is not None else Exception()
-         if data.ndim() > 2 or data.shape[1] < 2: raise ValueError()
-         X = np.data[:,:-1]
-         y =np.data[:,-1]
-         return X ,y
+    def split_Xy(data: np.ndarray):
+        '''
+            Разделение данных на X и y
+
+        '''
+
+        data = np.asarray(data) if data is not None else Exception()
+        data = np.squeeze(data, axis=0) if data.ndim > 2 and data.shape[0] == 1 else np.asarray(data)
+        if data.ndim != 2 or data.shape[1] < 2:
+             raise ValueError(f"Нужно 2D и ≥2 колонки, пришло {data.shape}")
+
+        X = data[:, :-1]
+        y = data[:, -1]
+        return X, y
 
 
     @staticmethod
-    def _size_to_int(size,n_samples):
-        if isinstance(size,float):
-                return int(size*n_samples)
-        elif isinstance(size,int):
-                return size
-        else:
-            raise ValueError("Размер должен быть числом с плавающей запятой или целым числом")
+    def _size_to_int(size, n_samples: int):
+        '''
+        преобразует размер массива в целое число
+
+        '''
+        if size is None:
+            return None
+        if isinstance(size, np.ndarray):
+            if size.size == 1: size = size.item()
+            else: raise ValueError("Размер должен быть скаляром, а не массивом")
+
+        if isinstance(size, (np.floating, float)):
+            return int(size * n_samples)
+        if isinstance(size, (np.integer, int)):
+            return int(size)
+
+        raise ValueError("Размер должен быть числом с плавающей запятой или целым числом")
 
 
     @staticmethod
     def train_test_split(x: np.ndarray, y: np.ndarray, test_size: float = 0.25, train_size:float | None = None, random_state: int | None = None, **kwargs):
+        '''
+
+        Разделяет полученные данные на train и на test и перемешивает их для лучшего обучения
+
+        '''
         x, y =np.asarray(x) , np.asarray(y) if y is not None else None
         n_samples = x.shape[0]
         if x.ndim ==0:
@@ -78,11 +101,10 @@ class DatasetNode(ShapeNode):
         if y is not None and y.shape[0] != n_samples:
             raise ValueError("Количество образцов в x и y должно быть одинаковым")
         
-        test_size = DatasetNode._size_to_int(test_size,n_samples) if test_size is not None else n_samples - train_size
-        train_size = DatasetNode._size_to_int(train_size,n_samples) if train_size is not None else n_samples - test_size
+        test_size = DatasetNode._size_to_int(test_size, n_samples) if test_size is not None else n_samples - train_size
+        train_size = DatasetNode._size_to_int(train_size, n_samples) if train_size is not None else n_samples - test_size
 
-        
-        test_size = test_size or n_samples - (test_size or train_size - n_samples*0.75)
+        test_size = test_size or n_samples - (test_size or train_size - n_samples * 0.75)
         train_size = train_size or n_samples - test_size
         if train_size + test_size > n_samples: raise Exception("Некорректные размеры тестовой и обучающей выборки")
 
