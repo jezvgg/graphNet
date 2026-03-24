@@ -77,29 +77,30 @@ node_list = {
                 input=Single[DataNode]
             ),
             NodeAnnotation(
-                label="Train test split",   
-                node_type= DatasetNode,
-                logic = DatasetNode.train_test_split,
-                annotations = {
-                        "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
-                        "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
-                        "test_size": Parameter(AttrType.INPUT, AFloat, default=0.25),
-                        "train_size": Parameter(AttrType.INPUT, AFloat, default=None)
-                    },      
-                input=False,
-                output=DataNode 
-
+            label="Train test split",
+            node_type=DataNode,                    
+            logic=DatasetNode.train_test_split,     
+            annotations={
+            "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+            "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+            "test_size": Parameter(AttrType.INPUT, AFloat, default=0.25),
+            "train_size": Parameter(AttrType.INPUT, AFloat, default=None),
+            },
+            input=False,
+            output=DataNode,  
             ),
             NodeAnnotation(
                 label="Split X/y",
-                node_type=DatasetNode,           
+                node_type=DataNode,           
                 logic=DatasetNode.split_Xy,
                 annotations={
+                "data": Parameter(AttrType.INPUT, ANode[DataNode]),
                  "X": Parameter(AttrType.OUTPUT, ANode[DataNode]),
                  "y": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                 
                  },
-                input=Single[DataNode],           
-                output=False                      
+                input=False,           
+                output=DataNode,                      
 )
         ]
     },
