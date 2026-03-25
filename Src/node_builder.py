@@ -9,8 +9,11 @@ from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
+from Src.Managers import ThemeManager
 
-
+BUTTON_HEIGHT: int = 32
+LINE_HEIGHT: int = 30
+PADDING: int = 8
 
 class NodeBuilder:
     '''
@@ -55,13 +58,65 @@ class NodeBuilder:
                         with dpg.tree_node(label=subanchor) as tree_subanchor:
 
                             for node in self.node_list[anchor][subanchor]:
-                                btn = dpg.add_button(label=node.label, user_data=node)
-                                
-                                with dpg.drag_payload(parent=btn, drag_data=btn):
-                                    dpg.add_text(node.label)
+                              self.build_list_node(node_data=node, parent=tree_subanchor)
 
         return list
 
+    def build_list_node(self, node_data: NodeAnnotation, parent: int | str) -> int | str:
+      '''
+      Построение элемента списка нод, визуально имитирующего ноду в редакторе.
+
+      Args:
+          node_data: NodeAnnotation - аннотация ноды из node_list
+          parent:    int | str      - родительский элемент (tree_node подкатегории)
+
+      Returns:
+          int | str - идентификатор созданной группы
+      '''
+
+      visible_params: list[tuple[str, Parameter]] = [
+          (label, param) for label, param in node_data.annotations.items()
+          if label != 'INPUT' and not isinstance(param.hint, ANode)
+      ]
+
+      extra_lines: int = 1
+      if node_data.input:
+          extra_lines += 1
+      if node_data.output:
+          extra_lines += 1
+
+      height: int = BUTTON_HEIGHT + (len(visible_params) + extra_lines) * LINE_HEIGHT + PADDING
+
+      with dpg.group(horizontal=False, parent=parent, user_data=node_data) as group:
+        # with dpg.drag_payload(parent=group, drag_data=node_data):
+        #     dpg.add_text(node_data.label)
+
+        btn: int | str = dpg.add_button(label=node_data.label, width=30)
+        ThemeManager.apply_theme(btn, node_data.node_type.theme_name)
+        with dpg.drag_payload(parent=btn, drag_data=group):
+          dpg.add_text(node_data.label)
+
+        if node_data.input:
+            dpg.add_text("INPUT", indent=4)
+            # input_label: int | str = dpg.add_text("INPUT", indent=4)
+            # with dpg.drag_payload(parent=input_label, drag_data=group):
+            #     dpg.add_text(node_data.label)
+
+        with dpg.tree_node(label="Docs") as docs_node:
+            dpg.add_text(node_data.docs)
+            # with dpg.drag_payload(parent=docs_node, drag_data=group):
+            #     dpg.add_text(node_data.label)
+        
+        for label, param in visible_params:
+            param.hint.build(label=label, parent=group, enabled=False)
+
+        if node_data.output:
+            dpg.add_text("Output", indent=4)
+          # output_label: int | str = dpg.add_text("OUTPUT", indent=4)
+          # with dpg.drag_payload(parent=output_label, drag_data=group):
+          #     dpg.add_text(node_data.label)
+
+      return group
 
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
@@ -186,4 +241,3 @@ class NodeBuilder:
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
         
-
