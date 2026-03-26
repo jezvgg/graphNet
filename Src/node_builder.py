@@ -9,8 +9,13 @@ from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
-from Src.Utils.list_node_item import ListNodeItem
+from Src.Managers import ThemeManager
 
+BUTTON_HEIGHT: int = 32
+LINE_HEIGHT: int = 30
+PADDING: int = 8
+LIST_HEADER_WIDTH: int = 210
+LIST_FIELD_WIDTH: int = 120
 
 class NodeBuilder:
     '''
@@ -55,10 +60,65 @@ class NodeBuilder:
                         with dpg.tree_node(label=subanchor) as tree_subanchor:
 
                             for node in self.node_list[anchor][subanchor]:
-                                ListNodeItem(node_data = node, parent = tree_subanchor)
+                              self._build_list_node(node_data=node, parent=tree_subanchor)
 
         return list
 
+    def _build_list_node(self, node_data: NodeAnnotation, parent: int | str) -> int | str:
+      '''
+      Построение элемента списка нод, визуально имитирующего ноду в редакторе.
+
+      Args:
+          node_data: NodeAnnotation - аннотация ноды из node_list
+          parent:    int | str      - родительский элемент (tree_node подкатегории)
+
+      Returns:
+          int | str - идентификатор созданной группы
+      '''
+
+
+      visible_params: list[tuple[str, Parameter]] = [
+          (label, param) for label, param in node_data.annotations.items()
+          if label != 'INPUT' and not isinstance(param.hint, ANode)
+      ]
+
+      with dpg.group(horizontal=False, parent=parent, user_data=node_data) as group:
+        with dpg.drag_payload(parent=group, drag_data=group):
+            dpg.add_text(node_data.label)
+
+        header_button: int | str = dpg.add_button(
+            label=node_data.label,
+            width=LIST_HEADER_WIDTH
+        )
+
+        layer_theme = ThemeManager._themes_config[node_data.node_type.theme_name]
+        title_color = layer_theme["mvNode"]["mvNodeCol_TitleBar"]
+
+        with dpg.theme() as btn_theme:
+            with dpg.theme_component(dpg.mvButton):
+                dpg.add_theme_color(dpg.mvThemeCol_Button, title_color)
+                dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, title_color)
+        dpg.bind_item_theme(header_button, btn_theme)
+
+        if node_data.input:
+            dpg.add_text("INPUT", indent=4)
+        
+        with dpg.tree_node(label="Docs", indent=4) as docs_node:
+          dpg.add_text(node_data.docs, wrap=LIST_HEADER_WIDTH - 20)
+
+        
+        for label, param in visible_params:
+              with dpg.group(horizontal=True) as param_group:
+                param.hint.build(label=label,
+                                parent=group,
+                                width=LIST_FIELD_WIDTH,
+                                enabled=False)
+
+
+        if node_data.output:
+          dpg.add_text("OUTPUT", indent=4)
+
+      return group
 
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
@@ -183,4 +243,3 @@ class NodeBuilder:
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
         
-
