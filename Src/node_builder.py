@@ -75,14 +75,14 @@ class NodeBuilder:
       Returns:
           int | str - идентификатор созданной группы
       '''
-
-
+      
       visible_params: list[tuple[str, Parameter]] = [
           (label, param) for label, param in node_data.annotations.items()
           if label != 'INPUT' and not isinstance(param.hint, ANode)
       ]
 
       with dpg.group(horizontal=False, parent=parent, user_data=node_data) as group:
+      
         with dpg.drag_payload(parent=group, drag_data=group):
             dpg.add_text(node_data.label)
 
@@ -93,7 +93,6 @@ class NodeBuilder:
 
         layer_theme = ThemeManager._themes_config[node_data.node_type.theme_name]
         title_color = layer_theme["mvNode"]["mvNodeCol_TitleBar"]
-
         with dpg.theme() as btn_theme:
             with dpg.theme_component(dpg.mvButton):
                 dpg.add_theme_color(dpg.mvThemeCol_Button, title_color)
@@ -105,7 +104,6 @@ class NodeBuilder:
         
         with dpg.tree_node(label="Docs", indent=4) as docs_node:
           dpg.add_text(node_data.docs, wrap=LIST_HEADER_WIDTH - 20)
-
         
         for label, param in visible_params:
               with dpg.group(horizontal=True) as param_group:
@@ -114,9 +112,12 @@ class NodeBuilder:
                                 width=LIST_FIELD_WIDTH,
                                 enabled=False)
 
-
         if node_data.output:
           dpg.add_text("OUTPUT", indent=4)
+        
+        dpg.add_spacer(height=2)
+        dpg.add_separator()
+        dpg.add_spacer(height=10)
 
       return group
 
