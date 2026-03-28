@@ -9,3 +9,4 @@ from Src.Enums.dpg_types import DPGType
 from Src.Enums.metrics import Metrics
 from Src.Enums.themes import Themes
 from Src.Enums.datasets import Datasets
+from Src.Enums.text_output_mode import TextOutputMode

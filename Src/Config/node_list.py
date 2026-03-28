@@ -3,7 +3,6 @@ import numpy as np
 from keras import layers
 import keras
 
-from Src.Enums.text_output_mode import TextOutputMode
 from Src.Enums import *
 from Src.Nodes import *
 from Src.Config.parameter import Parameter
@@ -67,7 +66,6 @@ node_list = {
                 annotations={
                     "files": Parameter(AttrType.INPUT, AString),
                     "max_tokens": Parameter(AttrType.INPUT, AInteger, default=20000),
-                    "output_sequence_length": Parameter(AttrType.INPUT, AInteger, default=200),
                     "output_mode": Parameter(AttrType.INPUT, AEnum[TextOutputMode], default=TextOutputMode.INT),
                     "shape": Parameter(AttrType.OUTPUT, 
                                        ASequence[AInteger, AInteger],
