@@ -52,41 +52,42 @@ class DatasetNode(ShapeNode):
     
 
     @staticmethod
-    def split_Xy(data: np.ndarray):
+    def split_Xy(data: np.ndarray, y_index: int = -1):
         '''
             Разделение данных на X и y
 
         '''
-
+        
         data = np.asarray(data)
-        if data is None:
-            raise Exception("Передаваемые данные пустые")
-        data = np.squeeze(data, axis=0) if data.ndim > 2 and data.shape[0] == 1 else np.asarray(data)
+        if data.ndim > 2 and data.shape[0] == 1:
+            data = np.squeeze(data, 0)
         if data.ndim != 2 or data.shape[1] < 2:
-             raise ValueError(f"Нужно 2D и ≥2 колонки, пришло {data.shape}")
-
-        X = data[:, :-1]
-        y = data[:, -1]
-        return Dataset(X, y)
+            raise ValueError(f"Нужно 2D и ≥2 колонки, пришло {data.shape}")
+        if not (-data.shape[1] <= y_index < data.shape[1]):
+             raise ValueError("y_index вне диапазона колонок")
+        X = np.delete(data, y_index, axis=1 )
+        y = data[:, y_index]
+        return Dataset(X, y,None,None,X.shape)
 
 
 
     @staticmethod
-    def train_test_split(x: np.ndarray, y: np.ndarray, test_size: float = 0.25, random_state: int | None = None, **kwargs):
+    def train_test_split(X: np.ndarray, y: np.ndarray, test_size: float = 0.25, random_state: int | None = None, **kwargs):
         '''
 
         Разделяет полученные данные на train и на test и перемешивает их для лучшего обучения
 
         '''
-        x, y =np.asarray(x) , np.asarray(y) 
-        n_samples = x.shape[0]
-        if x.ndim ==0:
+
+        X, y =np.asarray(X) , np.asarray(y) 
+        n_samples = X.shape[0]
+        if X.ndim ==0:
             raise ValueError("x должен быть массивом с размерностью не меньше 1")
         if y is not None and y.shape[0] != n_samples:
             raise ValueError("Количество образцов в x и y должно быть одинаковым")
         
         
-        if not (test_size>0 and test_size<1): raise Exception('')
+        if not (test_size>0 and test_size<1): raise Exception('Доля должна быть от 0 до 1!')
         test_size = int(test_size*n_samples)
         train_size = n_samples-test_size
 
@@ -94,15 +95,17 @@ class DatasetNode(ShapeNode):
         np.random.default_rng(random_state).shuffle(indices)
 
         n_train , n_test = indices[:train_size],indices[train_size:train_size+test_size]
-        X_train, X_test = x[n_train], x[n_test]
+        X_train, X_test = X[n_train], X[n_test]
         y_train, y_test = y[n_train], y[n_test]
-        return Dataset( X_train, X_test, y_train, y_test if y is not None else (X_train, X_test))
+        return Dataset(X_train, y_train, X_test, y_test, X_train.shape)
 
 
     def compile(self) -> bool:
+
         '''
         Выполняет логику узла и устанавливает значение для полей вывода данных.
         '''
+
         status = super().compile()
         if not status:
             return False

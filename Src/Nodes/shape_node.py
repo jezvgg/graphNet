@@ -24,7 +24,15 @@ class ShapeNode(DataNode):
         if not status or len(self.OUTPUT.shape) < 2: return False
         self.shape = self.OUTPUT.shape[1:]
         return status
+    
 
+
+    def __set__(self, instance, value):
+        cb = getattr(instance, f"_{self.name}_callback", None)
+        if cb:
+            cb(value)
+        setattr(instance, self.name, value)
+        
 
     @staticmethod
     def open_table_data(files: str, *args, **kwargs):

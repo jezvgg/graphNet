@@ -20,7 +20,7 @@ node_list = {
                 node_type = ShapeNode,
                 logic = ShapeNode.open_table_data,
                 annotations = {
-                        "files": Parameter(AttrType.INPUT, AString),
+                        "files": Parameter(AttrType.INPUT, AString,default="sample_data.csv"),
                         "delimiter": Parameter(AttrType.INPUT, AEnum[Delimiters]),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),
@@ -78,29 +78,36 @@ node_list = {
             ),
             NodeAnnotation(
             label="Train test split",
-            node_type=DataNode,                    
+            node_type=DatasetNode,                    
             logic=DatasetNode.train_test_split,     
             annotations={
-            "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+            "X": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
             "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
             "test_size": Parameter(AttrType.INPUT, AFloat, default=0.25),
-            "train_size": Parameter(AttrType.INPUT, AFloat, default=None),
+            "random_state":Parameter(AttrType.INPUT,AInteger,default=0),
+            #Добавил их чтобы для save data чтобы по отдельности посмотреть выводы
+            "X_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+            "y_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+            "X_test":  Parameter(AttrType.OUTPUT, ANode[DataNode]),
+            "y_test":  Parameter(AttrType.OUTPUT, ANode[DataNode]),
+
             },
             input=False,
             output=DataNode,  
             ),
             NodeAnnotation(
                 label="Split X/y",
-                node_type=DataNode,           
+                node_type=DatasetNode,           
                 logic=DatasetNode.split_Xy,
                 annotations={
                 "data": Parameter(AttrType.INPUT, ANode[DataNode]),
-                 "X": Parameter(AttrType.OUTPUT, ANode[DataNode]),
-                 "y": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                 "y_index":Parameter(AttrType.INPUT, AInteger),
+                 "X_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
+                 "y_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
                  
                  },
                 input=False,           
-                output=DataNode,                      
+                output=False,                      
 )
         ]
     },
@@ -425,9 +432,9 @@ node_list = {
             NodeAnnotation(
                 label="Save data",
                 node_type = UtilsNode,
-                logic = np.savetxt,
+                logic = UtilsNode.save_txt,
                 annotations = {
-                    "X": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "data": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                     "fname": Parameter(AttrType.INPUT, AString, default='result.txt')
                 },
                 input = False,
