@@ -1,3 +1,4 @@
+import numpy as np
 import keras
 from subprocess import Popen, PIPE
 
@@ -20,4 +21,14 @@ class UtilsNode(AbstractNode):
         except Exception as ex:
             raise Exception(f"Непредвиденная ошибка с записью в файл: {ex}")
 
+
+    @staticmethod
+    def save_txt(data, fname="result.txt", fmt="%g"):
+        """
+        Обёртка над np.savetxt с более читаемым форматированием чисел
+        """
+        try:
+            np.savetxt(fname, data, fmt=fmt)
+        except Exception as ex:
+            raise Exception(f"Непредвиденная ошибка с записью в файл: {ex}")
         
