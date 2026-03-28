@@ -19,7 +19,7 @@ class ShapeNode(DataNode):
     shape: tuple[int] = Backfield()
     theme_name: Themes = Themes.SHAPE
     OUTPUT: np.ndarray
-
+    EXTENSIONS = {'.wav', '.mp3', '.flac', '.ogg', '.m4a'}
 
     def compile(self):
         status = super().compile()
@@ -51,56 +51,50 @@ class ShapeNode(DataNode):
     
     
     @staticmethod
-    def open_audio_data(files: str, NFFT: int = 1024, noverlap: int = 512, max_duration_sec: float = 5.0, *args, **kwargs):
+    def open_audio_data(files: str, NFFT: int = 1024, noverlap: int = 512, max_duration_sec: float = 5.0):
         if not files:
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
         
         audios = []
-        extensions = {'.wav', '.mp3', '.flac', '.ogg', '.m4a'}
         
         for audio_path in sorted(Path(files).iterdir()):
-            if audio_path.is_file() and audio_path.suffix.lower() in extensions:
+            if not (audio_path.is_file() and audio_path.suffix.lower() in ShapeNode.EXTENSIONS):
+                continue
             
-                data, sample_rate = librosa.load(str(audio_path), sr=None, mono=True, duration=max_duration_sec)
+            data, sample_rate = librosa.load((audio_path), sr=None, mono=True, duration=max_duration_sec)
                 
-                target_length = int(sample_rate * max_duration_sec)
-                data = librosa.util.fix_length(data, size=target_length)
+            target_length = int(sample_rate * max_duration_sec)
+            data = librosa.util.fix_length(data, size=target_length)
                     
-                nfft = NFFT if NFFT else int(2 ** round(np.log2(sample_rate * 0.025)))
-                noverlap = noverlap if noverlap else nfft // 2
-                hop_length = nfft - noverlap 
+            nfft = NFFT if NFFT else int(2 ** round(np.log2(sample_rate * 0.025)))
+            noverlap = noverlap if noverlap else nfft // 2
+            hop_length = nfft - noverlap 
 
-                stft_matrix = librosa.stft(data, n_fft=nfft, hop_length=hop_length)
-                spectrum = np.abs(stft_matrix)**2
-                spectrum = 10. * np.log10(spectrum + 1e-10)
+            stft_matrix = librosa.stft(data, n_fft=nfft, hop_length=hop_length)
+            spectrum = np.abs(stft_matrix)**2
+            spectrum = 10. * np.log10(spectrum + 1e-10)
                 
-                audios.append(spectrum.T)
+            audios.append(spectrum.T)
 
         if not audios:
             return np.array([])
 
         return np.array(audios)
     
-
+    
     @staticmethod
-    def open_text_data(files: str, output_mode: TextOutputMode = TextOutputMode.INT, max_tokens: int = 20000, output_sequence_length: int = 300, *args, **kwargs):
+    def open_text_data(files: str, output_mode: TextOutputMode = TextOutputMode.INT, max_tokens: int = 20000):
         if not files: 
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
         
         texts = []
         for text_path in sorted(Path(files).iterdir()):
             if text_path.is_file() and text_path.suffix.lower() == '.txt':
-                with open(text_path, 'r', encoding='utf-8') as f:
-                    texts.append(f.read())
-        
-        mode_str = output_mode.value if isinstance(output_mode, TextOutputMode) else str(output_mode)
-        seq_len = output_sequence_length if mode_str == TextOutputMode.INT.value else None
+                texts.append(text_path.read_text(encoding='utf-8'))
 
         vectorizer = keras.layers.TextVectorization(
             max_tokens=max_tokens,
-            output_mode=mode_str,
-            output_sequence_length=seq_len,
-            *args, **kwargs
+            output_mode=output_mode 
         )
         
         vectorizer.adapt(texts)
