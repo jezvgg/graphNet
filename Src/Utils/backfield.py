@@ -25,6 +25,8 @@ class Backfield:
         return getattr(instance, self.name)
     
 
-    def __set__(self, instance, value) -> None:
-        getattr(instance, f"_{self.name}_callback")(value)
+    def __set__(self, instance, value) -> None:    
+        callback = getattr(instance, f"_{self.name}_callback", None)
+        if callable(callback):
+            callback(value)
         setattr(instance, self.name, value)
