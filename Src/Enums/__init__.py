@@ -10,3 +10,4 @@ from Src.Enums.metrics import Metrics
 from Src.Enums.themes import Themes
 from Src.Enums.datasets import Datasets
 from Src.Enums.text_output_mode import TextOutputMode
+from Src.Enums.split_mode import SplitMode

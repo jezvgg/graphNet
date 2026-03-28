@@ -5,11 +5,9 @@ import numpy as np
 import keras
 import librosa
 
-from Src.Enums import Themes
+from Src.Enums import Themes, TextOutputMode, SplitMode
 from Src.Utils import Backfield
 from Src.Nodes import DataNode
-from Src.Enums.text_output_mode import TextOutputMode
-
 
 
 class ShapeNode(DataNode):
@@ -81,9 +79,9 @@ class ShapeNode(DataNode):
 
         return np.array(audios)
     
-    
+
     @staticmethod
-    def open_text_data(files: str, output_mode: TextOutputMode = TextOutputMode.INT, max_tokens: int = 20000):
+    def open_text_data(files: str, output_mode: TextOutputMode = TextOutputMode.INT, max_tokens: int = 20000,split: SplitMode = SplitMode.WHITESPACE):
         if not files: 
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
         
@@ -94,7 +92,8 @@ class ShapeNode(DataNode):
 
         vectorizer = keras.layers.TextVectorization(
             max_tokens=max_tokens,
-            output_mode=output_mode 
+            output_mode=output_mode,
+            split=split
         )
         
         vectorizer.adapt(texts)

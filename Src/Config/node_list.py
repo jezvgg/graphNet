@@ -66,6 +66,7 @@ node_list = {
                 annotations={
                     "files": Parameter(AttrType.INPUT, AString),
                     "max_tokens": Parameter(AttrType.INPUT, AInteger, default=20000),
+                    "split": Parameter(AttrType.INPUT, AEnum[SplitMode], default=SplitMode.WHITESPACE),
                     "output_mode": Parameter(AttrType.INPUT, AEnum[TextOutputMode], default=TextOutputMode.INT),
                     "shape": Parameter(AttrType.OUTPUT, 
                                        ASequence[AInteger, AInteger],
