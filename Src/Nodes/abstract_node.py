@@ -80,7 +80,7 @@ class AbstractNode(ABC):
         '''
         Выводит сообщение в окно сборки модели.
         '''
-        dpg.add_text(message, parent="compile_window")
+        dpg.add_text(message, parent="current_node_messages")
 
 
     def compile(self, kwargs: dict = None) -> bool:
@@ -94,6 +94,7 @@ class AbstractNode(ABC):
         self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
         self.logger.debug(f"Аргументы ноды - {arguments}")
 
+        current_node_messages = dpg.add_group(tag="current_node_messages", parent="compile_window")
         AbstractNode.log2window(self.message)
 
         for argument in arguments:
@@ -131,6 +132,8 @@ class AbstractNode(ABC):
             self.raise_error(ex)
             return False
             
+        dpg.delete_item(current_node_messages)
+
         return True
 
 
