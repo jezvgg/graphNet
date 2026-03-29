@@ -65,7 +65,6 @@ class ShapeNode(DataNode):
             data = librosa.util.fix_length(data, size=target_length)
                     
             nfft = int(2 ** round(np.log2(sample_rate * 0.025)))
-            # noverlap = noverlap if noverlap else nfft // 2
             hop_length = nfft // 2 
 
             stft_matrix = librosa.stft(data, n_fft=nfft, hop_length=hop_length)
