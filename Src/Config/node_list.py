@@ -337,8 +337,9 @@ node_list = {
                 annotations = {
                         "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
                         "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                        "callbacks": Parameter(AttrType.INPUT, ANode[CallbackNode]),
                         "epochs": Parameter(AttrType.INPUT, AInteger),
-                        "history": Parameter(AttrType.OUTPUT, ANode[DataNode])  
+                        "history": Parameter(AttrType.OUTPUT, ANode[DataNode])
                     },
                 input = Single[CompileNode]
             ),
@@ -351,6 +352,15 @@ node_list = {
                     },
                 input = Single[FitNode],
                 output = DataNode
+            ),
+            NodeAnnotation(
+                label="Callback",
+                node_type= CallbackNode,
+                logic = CallbackNode.get_callback,
+                annotations = {
+                        "callback": Parameter(AttrType.INPUT, AEnum[Callbacks]),
+                    },
+                input = False
             )
         ],
         "Utils": [

@@ -21,3 +21,4 @@ class Themes(StrEnum):
     TABLE_DATA = "table_data"
     IMAGE_DATA = "image_data"
     DATASET = 'dataset'
+    CALLBACK = 'callback'

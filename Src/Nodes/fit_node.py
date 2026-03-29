@@ -36,8 +36,7 @@ class FitNode(DataNode):
         if kwargs['y'].dtype == np.object_ or np.isnan(kwargs['y']).any():
             raise AttributeError('Данные содержат неверный формат Y!')
         
-        trainingCallback = TrainingCallback()
-        history = model.fit(**kwargs, verbose=False, callbacks=[trainingCallback])
+        history = model.fit(**kwargs, verbose=False)
 
         return model
     
