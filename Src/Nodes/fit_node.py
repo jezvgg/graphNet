@@ -3,7 +3,6 @@ from dataclasses import dataclass
 import keras
 import dearpygui.dearpygui as dpg
 import numpy as np
-from tensorflow.keras import callbacks
 
 from Src.Enums import Themes
 from Src.Nodes import DataNode
@@ -39,38 +38,3 @@ class FitNode(DataNode):
         history = model.fit(**kwargs, verbose=False)
 
         return model
-    
-
-
-
-class TrainingCallback(callbacks.Callback):
-    '''
-    Колбэк для вывода логов обучения в окно сборки модели.
-    '''
-
-    def on_train_begin(self, logs: dict | None = None):
-        '''
-        Вывод в окно сборки модели сообщения о начале обучения.
-        '''
-        FitNode.add_message_to_compile_window_static("Обучение начато!")
-
-
-    def on_epoch_begin(self, epoch: int, logs: dict | None = None):
-        '''
-        Вывод в окно сборки модели сообщения о начале эпохи.
-        '''
-        FitNode.add_message_to_compile_window_static(f"Эпоха {epoch + 1} началась...")
-
-
-    def on_epoch_end(self, epoch: int, logs: dict | None = None):
-        '''
-        Вывод в окно сборки модели сообщения о конце эпохи.
-        '''
-        FitNode.add_message_to_compile_window_static(f"Эпоха {epoch + 1} закончилась")
-
-
-    def on_train_end(self, logs: dict | None = None):
-        '''
-        Вывод в окно сборки модели сообщения о конце обучения.
-        '''
-        FitNode.add_message_to_compile_window_static("Обучение завершено!")

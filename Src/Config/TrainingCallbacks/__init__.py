@@ -1,0 +1,1 @@
+from Src.Config.TrainingCallbacks.callbacks_list import callbacks_list
