@@ -49,8 +49,6 @@ node_list = {
                 logic=ShapeNode.open_audio_data,
                 annotations={
                     "files": Parameter(AttrType.INPUT, AString),
-                    "NFFT": Parameter(AttrType.INPUT, AInteger, default=1024),
-                    "noverlap": Parameter(AttrType.INPUT, AInteger, default=512),
                     "max_duration_sec": Parameter(AttrType.INPUT, AFloat, default=5.0),
                     "shape": Parameter(AttrType.OUTPUT, 
                                        ASequence[AInteger, AInteger],
