@@ -6,7 +6,7 @@ from Src.Nodes import AbstractNode
 
 class Log2Window(callbacks.Callback):
     '''
-    Колбэк для вывода логов обучения в окно сборки модели.
+    Сallback для вывода логов обучения в окно сборки модели.
     '''
 
     def on_train_begin(self, logs: dict | None = None):
