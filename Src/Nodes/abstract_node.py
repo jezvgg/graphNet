@@ -55,6 +55,7 @@ class AbstractNode(ABC):
         self.incoming = {}
         self.outgoing = {}
         self.OUTPUT = None
+        self.message = f"Сборка ноды {self}"
 
         if not docs: docs = inspect.getdoc(self.logic)
         self.docs = docs
@@ -75,21 +76,11 @@ class AbstractNode(ABC):
 
 
     @staticmethod
-    def add_message_to_compile_window_static(message: str):
+    def log2window(message: str):
         '''
         Выводит сообщение в окно сборки модели.
         '''
         dpg.add_text(message, parent="compile_window")
-
-
-    def add_message_to_compile_window(self, message: str = None):
-        '''
-        Выводит сообщение в окно сборки модели. По умолчанию выводится "Сборка ноды <__str__>".
-        '''
-        if message is not None:
-            AbstractNode.add_message_to_compile_window_static(message)
-        else:
-            AbstractNode.add_message_to_compile_window_static(f"Сборка ноды {self}")
 
 
     def compile(self, kwargs: dict = None) -> bool:
@@ -103,7 +94,7 @@ class AbstractNode(ABC):
         self.logger.info(f"Компиляция ноды - {self.__class__.__name__}")
         self.logger.debug(f"Аргументы ноды - {arguments}")
 
-        self.add_message_to_compile_window()
+        AbstractNode.log2window(self.message)
 
         for argument in arguments:
             name = dpg.get_item_label(argument)
