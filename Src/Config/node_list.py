@@ -8,7 +8,8 @@ from Src.Nodes import *
 from Src.Config.parameter import Parameter
 from Src.Config.node_annotation import NodeAnnotation
 from Src.Config.Annotations import *
-
+from Src.Config.Annotations.anot_figure import AFigure
+from Src.Nodes.plot_node import PlotNode
 
 # TODO Сделать сериализацию в JSON?
 node_list = {
@@ -83,12 +84,28 @@ node_list = {
                         "y_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
                         "X_test": Parameter(AttrType.OUTPUT, ANode[DataNode]),
                         "y_test": Parameter(AttrType.OUTPUT, ANode[DataNode]),
-                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
+                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger], backfield=ShapeNode.shape)
                         },
                 input=False,
                 output=False
             ),
         ],
+        "Visualization": [ 
+        NodeAnnotation(
+            label="Line Plot",
+            node_type=PlotNode,           
+            logic=PlotNode.create_plot,      
+            annotations={
+                "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                "title": Parameter(AttrType.INPUT, AString, default="My Plot"),
+                "figure": Parameter(AttrType.OUTPUT, AFigure, backfield=PlotNode.figure) 
+            },
+            input=False,
+            output=DataNode 
+        ),
+        ],
+    
         "Processing Utils": [
             NodeAnnotation(
                 label="to categorical",
@@ -444,6 +461,17 @@ node_list = {
                 annotations = {
                     "model": Parameter(AttrType.INPUT, ANode[Single[CompileNode]]),
                     "filename": Parameter(AttrType.INPUT, AString, default='model.json')
+                },
+                input = False,
+                output = False
+            ),
+            NodeAnnotation(
+                label="Save figure",
+                node_type = UtilsNode,
+                logic = lambda figure, filepath: figure.savefig(filepath),
+                annotations = {
+                    "figure": Parameter(AttrType.INPUT, AFigure[False]),
+                    "filepath": Parameter(AttrType.INPUT, AString, default='figure.png')
                 },
                 input = False,
                 output = False
