@@ -91,13 +91,7 @@ class NodeBuilder:
             width=LIST_HEADER_WIDTH
         )
 
-        layer_theme = ThemeManager._themes_config[node_data.node_type.theme_name]
-        title_color = layer_theme["mvNode"]["mvNodeCol_TitleBar"]
-        with dpg.theme() as btn_theme:
-            with dpg.theme_component(dpg.mvButton):
-                dpg.add_theme_color(dpg.mvThemeCol_Button, title_color)
-                dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, title_color)
-        dpg.bind_item_theme(header_button, btn_theme)
+        ThemeManager.apply_theme(header_button, node_data.node_type.theme_name)
 
         if node_data.input:
             dpg.add_text("INPUT", indent=4)
