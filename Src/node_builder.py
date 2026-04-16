@@ -76,7 +76,7 @@ class NodeBuilder:
           int | str - идентификатор созданной группы
       '''
       
-      visible_params: list[tuple[str, Parameter]] = [
+      params: list[tuple[str, Parameter]] = [
           (label, param) for label, param in node_data.annotations.items()
           if label != 'INPUT' and not isinstance(param.hint, ANode)
       ]
@@ -105,7 +105,7 @@ class NodeBuilder:
         with dpg.tree_node(label="Docs", indent=4) as docs_node:
           dpg.add_text(node_data.docs, wrap=LIST_HEADER_WIDTH - 20)
         
-        for label, param in visible_params:
+        for label, param in params:
               with dpg.group(horizontal=True) as param_group:
                 param.hint.build(label=label,
                                 parent=group,
