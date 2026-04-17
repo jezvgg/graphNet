@@ -9,13 +9,17 @@ from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
+from Src.Config.Annotations.annotation import Annotation
 from Src.Managers import ThemeManager
 
 BUTTON_HEIGHT: int = 32
 LINE_HEIGHT: int = 30
 PADDING: int = 8
-LIST_HEADER_WIDTH: int = 210
-LIST_FIELD_WIDTH: int = 120
+# LIST_HEADER_WIDTH: int = 210
+LIST_HEADER_WIDTH: int = Annotation.BASE_WIDTH
+# LIST_FIELD_WIDTH: int = 120
+LIST_FIELD_WIDTH: int = LIST_HEADER_WIDTH - 40
+LIST_DELETE_WIDTH: int = LIST_HEADER_WIDTH // 4
 
 class NodeBuilder:
     '''
@@ -94,9 +98,11 @@ class NodeBuilder:
         ThemeManager.apply_theme(header_button, node_data.node_type.theme_name)
 
         if node_data.input:
-            dpg.add_text("INPUT", indent=4)
-        
-        with dpg.tree_node(label="Docs", indent=4) as docs_node:
+          with dpg.group(horizontal=True):
+            dpg.add_text("●", color=[66, 165, 245, 255])
+            dpg.add_text("INPUT")        
+
+        with dpg.tree_node(label="Docs"):
           dpg.add_text(node_data.docs, wrap=LIST_HEADER_WIDTH - 20)
         
         for label, param in params:
@@ -106,10 +112,19 @@ class NodeBuilder:
                                 width=LIST_FIELD_WIDTH,
                                 enabled=False)
 
+        delete_button: int | str = dpg.add_button(
+            label = "Delete",
+            width = LIST_DELETE_WIDTH
+        )
+        ThemeManager.apply_theme(delete_button, node_data.node_type.theme_name)
+
         if node_data.output:
-          dpg.add_text("OUTPUT", indent=4)
+          with dpg.group(horizontal=True):
+            dpg.add_text("OUTPUT", indent=4)
+            dpg.add_spacer(width=LIST_HEADER_WIDTH - 100)
+            dpg.add_text("●", color=[66, 165, 245, 255])
         
-        dpg.add_spacer(height=2)
+        dpg.add_spacer(width=LIST_HEADER_WIDTH, height=4)
         dpg.add_separator()
         dpg.add_spacer(height=10)
 
