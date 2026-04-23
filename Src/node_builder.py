@@ -11,15 +11,11 @@ from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
 from Src.Config.Annotations.annotation import Annotation
 from Src.Managers import ThemeManager
+from Src.Enums import Themes
 
-BUTTON_HEIGHT: int = 32
-LINE_HEIGHT: int = 30
-PADDING: int = 8
-# LIST_HEADER_WIDTH: int = 210
-LIST_HEADER_WIDTH: int = Annotation.BASE_WIDTH
-# LIST_FIELD_WIDTH: int = 120
-LIST_FIELD_WIDTH: int = LIST_HEADER_WIDTH - 40
-LIST_DELETE_WIDTH: int = LIST_HEADER_WIDTH // 4
+
+LIST_FIELD_WIDTH: int = Annotation.BASE_WIDTH
+
 
 class NodeBuilder:
     '''
@@ -79,56 +75,50 @@ class NodeBuilder:
       Returns:
           int | str - идентификатор созданной группы
       '''
-      
-      params: list[tuple[str, Parameter]] = [
+      CARD_WIDTH = LIST_FIELD_WIDTH + 50
+      card_id = dpg.generate_uuid()
+
+      params = [
           (label, param) for label, param in node_data.annotations.items()
           if label != 'INPUT' and not isinstance(param.hint, ANode)
       ]
+      connection_params = [
+          label for label, param in node_data.annotations.items()
+          if label != 'INPUT' and isinstance(param.hint, ANode)
+      ]
 
-      with dpg.group(horizontal=False, parent=parent, user_data=node_data) as group:
-      
-        with dpg.drag_payload(parent=group, drag_data=group):
-            dpg.add_text(node_data.label)
+      with dpg.child_window(tag=card_id, parent=parent, width=CARD_WIDTH, height = 20, autosize_y=True, 
+                            no_scrollbar=True, border=True, user_data=node_data) as card:
+        ThemeManager.apply_theme(card, Themes.NODE_CARD)
 
-        header_button: int | str = dpg.add_button(
-            label=node_data.label,
-            width=LIST_HEADER_WIDTH
-        )
+        with dpg.group() as drag_group:
+            # drag_data передает ID карточки в drop_callback
+            with dpg.drag_payload(parent=drag_group, drag_data=card_id):
+                dpg.add_text(node_data.label)
 
-        ThemeManager.apply_theme(header_button, node_data.node_type.theme_name)
+            header_button = dpg.add_button(label=node_data.label, width=-1)
+            ThemeManager.apply_theme(header_button, node_data.node_type.theme_name)
 
-        if node_data.input:
-          with dpg.group(horizontal=True):
-            dpg.add_text("●", color=[66, 165, 245, 255])
-            dpg.add_text("INPUT")        
+            if node_data.input:
+                dpg.add_text("INPUT")        
 
-        with dpg.tree_node(label="Docs"):
-          dpg.add_text(node_data.docs, wrap=LIST_HEADER_WIDTH - 20)
-        
-        for label, param in params:
-              with dpg.group(horizontal=True) as param_group:
-                param.hint.build(label=label,
-                                parent=group,
-                                width=LIST_FIELD_WIDTH,
-                                enabled=False)
+            with dpg.tree_node(label="Docs"):
+                dpg.add_text(node_data.docs, wrap=CARD_WIDTH - 30)
 
-        delete_button: int | str = dpg.add_button(
-            label = "Delete",
-            width = LIST_DELETE_WIDTH
-        )
-        ThemeManager.apply_theme(delete_button, node_data.node_type.theme_name)
+            for label in connection_params:
+                dpg.add_text(label)
+            
+            for label, param in params:
+                param.hint.build(label=label, parent=drag_group, width=120, enabled=False)
 
-        if node_data.output:
-          with dpg.group(horizontal=True):
-            dpg.add_text("OUTPUT", indent=4)
-            dpg.add_spacer(width=LIST_HEADER_WIDTH - 100)
-            dpg.add_text("●", color=[66, 165, 245, 255])
-        
-        dpg.add_spacer(width=LIST_HEADER_WIDTH, height=4)
-        dpg.add_separator()
-        dpg.add_spacer(height=10)
+            delete_button = dpg.add_button(label="Delete", width=CARD_WIDTH // 3)
+            ThemeManager.apply_theme(delete_button, node_data.node_type.theme_name)
+            
+            if node_data.output:
+                dpg.add_text("OUTPUT")
 
-      return group
+      dpg.add_spacer(height=10)
+      return card_id    
 
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''

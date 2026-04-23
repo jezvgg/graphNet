@@ -263,5 +263,20 @@
       "mvThemeCol_ButtonHovered":[240, 83, 137, 255],
       "mvThemeCol_ButtonActive":[245, 101, 151, 255]
     }
+  },
+  "sidebar": {
+    "mvChildWindow": {
+      "mvThemeCol_ChildBg": [30, 30, 30, 255],
+      "mvStyleVar_ChildRounding": 0
+    }
+  },
+  "node_card": {
+    "mvChildWindow": {
+      "mvThemeCol_ChildBg": [45, 45, 45, 255],
+      "mvThemeCol_Border": [65, 65, 65, 255],
+      "mvStyleVar_ChildRounding": 4,
+      "mvStyleVar_ChildBorderSize": 1,
+      "mvStyleVar_WindowPadding": [10, 10]
+    }
   }
 }
