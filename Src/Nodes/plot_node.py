@@ -10,46 +10,38 @@ from Src.Enums import Themes
 from Src.Nodes.data_node import DataNode
 
 
+from Src.Utils import Backfield
+
 class PlotNode(DataNode):
     theme_name: Themes = Themes.PLOT
-
-
-    @staticmethod
-    def create_plot(x: Any = None, y: Any = None, title: str = "My Plot") -> plt.Figure:
-        '''
-        Создаёт график по переданным данным.
-        '''
-        fig: plt.Figure
-        ax: Any
-        fig, ax = plt.subplots(figsize=(4, 3), dpi=100)
-
-        if x is not None and y is not None:
-            x_len: int = x.shape[0] if hasattr(x, 'shape') else len(x)
-            y_len: int = y.shape[0] if hasattr(y, 'shape') else len(y)
-            
-            if x_len == y_len:
-                ax.plot(x, y)
-            else:
-                ax.plot(x, label='x')
-                ax.plot(y, label='y')
-                ax.legend()
-        elif x is not None:
-            ax.plot(x)
-        elif y is not None:
-            ax.plot(y)
-        
-        if x is not None or y is not None:
-            ax.grid(True)
-
-        ax.set_title(title)
-        fig.tight_layout()
-        return fig
-
+    figure: Backfield = Backfield()
 
     def compile(self, kwargs: dict[str, Any] | None = None) -> bool:
+        fig, ax = plt.subplots(figsize=(4, 3), dpi=100)
+        
+        original_logic = self.logic
+        
+        def wrapped_logic(*args: Any, **kw: Any) -> Any:
+            title = kw.pop("title", "My Plot")
+            
+            args = [np.squeeze(a) if isinstance(a, np.ndarray) else a for a in args]
+            if len(args) == 1 and isinstance(args[0], np.ndarray) and original_logic.__name__ != 'hist':
+                data = args[0]
+                args = [data[:, 0], data[:, 1]] if data.ndim > 1 and data.shape[1] >= 2 else [np.arange(len(data)), data]
+                
+            res = original_logic(*args, **kw)
+            ax.set_title(title)
+            ax.grid(True)
+            fig.tight_layout()
+            return res
+            
+        self.logic = wrapped_logic
         status: bool = super().compile(kwargs)
+        self.logic = original_logic
+        
         if not status:
+            plt.close(fig)
             return False
             
-        self.figure = self.OUTPUT
+        self.figure = fig
         return status
