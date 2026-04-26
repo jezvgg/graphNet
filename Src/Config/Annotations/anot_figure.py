@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import dearpygui.dearpygui as dpg
@@ -10,55 +10,19 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from Src.Config.Annotations.annotation import Annotation
-from Src.Config.Annotations.single import Single
-from Src.Enums import DPGType
 
 
 
 
 @dataclass
 class AFigure(Annotation):
-    node_type: type = object
-    single: bool = True
     display: bool = True
+    single: bool = field(default=True, init=False)
+    node_type: type = field(default=object, init=False)
 
 
-    @classmethod
-    def __class_getitem__(cls: type, item: Any) -> type:
-        display: bool = True
-        node_type: type = object
-        single: bool = True
-
-        if isinstance(item, tuple):
-            i: Any
-            for i in item:
-                if isinstance(i, bool):
-                    display = i
-                elif isinstance(i, Single):
-                    single = True
-                    node_type = i.node_type
-                elif isinstance(i, type):
-                    single = False
-                    node_type = i
-        else:
-            if isinstance(item, bool):
-                display = item
-            elif isinstance(item, Single):
-                single = True
-                node_type = item.node_type
-            elif isinstance(item, type):
-                single = False
-                node_type = item
-
-        return type(f"{cls.__name__}Custom", (cls,), {
-            'node_type': node_type,
-            'single': single,
-            'display': display
-        })
-
-
-    @classmethod
-    def build(cls: type, parent: int | str, *args: Any, **kwargs: Any) -> int | str: 
+    @staticmethod
+    def _build(display: bool, parent: int | str, *args: Any, **kwargs: Any) -> int | str: 
         new_parent: int | str = dpg.get_item_parent(parent)
         attr_config: dict[str, Any] = dpg.get_item_configuration(parent)
         dpg.delete_item(parent)
@@ -67,59 +31,56 @@ class AFigure(Annotation):
         kwargs['parent'] = new_parent
         kwargs['user_data'] = []
         attr_type: int = attr_config.get('attribute_type', dpg.mvNode_Attr_Input)
-        
-        if attr_type == dpg.mvNode_Attr_Static:
-            attr_type = dpg.mvNode_Attr_Input
-            
-        kwargs['attribute_type'] = attr_type
+        kwargs['attribute_type'] = dpg.mvNode_Attr_Input if attr_type == dpg.mvNode_Attr_Static else attr_type
         
         with dpg.node_attribute(*args, **kwargs):
-            if cls.display:
-                if not dpg.does_alias_exist("figure_texture_registry"):
-                    dpg.add_texture_registry(tag="figure_texture_registry")
+            if not dpg.does_alias_exist("figure_texture_registry"):
+                dpg.add_texture_registry(tag="figure_texture_registry")
 
-                tex_id: int | str = dpg.generate_uuid()
-                dpg.add_dynamic_texture(
-                    width=400, 
-                    height=300, 
-                    default_value=np.full((300, 400, 4), 0.5, dtype=np.float32).flatten(), 
-                    tag=tex_id, 
-                    parent="figure_texture_registry"
-                )
-                return dpg.add_image(tex_id, user_data=tex_id)
-            else:
-                label_text: str = kwargs.get('label') or "Figure"
-                return dpg.add_text(label_text, user_data="hidden_figure")
+            tex_id: int | str = dpg.generate_uuid()
+            dpg.add_dynamic_texture(
+                width=400, height=300, 
+                default_value=np.full((300, 400, 4), 0.5, dtype=np.float32).flatten(), 
+                tag=tex_id, parent="figure_texture_registry"
+            )
+            
+            dpg.add_text(kwargs.get('label') or "Figure", show=not display)
+            return dpg.add_image(tex_id, user_data=tex_id, show=display)
+
+    def build(self, parent: int | str, *args: Any, **kwargs: Any) -> int | str:
+        return self._build(self.display, parent, *args, **kwargs)
 
 
-    @classmethod
-    def get(cls: type, input_id: int | str) -> list[Any] | Any:
+    @staticmethod
+    def _get(display: bool, input_id: int | str) -> Any:
         parent: int | str = dpg.get_item_parent(input_id)
         user_data: list[int | str] | None = dpg.get_item_user_data(parent)
         
+        if not user_data:
+            return None
+            
         results: list[Any] = []
-        if user_data:
-            attribute: int | str
-            for attribute in user_data:
-                label: str = dpg.get_item_label(attribute)
-                node: Any = dpg.get_item_user_data(dpg.get_item_parent(attribute))
-                results.append(getattr(node, label))
+        for attribute in user_data:
+            label: str = dpg.get_item_label(attribute)
+            node: Any = dpg.get_item_user_data(dpg.get_item_parent(attribute))
+            results.append(getattr(node, label))
 
-        return results[0] if cls.single and results else results
+        return results[0] if results else None
+
+    def get(self, input_id: int | str) -> Any:
+        return self._get(self.display, input_id)
 
 
-    @classmethod 
-    def set(cls: type, input_id: int | str, fig: plt.Figure) -> bool:
-        if not cls.display:
+    @staticmethod 
+    def _set(display: bool, input_id: int | str, fig: plt.Figure) -> bool:
+        if not display:
             return True
 
         canvas: FigureCanvas = FigureCanvas(fig)
         canvas.draw()
         
-        w: int
-        h: int
         w, h = canvas.get_width_height()
-        tex_data: np.ndarray = np.frombuffer(canvas.buffer_rgba(), dtype=np.uint8).astype(np.float32) / 255.0
+        tex_data = np.frombuffer(canvas.buffer_rgba(), dtype=np.uint8).astype(np.float32) / 255.0
 
         tex_id: int | str = dpg.get_item_user_data(input_id)
         
@@ -128,3 +89,6 @@ class AFigure(Annotation):
         
         plt.close(fig) 
         return True
+
+    def set(self, input_id: int | str, fig: plt.Figure) -> bool:
+        return self._set(self.display, input_id, fig)
