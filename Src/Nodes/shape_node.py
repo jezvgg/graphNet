@@ -82,9 +82,7 @@ class ShapeNode(DataNode):
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
         
         texts = []
-        for text_path in sorted(Path(files).iterdir()):
-            if not text_path.is_file() or text_path.suffix.lower() != '.txt':
-                continue
+        for text_path in sorted(Path(files).glob('*.txt')):
             texts.append(text_path.read_text(encoding='utf-8'))
 
         vectorizer = keras.layers.TextVectorization(
