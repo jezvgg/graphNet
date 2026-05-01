@@ -89,7 +89,7 @@ class NodeBuilder:
         items_count = len(params) + len(connection_params)
         if node_data.input: items_count += 1
         if node_data.output: items_count += 1
-        calc_height = 80 + (items_count * 25) 
+        calc_height = 80 + (items_count * 30) 
 
         with dpg.child_window(
             tag=card_id, 
@@ -127,18 +127,22 @@ class NodeBuilder:
 
                 for label in connection_params:
                     dpg.add_text(label)
-                
+
+                #TODO нужно подумать, как перекрасить параметры с черного в дефолтный
                 for label, param in params:
-                    param.hint.build(label=label, parent=drag_group, width=120, enabled=False)
+                    parameter = param.hint.build(label=label, parent=drag_group, width=120, enabled=False)
+                    if parameter:
+                        ThemeManager.apply_theme(parameter, Themes.DEFAULT)
 
                 delete_button = dpg.add_button(label="Delete", width=self.card_width // 3)
                 ThemeManager.apply_theme(delete_button, Themes.DEFAULT)
 
                 if node_data.output:
-                    dpg.add_text("OUTPUT", indent=self.card_width - 65)
+                    dpg.add_text("OUTPUT")
 
         dpg.add_spacer(height=10)
         return card_id
+    
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
         Построение dpg.node из класса AbstractNode. Используется, для создания новых нодов в редакторе. Ноды берутся из user_data в списке слева.
