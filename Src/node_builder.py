@@ -14,7 +14,6 @@ from Src.Managers import ThemeManager
 from Src.Enums import Themes
 
 
-LIST_FIELD_WIDTH: int = Annotation.BASE_WIDTH
 
 
 class NodeBuilder:
@@ -25,14 +24,15 @@ class NodeBuilder:
         factory: InputsFactory - фабрика конвертации аннотаций в инпуты
         layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
+    card_width: int = Annotation.BASE_WIDTH + 50
     node_list: dict[str, dict[str, list[NodeAnnotation]]]
     delete_callback: Callable
     logger: Logger
 
 
-    def __init__(self, 
+    def __init__(self,
                  node_list: dict[str: AbstractNode],
-                 delete_callback: Callable):
+                 delete_callback: Callable,):
         '''
         Args:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
@@ -65,61 +65,80 @@ class NodeBuilder:
         return list
 
     def _build_list_node(self, node_data: NodeAnnotation, parent: int | str) -> int | str:
-      '''
-      Построение элемента списка нод, визуально имитирующего ноду в редакторе.
+        '''
+        Построение элемента списка нод, визуально имитирующего ноду в редакторе.
 
-      Args:
-          node_data: NodeAnnotation - аннотация ноды из node_list
-          parent:    int | str      - родительский элемент (tree_node подкатегории)
+        Args:
+            node_data: NodeAnnotation - аннотация ноды из node_list
+            parent:    int | str      - родительский элемент (tree_node подкатегории)
 
-      Returns:
-          int | str - идентификатор созданной группы
-      '''
-      CARD_WIDTH = LIST_FIELD_WIDTH + 50
-      card_id = dpg.generate_uuid()
+        Returns:
+            int | str - идентификатор созданной группы
+        '''
+        card_id = dpg.generate_uuid()
 
-      params = [
-          (label, param) for label, param in node_data.annotations.items()
-          if label != 'INPUT' and not isinstance(param.hint, ANode)
-      ]
-      connection_params = [
-          label for label, param in node_data.annotations.items()
-          if label != 'INPUT' and isinstance(param.hint, ANode)
-      ]
+        params = [
+            (label, param) for label, param in node_data.annotations.items()
+            if label != 'INPUT' and not isinstance(param.hint, ANode)
+        ]
+        connection_params = [
+            label for label, param in node_data.annotations.items()
+            if label != 'INPUT' and isinstance(param.hint, ANode)
+        ]
 
-      with dpg.child_window(tag=card_id, parent=parent, width=CARD_WIDTH, height = 20, autosize_y=True, 
-                            no_scrollbar=True, border=True, user_data=node_data) as card:
-        ThemeManager.apply_theme(card, Themes.NODE_CARD)
+        items_count = len(params) + len(connection_params)
+        if node_data.input: items_count += 1
+        if node_data.output: items_count += 1
+        calc_height = 80 + (items_count * 25) 
 
-        with dpg.group() as drag_group:
-            # drag_data передает ID карточки в drop_callback
-            with dpg.drag_payload(parent=drag_group, drag_data=card_id):
-                dpg.add_text(node_data.label)
+        with dpg.child_window(
+            tag=card_id, 
+            parent=parent, 
+            width=self.card_width, 
+            height=calc_height, 
+            no_scrollbar=True, 
+            border=True, 
+            user_data=node_data
+        ) as card:
+            ThemeManager.apply_theme(card, Themes.NODE_CARD)
 
-            header_button = dpg.add_button(label=node_data.label, width=-1)
-            ThemeManager.apply_theme(header_button, node_data.node_type.theme_name)
+            with dpg.group() as drag_group:
+                with dpg.drag_payload(parent=drag_group, drag_data=card_id):
+                    dpg.add_text(node_data.label)
 
-            if node_data.input:
-                dpg.add_text("INPUT")        
+                theme_name = node_data.node_type.theme_name
+                node_colors = ThemeManager._themes_config.get(theme_name, {}).get("mvNode", {})
+                title_color = node_colors.get("mvNodeCol_TitleBar", [50, 50, 50, 255])
+                
+                with dpg.theme() as header_theme:
+                    with dpg.theme_component(dpg.mvButton):
+                        dpg.add_theme_color(dpg.mvThemeCol_Button, title_color)
+                        dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, title_color)
+                        dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, title_color)
 
-            with dpg.tree_node(label="Docs"):
-                dpg.add_text(node_data.docs, wrap=CARD_WIDTH - 30)
+                header_button = dpg.add_button(label=node_data.label, width=-1)
+                dpg.bind_item_theme(header_button, header_theme)
 
-            for label in connection_params:
-                dpg.add_text(label)
-            
-            for label, param in params:
-                param.hint.build(label=label, parent=drag_group, width=120, enabled=False)
+                if node_data.input:
+                    dpg.add_text("INPUT")        
 
-            delete_button = dpg.add_button(label="Delete", width=CARD_WIDTH // 3)
-            ThemeManager.apply_theme(delete_button, node_data.node_type.theme_name)
-            
-            if node_data.output:
-                dpg.add_text("OUTPUT")
+                with dpg.tree_node(label="Docs"):
+                    dpg.add_text(node_data.docs, wrap=self.card_width - 30)
 
-      dpg.add_spacer(height=10)
-      return card_id    
+                for label in connection_params:
+                    dpg.add_text(label)
+                
+                for label, param in params:
+                    param.hint.build(label=label, parent=drag_group, width=120, enabled=False)
 
+                delete_button = dpg.add_button(label="Delete", width=self.card_width // 3)
+                ThemeManager.apply_theme(delete_button, Themes.DEFAULT)
+
+                if node_data.output:
+                    dpg.add_text("OUTPUT", indent=self.card_width - 65)
+
+        dpg.add_spacer(height=10)
+        return card_id
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
         Построение dpg.node из класса AbstractNode. Используется, для создания новых нодов в редакторе. Ноды берутся из user_data в списке слева.
