@@ -16,32 +16,30 @@ class PlotNode(DataNode):
     theme_name: Themes = Themes.PLOT
     figure: Backfield = Backfield()
 
-    def compile(self, kwargs: dict[str, Any] | None = None) -> bool:
-        fig, ax = plt.subplots(figsize=(4, 3), dpi=100)
-        
-        original_logic = self.logic
-        
-        def wrapped_logic(*args: Any, **kw: Any) -> Any:
-            title = kw.pop("title", "My Plot")
+    @staticmethod
+    def wrapper(func):
+        def wrapped_logic(x=None, y=None, title="My Plot", **kwargs):
+            fig, ax = plt.subplots(figsize=(4, 3), dpi=100)
             
-            args = [np.squeeze(a) if isinstance(a, np.ndarray) else a for a in args]
-            if len(args) == 1 and isinstance(args[0], np.ndarray) and original_logic.__name__ != 'hist':
-                data = args[0]
-                args = [data[:, 0], data[:, 1]] if data.ndim > 1 and data.shape[1] >= 2 else [np.arange(len(data)), data]
-                
-            res = original_logic(*args, **kw)
+            raw = [a for a in [x, y] if a is not None]
+            
+            data_to_plot = (
+                [np.squeeze(raw[0])[:, 0], np.squeeze(raw[0])[:, 1]]
+                if len(raw) >= 1 and np.squeeze(raw[0]).ndim > 1 and np.squeeze(raw[0]).shape[1] >= 2
+                else [np.squeeze(a) for a in raw]
+            )
+
+            func(*data_to_plot, **kwargs)
+
             ax.set_title(title)
             ax.grid(True)
             fig.tight_layout()
-            return res
-            
-        self.logic = wrapped_logic
-        status: bool = super().compile(kwargs)
-        self.logic = original_logic
+            return fig
+        return wrapped_logic
+    
+    def compile(self, kwargs=None):
+        status = super().compile(kwargs)
+        status and setattr(self, 'figure', self.OUTPUT)
         
-        if not status:
-            plt.close(fig)
-            return False
-            
-        self.figure = fig
         return status
+    

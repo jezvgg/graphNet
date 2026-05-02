@@ -20,9 +20,9 @@ class AFigure(Annotation):
     single: bool = field(default=True, init=False)
     node_type: type = field(default=object, init=False)
 
-
     @staticmethod
-    def _build(display: bool, parent: int | str, *args: Any, **kwargs: Any) -> int | str: 
+    def build(parent: int | str, display: bool = True, *args: Any, **kwargs: Any) -> int | str: 
+        # Переименовано из _build, display теперь второй аргумент
         new_parent: int | str = dpg.get_item_parent(parent)
         attr_config: dict[str, Any] = dpg.get_item_configuration(parent)
         dpg.delete_item(parent)
@@ -47,12 +47,12 @@ class AFigure(Annotation):
             dpg.add_text(kwargs.get('label') or "Figure", show=not display)
             return dpg.add_image(tex_id, user_data=tex_id, show=display)
 
-    def build(self, parent: int | str, *args: Any, **kwargs: Any) -> int | str:
-        return self._build(self.display, parent, *args, **kwargs)
-
+    def build_instance(self, parent: int | str, *args: Any, **kwargs: Any) -> int | str:
+        return self.build(parent, self.display, *args, **kwargs)
 
     @staticmethod
-    def _get(display: bool, input_id: int | str) -> Any:
+    def get(input_id: int | str) -> Any:
+        
         parent: int | str = dpg.get_item_parent(input_id)
         user_data: list[int | str] | None = dpg.get_item_user_data(parent)
         
@@ -67,12 +67,11 @@ class AFigure(Annotation):
 
         return results[0] if results else None
 
-    def get(self, input_id: int | str) -> Any:
-        return self._get(self.display, input_id)
-
+    def get_instance(self, input_id: int | str) -> Any:
+        return self.get(input_id, self.display)
 
     @staticmethod 
-    def _set(display: bool, input_id: int | str, fig: plt.Figure) -> bool:
+    def set(input_id: int | str, fig: plt.Figure, display: bool = True) -> bool:
         if not display:
             return True
 
@@ -90,5 +89,5 @@ class AFigure(Annotation):
         plt.close(fig) 
         return True
 
-    def set(self, input_id: int | str, fig: plt.Figure) -> bool:
-        return self._set(self.display, input_id, fig)
+    def set_instance(self, input_id: int | str, fig: plt.Figure) -> bool:
+        return self.set(input_id, fig, self.display)

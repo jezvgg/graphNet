@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from keras import layers
 import keras
@@ -10,7 +11,6 @@ from Src.Config.node_annotation import NodeAnnotation
 from Src.Config.Annotations import *
 from Src.Config.Annotations.anot_figure import AFigure
 from Src.Nodes.plot_node import PlotNode
-import matplotlib.pyplot as plt
 
 # TODO Сделать сериализацию в JSON?
 node_list = {
@@ -92,50 +92,56 @@ node_list = {
             ),
         ],
         "Visualization": [ 
-        NodeAnnotation(
-            label="Line Plot",
-            node_type=PlotNode,           
-            logic=plt.plot,      
-            annotations={
-                "title": Parameter(AttrType.INPUT, AString, default="My Plot"),
-                "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
-            },
-            input=DataNode,
-            output=DataNode 
-        ),
-        NodeAnnotation(
-            label="Bar Plot",
-            node_type=PlotNode,           
-            logic=plt.bar,      
-            annotations={
-                "title": Parameter(AttrType.INPUT, AString, default="My Plot"),
-                "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
-            },
-            input=DataNode,
-            output=DataNode 
-        ),
-        NodeAnnotation(
-            label="Histogram",
-            node_type=PlotNode,           
-            logic=plt.hist,      
-            annotations={
-                "title": Parameter(AttrType.INPUT, AString, default="My Plot"),
-                "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
-            },
-            input=DataNode,
-            output=DataNode 
-        ),
-        NodeAnnotation(
-            label="Scatter Plot",
-            node_type=PlotNode,           
-            logic=plt.scatter,      
-            annotations={
-                "title": Parameter(AttrType.INPUT, AString, default="My Plot"),
-                "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
-            },
-            input=DataNode,
-            output=DataNode 
-        ),
+            NodeAnnotation(
+                label="Line Plot",
+                node_type=PlotNode,           
+                logic=PlotNode.wrapper(plt.plot),
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "title": Parameter(AttrType.INPUT, AString, default="Line Plot"),
+                    "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
+                },
+                input=False, 
+                output=DataNode 
+            ),
+            NodeAnnotation(
+                label="Bar Plot",
+                node_type=PlotNode,
+                logic=PlotNode.wrapper(plt.bar),
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]), 
+                    "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]), 
+                    "title": Parameter(AttrType.INPUT, AString, default="Bar Plot"),
+                    "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
+                },
+                input=False,
+                output=DataNode 
+            ),
+            NodeAnnotation(
+                label="Histogram",
+                node_type=PlotNode,           
+                logic=PlotNode.wrapper(plt.hist),    
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]), 
+                    "title": Parameter(AttrType.INPUT, AString, default="Histogram"),
+                    "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
+                },
+                input=False,
+                output=DataNode 
+            ),
+            NodeAnnotation(
+                label="Scatter Plot",
+                node_type=PlotNode,           
+                logic=PlotNode.wrapper(plt.scatter),      
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]), 
+                    "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "title": Parameter(AttrType.INPUT, AString, default="Scatter Plot"),
+                    "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
+                },
+                input=False,
+                output=DataNode 
+            ),
         ],
     
         "Processing Utils": [
