@@ -11,6 +11,7 @@ from Src.Config.node_annotation import NodeAnnotation
 from Src.Config.Annotations import *
 from Src.Config.Annotations.anot_figure import AFigure
 from Src.Nodes.plot_node import PlotNode
+import matplotlib.pyplot as plt
 
 # TODO Сделать сериализацию в JSON?
 node_list = {
