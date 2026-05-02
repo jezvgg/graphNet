@@ -22,7 +22,6 @@ class AFigure(Annotation):
 
     @staticmethod
     def build(parent: int | str, display: bool = True, *args: Any, **kwargs: Any) -> int | str: 
-        # Переименовано из _build, display теперь второй аргумент
         new_parent: int | str = dpg.get_item_parent(parent)
         attr_config: dict[str, Any] = dpg.get_item_configuration(parent)
         dpg.delete_item(parent)
