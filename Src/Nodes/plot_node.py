@@ -39,7 +39,6 @@ class PlotNode(DataNode):
     
     def compile(self, kwargs=None):
         status = super().compile(kwargs)
-        status and setattr(self, 'figure', self.OUTPUT)
-        
+        status = status and setattr(self, 'figure', self.OUTPUT)
         return status
     
