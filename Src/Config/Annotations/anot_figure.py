@@ -12,8 +12,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from Src.Config.Annotations.annotation import Annotation
 
 
-
-
 @dataclass
 class AFigure(Annotation):
     display: bool = True
@@ -21,7 +19,7 @@ class AFigure(Annotation):
     node_type: type = field(default=object, init=False)
 
     @staticmethod
-    def build(parent: int | str, display: bool = True, *args: Any, **kwargs: Any) -> int | str: 
+    def static_build(parent: int | str, display: bool = True, *args: Any, **kwargs: Any) -> int | str: 
         new_parent: int | str = dpg.get_item_parent(parent)
         attr_config: dict[str, Any] = dpg.get_item_configuration(parent)
         dpg.delete_item(parent)
@@ -46,12 +44,11 @@ class AFigure(Annotation):
             dpg.add_text(kwargs.get('label') or "Figure", show=not display)
             return dpg.add_image(tex_id, user_data=tex_id, show=display)
 
-    def build_instance(self, parent: int | str, *args: Any, **kwargs: Any) -> int | str:
-        return self.build(parent, self.display, *args, **kwargs)
+    def build(self, parent: int | str, *args: Any, **kwargs: Any) -> int | str:
+        return self.static_build(parent, self.display, *args, **kwargs)
 
     @staticmethod
-    def get(input_id: int | str) -> Any:
-        
+    def static_get(input_id: int | str) -> Any:
         parent: int | str = dpg.get_item_parent(input_id)
         user_data: list[int | str] | None = dpg.get_item_user_data(parent)
         
@@ -66,11 +63,11 @@ class AFigure(Annotation):
 
         return results[0] if results else None
 
-    def get_instance(self, input_id: int | str) -> Any:
-        return self.get(input_id, self.display)
+    def get(self, input_id: int | str) -> Any:
+        return self.static_get(input_id)
 
     @staticmethod 
-    def set(input_id: int | str, fig: plt.Figure, display: bool = True) -> bool:
+    def static_set(input_id: int | str, fig: plt.Figure, display: bool = True) -> bool:
         if not display:
             return True
 
@@ -88,5 +85,5 @@ class AFigure(Annotation):
         plt.close(fig) 
         return True
 
-    def set_instance(self, input_id: int | str, fig: plt.Figure) -> bool:
-        return self.set(input_id, fig, self.display)
+    def set(self, input_id: int | str, fig: plt.Figure) -> bool:
+        return self.static_set(input_id, fig, self.display)
