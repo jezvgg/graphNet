@@ -24,7 +24,7 @@ class NodeBuilder:
         factory: InputsFactory - фабрика конвертации аннотаций в инпуты
         layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
-    card_width: int = Annotation.BASE_WIDTH + 50
+    card_width: int = Annotation.BASE_WIDTH + 120
     node_list: dict[str, dict[str, list[NodeAnnotation]]]
     delete_callback: Callable
     logger: Logger
@@ -40,7 +40,6 @@ class NodeBuilder:
         self.logger = logging()("nodes")
         self.delete_callback = delete_callback
         self.node_list = node_list
-
 
     def build_list(self, parent: str | int) -> str | int:
         '''
@@ -130,11 +129,11 @@ class NodeBuilder:
 
                 #TODO нужно подумать, как перекрасить параметры с черного в дефолтный
                 for label, param in params:
-                    parameter = param.hint.build(label=label, parent=drag_group, width=120, enabled=False)
+                    parameter = param.hint.build(label=label, parent=drag_group, width=Annotation.BASE_WIDTH, enabled=False)
                     if parameter:
                         ThemeManager.apply_theme(parameter, Themes.DEFAULT)
 
-                delete_button = dpg.add_button(label="Delete", width=self.card_width // 3)
+                delete_button = dpg.add_button(label="Delete")
                 ThemeManager.apply_theme(delete_button, Themes.DEFAULT)
 
                 if node_data.output:
