@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from keras import layers
 import keras
@@ -8,7 +9,9 @@ from Src.Nodes import *
 from Src.Config.parameter import Parameter
 from Src.Config.node_annotation import NodeAnnotation
 from Src.Config.Annotations import *
-
+from Src.Config.Annotations.anot_figure import AFigure
+from Src.Nodes.plot_node import PlotNode
+import matplotlib.pyplot as plt
 
 # TODO Сделать сериализацию в JSON?
 node_list = {
@@ -44,6 +47,36 @@ node_list = {
                 output=DataNode
             ),
             NodeAnnotation(
+                label="Audio data",
+                node_type=ShapeNode,
+                logic=ShapeNode.open_audio_data,
+                annotations={
+                    "files": Parameter(AttrType.INPUT, AString),
+                    "max_duration_sec": Parameter(AttrType.INPUT, AFloat, default=5.0),
+                    "shape": Parameter(AttrType.OUTPUT, 
+                                       ASequence[AInteger, AInteger],
+                                       backfield=ShapeNode.shape)
+                },
+                input=False,
+                output=DataNode
+            ),
+            NodeAnnotation(
+                label="Text data",
+                node_type=ShapeNode,
+                logic=ShapeNode.open_text_data,
+                annotations={
+                    "files": Parameter(AttrType.INPUT, AString),
+                    "max_tokens": Parameter(AttrType.INPUT, AInteger, default=20000),
+                    "split": Parameter(AttrType.INPUT, AEnum[SplitMode], default=SplitMode.WHITESPACE),
+                    "output_mode": Parameter(AttrType.INPUT, AEnum[TextOutputMode], default=TextOutputMode.INT),
+                    "shape": Parameter(AttrType.OUTPUT, 
+                                       ASequence[AInteger, AInteger],
+                                       backfield=ShapeNode.shape)
+                },
+                input=False,
+                output=DataNode
+            ),
+            NodeAnnotation(
                 label="Load Dataset",
                 node_type= DatasetNode,
                 logic = DatasetNode.open_data,
@@ -53,12 +86,65 @@ node_list = {
                         "y_train": Parameter(AttrType.OUTPUT, ANode[DataNode]),
                         "X_test": Parameter(AttrType.OUTPUT, ANode[DataNode]),
                         "y_test": Parameter(AttrType.OUTPUT, ANode[DataNode]),
-                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
+                        "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger], backfield=ShapeNode.shape)
                         },
                 input=False,
                 output=False
             ),
         ],
+        "Visualization": [ 
+            NodeAnnotation(
+                label="Line Plot",
+                node_type=PlotNode,           
+                logic=PlotNode.wrapper(plt.plot),
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "title": Parameter(AttrType.INPUT, AString, default="Line Plot"),
+                    "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
+                },
+                input=False, 
+                output=DataNode 
+            ),
+            NodeAnnotation(
+                label="Bar Plot",
+                node_type=PlotNode,
+                logic=PlotNode.wrapper(plt.bar),
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]), 
+                    "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]), 
+                    "title": Parameter(AttrType.INPUT, AString, default="Bar Plot"),
+                    "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
+                },
+                input=False,
+                output=DataNode 
+            ),
+            NodeAnnotation(
+                label="Histogram",
+                node_type=PlotNode,           
+                logic=PlotNode.wrapper(plt.hist),    
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]), 
+                    "title": Parameter(AttrType.INPUT, AString, default="Histogram"),
+                    "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
+                },
+                input=False,
+                output=DataNode 
+            ),
+            NodeAnnotation(
+                label="Scatter Plot",
+                node_type=PlotNode,           
+                logic=PlotNode.wrapper(plt.scatter),      
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[Single[DataNode]]), 
+                    "y": Parameter(AttrType.INPUT, ANode[Single[DataNode]]),
+                    "title": Parameter(AttrType.INPUT, AString, default="Scatter Plot"),
+                    "figure": Parameter(AttrType.OUTPUT, AFigure(), backfield=PlotNode.figure) 
+                },
+                input=False,
+                output=DataNode 
+            ),
+        ],
+    
         "Processing Utils": [
             NodeAnnotation(
                 label="to categorical",
@@ -414,6 +500,17 @@ node_list = {
                 annotations = {
                     "model": Parameter(AttrType.INPUT, ANode[Single[CompileNode]]),
                     "filename": Parameter(AttrType.INPUT, AString, default='model.json')
+                },
+                input = False,
+                output = False
+            ),
+            NodeAnnotation(
+                label="Save figure",
+                node_type = UtilsNode,
+                logic = lambda figure, filepath: figure.savefig(filepath),
+                annotations = {
+                    "figure": Parameter(AttrType.INPUT, AFigure(display=False)),
+                    "filepath": Parameter(AttrType.INPUT, AString, default='figure.png')
                 },
                 input = False,
                 output = False
