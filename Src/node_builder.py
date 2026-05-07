@@ -99,7 +99,15 @@ class NodeBuilder:
             border=True, 
             user_data=node_data
         ) as card:
-            ThemeManager.apply_theme(card, Themes.NODE_CARD)
+            
+            with dpg.theme() as card_theme:
+                with dpg.theme_component(dpg.mvChildWindow):
+                    dpg.add_theme_style(dpg.mvStyleVar_WindowPadding, 0, 0)
+                    dpg.add_theme_style(dpg.mvStyleVar_ChildRounding, 4)
+                    dpg.add_theme_style(dpg.mvStyleVar_ChildBorderSize, 1)
+                    dpg.add_theme_color(dpg.mvThemeCol_ChildBg, [50, 50, 50, 255])
+                    dpg.add_theme_color(dpg.mvThemeCol_Border, [100, 100, 100, 255])
+            dpg.bind_item_theme(card, card_theme)
 
             with dpg.group() as drag_group:
                 with dpg.drag_payload(parent=drag_group, drag_data=card_id):
@@ -114,34 +122,44 @@ class NodeBuilder:
                         dpg.add_theme_color(dpg.mvThemeCol_Button, title_color)
                         dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, title_color)
                         dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, title_color)
+                        dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 4)
+                        dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 4, 4)
 
-                header_button = dpg.add_button(label=node_data.label, width=-1)
-                dpg.bind_item_theme(header_button, header_theme)
+                with dpg.group() as header_group:
+                    with dpg.theme() as group_theme:
+                        with dpg.theme_component(dpg.mvGroup):
+                            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 0)
+                    dpg.bind_item_theme(header_group, group_theme)
 
-                if node_data.input:
-                    dpg.add_text("INPUT")        
+                    header_button = dpg.add_button(label=node_data.label, width=-1)
+                    dpg.bind_item_theme(header_button, header_theme)
+                
+                dpg.add_spacer(height=4)
+                with dpg.group(indent=10) as body_group:
 
-                with dpg.tree_node(label="Docs"):
-                    dpg.add_text(node_data.docs, wrap=self.card_width - 30)
+                    if node_data.input:
+                        dpg.add_text("INPUT")        
 
-                for label in connection_params:
-                    dpg.add_text(label)
+                    with dpg.tree_node(label="Docs"):
+                        dpg.add_text(node_data.docs, wrap=self.card_width - 30)
 
-                #TODO нужно подумать, как перекрасить параметры с черного в дефолтный
-                for label, param in params:
-                    parameter = param.hint.build(label=label, parent=drag_group, width=Annotation.BASE_WIDTH, enabled=False)
-                    if parameter:
-                        ThemeManager.apply_theme(parameter, Themes.DEFAULT)
+                    for label in connection_params:
+                        dpg.add_text(label)
 
-                delete_button = dpg.add_button(label="Delete")
-                ThemeManager.apply_theme(delete_button, Themes.DEFAULT)
+                    for label, param in params:
+                        parameter = param.hint.build(label=label, parent=body_group, width=Annotation.BASE_WIDTH, enabled=False)
+                        if parameter:
+                            ThemeManager.apply_theme(parameter, Themes.DEFAULT)
 
-                if node_data.output:
-                    dpg.add_text("OUTPUT")
+                    delete_button = dpg.add_button(label="Delete")
+                    ThemeManager.apply_theme(delete_button, Themes.DEFAULT)
+
+                    if node_data.output:
+                        dpg.add_text("OUTPUT")
 
         dpg.add_spacer(height=10)
-        return card_id
-    
+        return card_id    
+
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
         Построение dpg.node из класса AbstractNode. Используется, для создания новых нодов в редакторе. Ноды берутся из user_data в списке слева.
