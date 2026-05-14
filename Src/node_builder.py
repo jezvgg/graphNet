@@ -24,7 +24,7 @@ class NodeBuilder:
         factory: InputsFactory - фабрика конвертации аннотаций в инпуты
         layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
-    card_width: int = Annotation.BASE_WIDTH + 120
+    card_width: int = Annotation.BASE_WIDTH + 115
     node_list: dict[str, dict[str, list[NodeAnnotation]]]
     delete_callback: Callable
     logger: Logger
@@ -88,7 +88,7 @@ class NodeBuilder:
         items_count = len(params) + len(connection_params)
         if node_data.input: items_count += 1
         if node_data.output: items_count += 1
-        calc_height = 80 + (items_count * 30) 
+        calc_height = 80 + (items_count * 26) 
 
         with dpg.child_window(
             tag=card_id, 
@@ -103,7 +103,7 @@ class NodeBuilder:
             with dpg.theme() as card_theme:
                 with dpg.theme_component(dpg.mvChildWindow):
                     dpg.add_theme_style(dpg.mvStyleVar_WindowPadding, 0, 0)
-                    dpg.add_theme_style(dpg.mvStyleVar_ChildRounding, 4)
+                    dpg.add_theme_style(dpg.mvStyleVar_ChildRounding, 8)
                     dpg.add_theme_style(dpg.mvStyleVar_ChildBorderSize, 1)
                     dpg.add_theme_color(dpg.mvThemeCol_ChildBg, [50, 50, 50, 255])
                     dpg.add_theme_color(dpg.mvThemeCol_Border, [100, 100, 100, 255])
@@ -122,8 +122,10 @@ class NodeBuilder:
                         dpg.add_theme_color(dpg.mvThemeCol_Button, title_color)
                         dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, title_color)
                         dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, title_color)
-                        dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 4)
-                        dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 4, 4)
+                        dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5)
+                        dpg.add_theme_style(dpg.mvStyleVar_ButtonTextAlign, 0.01, 0.5) 
+                        dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 4, 8)
+                        dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0)
 
                 with dpg.group() as header_group:
                     with dpg.theme() as group_theme:
@@ -134,11 +136,17 @@ class NodeBuilder:
                     header_button = dpg.add_button(label=node_data.label, width=-1)
                     dpg.bind_item_theme(header_button, header_theme)
                 
-                dpg.add_spacer(height=4)
-                with dpg.group(indent=10) as body_group:
+                dpg.add_spacer(height=2)
 
+                with dpg.group(indent=8) as body_group:
+                    with dpg.theme() as body_theme:
+                        with dpg.theme_component(dpg.mvGroup):
+                            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 2, 0) 
+                    dpg.bind_item_theme(body_group, body_theme)
                     if node_data.input:
-                        dpg.add_text("INPUT")        
+                        dpg.add_text("INPUT")
+                    
+                    dpg.add_spacer(height=1)
 
                     with dpg.tree_node(label="Docs"):
                         dpg.add_text(node_data.docs, wrap=self.card_width - 30)
