@@ -8,12 +8,12 @@ from Src.Config.Annotations import ANode
 from Src.Nodes import AbstractNode
 from Src.Enums.attr_type import AttrType
 from Src.Logging.logger_factory import Logger_factory
-from Tests.DPG_test import DPGUnitTest
+from Tests.DPG_test_with_reset import DPGUnitTestWithReset
 
 
 
 
-class test_NodeEditor(DPGUnitTest):
+class test_NodeEditor(DPGUnitTestWithReset):
     '''
     Проверка объектов аннотации и их работоспособности
     '''
@@ -24,9 +24,12 @@ class test_NodeEditor(DPGUnitTest):
     def setUpClass(cls):
         super().setUpClass()
         dpg.create_viewport(title='Custom Title')
+        # Перезагружаем темы явно — после пересоздания контекста
+        # старые ID тем из предыдущего тестового класса становятся невалидны
+        from Src.Managers.theme_manager import ThemeManager
+        ThemeManager.load_themes("Tests/themes.json")
         with open("Tests/logger_config.json") as f:
             config = json.load(f)
-
         log_factory = Logger_factory(config)
         cls.node_editor = NodeEditor()
 
@@ -231,5 +234,28 @@ class test_NodeEditor(DPGUnitTest):
         assert len(dpg.get_item_children("node_editor", slot=1)) == nodes_count - 1
         assert node_attr2 not in node2.incoming
         assert node2 in self.node_editor._NodeEditor__start_nodes
+
+
+    def test_node_editor_tag_in_dpg(self):
+        # После инициализации NodeEditor тег "node_editor" должен существовать в DPG
+        assert dpg.does_item_exist("node_editor")
+
+
+    def test_drop_callback_returns_node_id(self):
+        # drop_callback должен возвращать id созданной ноды
+        node = NodeAnnotation(
+            label="Example",
+            node_type=AbstractNode,
+            logic=lambda x: x,
+            annotations={}
+        )
+
+        with dpg.window():
+            btn = dpg.add_button(label=node.label, user_data=node)
+
+        node_id = self.node_editor.drop_callback("node_editor", btn)
+
+        # Возвращённый id должен быть валидным DPG-элементом
+        assert node_id in dpg.get_all_items()
 
 

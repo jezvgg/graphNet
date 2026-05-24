@@ -1,13 +1,13 @@
 import dearpygui.dearpygui as dpg
 
-from Tests.DPG_test import DPGUnitTest
-from Src.Themes import ThemeManager
+from Tests.DPG_test_with_reset import DPGUnitTestWithReset
+from Src.Managers.theme_manager import ThemeManager
 from Src.Enums import Themes
 
 
 
 
-class test_ThemeManager(DPGUnitTest):
+class test_ThemeManager(DPGUnitTestWithReset):
     '''
     Проверка менеджера тем
     '''
@@ -107,3 +107,28 @@ class test_ThemeManager(DPGUnitTest):
         assert dpg.get_item_theme(node_id) == combined_theme_id
 
         assert True
+
+
+    def test_apply_theme_replaces_previous(self):
+        """
+        Проверяет, что повторный вызов apply_theme заменяет темы, а не добавляет к ним.
+        """
+        with dpg.window():
+            button_id = dpg.add_button(label="Test Button")
+
+        ThemeManager.apply_theme(button_id, Themes.DEFAULT)
+        ThemeManager.apply_theme(button_id, Themes.ERROR)
+
+        item_themes = ThemeManager._item_themes[button_id]
+        assert Themes.ERROR in item_themes
+        assert Themes.DEFAULT not in item_themes
+        assert len(item_themes) == 1
+
+
+    def test_get_theme_returns_valid_dpg_item(self):
+        """
+        Проверяет, что get_theme возвращает существующий DPG-элемент.
+        """
+        theme_id = ThemeManager.get_theme(Themes.DEFAULT)
+
+        assert theme_id in dpg.get_all_items()

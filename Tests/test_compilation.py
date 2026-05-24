@@ -8,10 +8,10 @@ from Src.Config.node_list import node_list
 from Src.Config.Annotations import *
 from Src.Enums import *
 from Src.Logging.logger_factory import Logger_factory
-from Tests.DPG_test import DPGUnitTest
+from Tests.DPG_test_with_reset import DPGUnitTestWithReset
 
 
-class test_compilation(DPGUnitTest):
+class test_compilation(DPGUnitTestWithReset):
     '''
     Проверка компиляции графа
     '''
@@ -36,12 +36,15 @@ class test_compilation(DPGUnitTest):
     def test_compilation(self):
         nodes_in_mock = {
             "Table data": node_list["Data & Preprocessing"]["Import data"][0],
-            "To categorical": node_list["Data & Preprocessing"]["Preprocessing Utils"][0],
+            # "Preprocessing Utils" переименован в "Processing Utils" в node_list.py
+            "To categorical": node_list["Data & Preprocessing"]["Processing Utils"][0],
             "Dense": node_list["Neural Network Layers"]["Full"][0],
             "Compile": node_list["Training"]["General"][0],
             "Fit": node_list["Training"]["General"][1],
             "Predict": node_list["Training"]["General"][2],
-            "Save": node_list["Training"]["Utils"][2]
+            # Индекс изменился: между старым [2] ("Save") и его позицией
+            # был добавлен "Calculate Metric", сдвинув "Save data" на [3]
+            "Save": node_list["Training"]["Utils"][3]
         }
         get_attr = lambda attr_name, node_id: [attribute for attribute in dpg.get_item_children(node_id, slot=1) \
                                                for field in dpg.get_item_children(attribute, slot=1)\
@@ -82,8 +85,8 @@ class test_compilation(DPGUnitTest):
         assert AString.set(dpg.get_item_children(get_attr("files", dataY), slot=1)[0], "./Tests/y.txt")
         assert AInteger.set(dpg.get_item_children(get_attr("num_classes", categorical), slot=1)[0], 2)
         assert AInteger.set(dpg.get_item_children(get_attr("units", dense), slot=1)[0], 2)
-        assert AEnum[Activations].set(dpg.get_item_children(get_attr("activation", dense), slot=1)[0], Activations.softmax)
-        assert AEnum[Losses].set(dpg.get_item_children(get_attr("loss", compile), slot=1)[0], Losses.binary_crossentropy)
+        assert AEnum[Activations].set(dpg.get_item_children(get_attr("activation", dense), slot=1)[0], Activations.SOFTMAX) #был использован нижний регистр softmax (src/utils/activations.py)
+        assert AEnum[Losses].set(dpg.get_item_children(get_attr("loss", compile), slot=1)[0], Losses.BINARY_CROSSENTROPY) #тоже самое (src/utils/losses.py)
         assert AInteger.set(dpg.get_item_children(get_attr("epochs", fit), slot=1)[0], 10)
 
         # Компилируем
@@ -94,3 +97,10 @@ class test_compilation(DPGUnitTest):
         filepath: Path = Path(AString.get(dpg.get_item_children(get_attr("fname", save), slot=1)[0]))
         assert filepath.exists()
         filepath.unlink(missing_ok=True)
+
+
+    def test_simple_compilation_returns_set(self):
+        # compile_graph должен вернуть множество (set) посещённых нодов
+        result = self.node_editor.builder.compile_graph(self.node_editor._NodeEditor__start_nodes)
+
+        assert isinstance(result, set)

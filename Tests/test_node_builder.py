@@ -6,10 +6,10 @@ from Src.node_builder import NodeBuilder
 from Src.Config.node_annotation import NodeAnnotation
 from Src.Nodes import AbstractNode, InputLayerNode
 from Src.Logging.logger_factory import Logger_factory
-from Tests.DPG_test import DPGUnitTest
+from Tests.DPG_test_with_reset import DPGUnitTestWithReset
 
 
-class test_NodeBuilder(DPGUnitTest):
+class test_NodeBuilder(DPGUnitTestWithReset):
     '''
     Проверка объектов аннотации и их работоспособности
     '''
@@ -17,9 +17,12 @@ class test_NodeBuilder(DPGUnitTest):
     def setUpClass(cls):
         super().setUpClass()
         dpg.create_viewport(title='Custom Title')
+        # Перезагружаем темы явно — после пересоздания контекста
+        # старые ID тем из предыдущего тестового класса становятся невалидны
+        from Src.Managers.theme_manager import ThemeManager
+        ThemeManager.load_themes("Tests/themes.json")
         with open("Tests/logger_config.json") as f:
             config = json.load(f)
-
         log_factory = Logger_factory(config)
 
 
@@ -81,3 +84,22 @@ class test_NodeBuilder(DPGUnitTest):
 
         assert isinstance(node, InputLayerNode)
         assert dpg.get_item_label(node_id) == "Input"
+
+
+    def test_build_node_correct_label(self):
+        builder = NodeBuilder({}, lambda x: x)
+
+        with dpg.window() as id:
+            with dpg.node_editor() as editor_id:
+                node_id = builder.build_node(
+                    NodeAnnotation(
+                        label="MyTestLabel",
+                        node_type=AbstractNode,
+                        logic=lambda x: x,
+                        annotations={}
+                    ),
+                    editor_id
+                )
+
+        # Нода должна получить метку из NodeAnnotation
+        assert dpg.get_item_label(node_id) == "MyTestLabel"
