@@ -13,3 +13,7 @@ dependencies = [
     "tensorflow>=2.19.0",
     "matplotlib>=3.10.0",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["Tests"]
