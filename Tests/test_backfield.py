@@ -12,13 +12,9 @@ class test_backfield(unittest.TestCase):
         @dataclass
         class A:
             flag = False
-            # Backfield больше не принимает callback в конструкторе —
-            # передаём только начальное значение
             b = Backfield(0)
 
         a = A()
-        # Callback теперь привязывается отдельно через .bind()
-        # на конкретный экземпляр класса
         A.b.bind(a, lambda _: setattr(A, 'flag', True))
         a.b = 1
 
