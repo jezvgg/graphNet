@@ -10,21 +10,21 @@
 <a name="english"></a>
 # graphNet (English)
 
-[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org)
+[![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**graphNet** is a cross-platform desktop application designed for visual prototyping and construction of neural network architectures. Using an intuitive node-graph interface, users can create layers, link them to define the data flow, and configure parameters for each individual node.
+**graphNet** is a cross-platform desktop application designed for visual prototyping and construction of neural network architectures. Built on top of the fast and lightweight **Dear PyGui** library, it provides an intuitive node-graph interface where users can easily create layers, link them to define the data flow, and configure parameters for each individual node.
 
 ---
 
-## About the Project
+## 📝 About the Project
 
 Developing deep learning models often requires writing boilerplate code to define complex, multi-branch architectures. **graphNet** aims to simplify this process by providing a visual workspace where you can:
 * **Assemble architectures interactively:** Add layers (nodes) such as Linear, Conv2D, Pooling, or Activation functions, and connect them with edges.
 * **Configure hyperparameters:** Adjust weights, kernel sizes, strides, activation functions, and other layer parameters directly inside the GUI.
 * **Visualize the flow:** Easily trace how data moves through complex topologies, including multi-input or multi-output systems.
 
-### ️ Screenshots & Media
+### 🖼️ Screenshots & Media
 
 #### Main Workspace
 ![graphNet Workspace](Assets/preview.jpg)
@@ -33,10 +33,11 @@ Developing deep learning models often requires writing boilerplate code to defin
 #### Video Demonstration
 Below is a video demonstrating the workflow, from placing the first node to running the application:
 
-<video src="Assets/demo.mp4" controls width="100%"></video>
+<video src="Assets/IMG_3070.mov" controls width="100%"></video>
+
 ---
 
-## How to Run
+## 🚀 How to Run
 
 You can run **graphNet** either as a standalone pre-compiled application or directly from the source code.
 
@@ -72,61 +73,74 @@ Once `uv` is installed, navigate to the project directory and execute:
 ```bash
 uv run main.py
 ```
-*`uv` will automatically create a virtual environment, install the correct Python version, install all required dependencies listed in `pyproject.toml`, and launch the app.*
+*`uv` will automatically create a virtual environment, install the correct Python version (>=3.12.0), install all required dependencies (Dear PyGui, NumPy, Pillow, PyDot, TensorFlow), and launch the app*
 
-#### 3. Standard `pip` alternative (Optional)
-If you prefer traditional tools:
+---
+
+## 🧪 Testing & Coverage
+
+The project uses **pytest** for automated testing. Thanks to the configuration in `pyproject.toml`, you do not need to manually configure `PYTHONPATH` or test directories.
+
+### 1. Running Automated Tests
+To run all tests in the repository, simply execute:
 ```bash
-pip install -r requirements.txt
-python main.py
+uv run pytest
+```
+
+### 2. Calculating Code Coverage
+To measure how much of the codebase is covered by your tests, first install the `coverage` tool as a development dependency:
+```bash
+uv add --dev coverage
+```
+Then run the tests under coverage tracking and generate a report:
+```bash
+uv run coverage run -m pytest
+uv run coverage report
 ```
 
 ---
 
-## ️ Building from Source (.EXE compilation)
+## 🤝 Contribution & Joining the Team
 
-If you want to compile your own `.exe` file after making changes to the source code, you can use one of these methods:
+We welcome contributions of all kinds — from fixing typos in the documentation to implementing complex features. Feel free to open issues or submit Pull Requests!
 
-### Method A. Using `make`
-If `make` is installed on your Windows environment:
+### 🚀 Want to Join Our Team?
+We are actively looking for passionate developers to join the **graphNet** core team. If you want to work with us, the process is simple:
+1. **Contact us:** Reach out to **[@jezvGG](https://t.me/jezvGG)** on Telegram and tell us a bit about your experience and interest in the project.
+2. **Interview:** Have a brief technical interview with the team to discuss your background and align goals.
+3. **Test Task:** Complete a small, hands-on test assignment to showcase your coding skills.
+
+---
+
+## 🛠️ Building from Source (.EXE compilation)
+
+If you want to compile your own `.exe` file after making changes to the source code, you can use the configured Makefile:
+
 ```bash
 make build
 ```
-The compiled executable will be placed in the `dist/` folder.
-
-### Method B. Interactive Build via `auto-py-to-exe`
-1. Install the tool:
-   ```bash
-   pip install auto-py-to-exe
-   ```
-2. Launch it:
-   ```bash
-   auto-py-to-exe
-   ```
-3. Set the following options in the interface:
-   * **Script Location:** Choose `main.py`.
-   * **One File / One Directory:** Select *One File*.
-   * **Console Window:** Select *Window Based (hide the console)*.
-   * **Additional Files:** Click *Add Folder* and add the `Assets` folder (ensure the destination path is set to `Assets`).
-4. Click **«Convert .py to .exe»**. The output file will be generated in the `output/` directory.
+*The compiled executable will be placed in the `dist/` directory with all assets and configs embedded.*
 
 ---
 
 <a name="русский"></a>
 # graphNet (Русский)
 
-**graphNet** — это кроссплатформенное десктопное приложение на Python, разработанное для визуального проектирования и конструирования архитектур нейронных сетей. С помощью интерфейса в виде графа пользователи могут добавлять слои (узлы), связывать их для определения потока данных и настраивать параметры каждого элемента.
+[![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+**graphNet** — это кроссплатформенное десктопное приложение на Python, разработанное для визуального проектирования и конструирования архитектур нейронных сетей. Благодаря быстрому и легковесному GUI-фреймворку **Dear PyGui**, приложение предоставляет интуитивный интерфейс в виде графа, где пользователи могут добавлять слои (узлы), связывать их для определения потока данных и настраивать параметры каждого элемента.
 
 ---
 
-## О проекте
+## 📝 О проекте
 
 Проектирование архитектур глубокого обучения часто требует написания шаблонного кода, особенно для сложных сетей с ветвлением. **graphNet** призван решить эту проблему, предоставляя графическую рабочую область, где вы можете:
 * **Интерактивно собирать архитектуру:** Добавлять слои (линейные, сверточные, пулинг, функции активации) и связывать их ребрами.
 * **Конфигурировать параметры:** Настраивать размерности, шаги (stride), ядра свертки и другие параметры слоев напрямую через графический интерфейс.
 * **Визуализировать потоки данных:** Наглядно видеть, как данные проходят через сложные топологии, включая системы с несколькими входами и выходами.
 
-### Скриншоты и медиа-материалы
+### 🖼️ Скриншоты и медиа-материалы
 
 #### Главное рабочее пространство
 ![Рабочее пространство graphNet](Assets/preview.jpg)
@@ -135,10 +149,11 @@ The compiled executable will be placed in the `dist/` folder.
 #### Видеодемонстрация работы
 Ниже представлено видео, демонстрирующее процесс создания сети от первой ноды до запуска:
 
-<video src="Assets/demo.mp4" controls width="100%"></video>
+<video src="Assets/IMG_3070.mov" controls width="100%"></video>
+
 ---
 
-##  Как запустить
+## 🚀 Как запустить
 
 Вы можете запустить **graphNet** либо как готовую автономную программу, либо из исходного кода через консоль.
 
@@ -174,41 +189,51 @@ The compiled executable will be placed in the `dist/` folder.
 ```bash
 uv run main.py
 ```
-*`uv` автоматически создаст виртуальное окружение, загрузит необходимую версию Python, установит зависимости из файла `pyproject.toml` и запустит проект.*
+*`uv` автоматически создаст виртуальное окружение, загрузит необходимую версию Python (>=3.12.0), установит зависимости (Dear PyGui, NumPy, Pillow, PyDot, TensorFlow) и запустит проект.*
 
-#### 3. Альтернативный запуск через классический `pip`
-Если вы предпочитаете стандартные инструменты:
+---
+
+## 🧪 Тестирование и покрытие (Coverage)
+
+Для автоматического тестирования в проекте используется фреймворк **pytest**. Благодаря встроенной конфигурации в `pyproject.toml`, вам больше не нужно вручную настраивать переменную `PYTHONPATH` и пути к тестам перед запуском.
+
+### 1. Запуск автотестов
+Для запуска всех тестов в репозитории выполните команду:
 ```bash
-pip install -r requirements.txt
-python main.py
+uv run pytest
+```
+
+### 2. Расчёт покрытия кода (Coverage)
+Чтобы измерить процент покрытия исходного кода тестами, сначала установите пакет `coverage` в зависимости для разработки:
+```bash
+uv add --dev coverage
+```
+Затем запустите тесты под контролем утилиты coverage и выведите отчет в консоль:
+```bash
+uv run coverage run -m pytest
+uv run coverage report
 ```
 
 ---
 
-## Сборка исполняемого файла (.EXE из исходников)
+## 🤝 Участие в разработке (Contribution)
 
-Если вы внесли изменения в код и хотите собрать собственный `.exe` файл, воспользуйтесь одним из предложенных способов.
+Мы рады любому вкладу в развитие **graphNet** — от исправления опечаток в документации до реализации новых архитектурных слоев. Смело создавайте тикеты (Issues) или отправляйте Pull Requests!
 
-### Способ А. С использованием утилиты `make`
-Если в вашей системе установлен инструмент `make`:
+### 🚀 Хотите попасть к нам в команду?
+Мы всегда в поиске увлеченных разработчиков, готовых развивать проект вместе с нами. Чтобы присоединиться к основной команде, вам нужно:
+1. **Написать нам:** Свяжитесь напрямую через Telegram с **[@jezvGG](https://t.me/jezvGG)** и коротко расскажите о своем опыте.
+2. **Пройти собеседование:** Пройти небольшое техническое собеседование с командой, где мы познакомимся и обсудим общие задачи.
+3. **Решить тестовое:** Выполнить небольшое практическое тестовое задание для демонстрации ваших навыков.
+
+---
+
+## 🛠️ Сборка исполняемого файла (.EXE из исходников)
+
+Если вы внесли изменения в код и хотите собрать собственный `.exe` файл, воспользуйтесь настроенным `Makefile`:
+
 ```bash
 make build
 ```
-Готовый исполняемый файл будет помещен в созданную папку `dist/`.
-
-### Способ Б. Интерактивная сборка через `auto-py-to-exe`
-1. Установите инструмент сборки:
-   ```bash
-   pip install auto-py-to-exe
-   ```
-2. Запустите графический интерфейс утилиты:
-   ```bash
-   auto-py-to-exe
-   ```
-3. Выполните настройки в открывшемся окне:
-   * **Script Location:** Выберите ваш главный файл `main.py`.
-   * **One File / One Directory:** Установите значение *One File*.
-   * **Console Window:** Выберите *Window Based (hide the console)*.
-   * **Additional Files:** Нажмите *Add Folder* и укажите папку `Assets` (убедитесь, что относительный путь назначения справа указан как `Assets`).
-4. Нажмите синюю кнопку **«Convert .py to .exe»**. Собранное приложение будет сохранено в папке `output/`.
+*Собранное приложение со всеми ресурсами и конфигурациями логгера будет сохранено в папку `dist/`.*
 ```
