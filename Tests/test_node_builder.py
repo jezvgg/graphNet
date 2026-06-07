@@ -6,6 +6,7 @@ from Src.node_builder import NodeBuilder
 from Src.Config.node_annotation import NodeAnnotation
 from Src.Nodes import AbstractNode, InputLayerNode
 from Src.Logging.logger_factory import Logger_factory
+from Src.Managers.theme_manager import ThemeManager
 from Tests.DPG_test_with_reset import DPGUnitTestWithReset
 
 
@@ -19,7 +20,6 @@ class test_NodeBuilder(DPGUnitTestWithReset):
         dpg.create_viewport(title='Custom Title')
         # Перезагружаем темы явно — после пересоздания контекста
         # старые ID тем из предыдущего тестового класса становятся невалидны
-        from Src.Managers.theme_manager import ThemeManager
         ThemeManager.load_themes("Tests/themes.json")
         with open("Tests/logger_config.json") as f:
             config = json.load(f)
