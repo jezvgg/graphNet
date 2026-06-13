@@ -1,5 +1,6 @@
 import sys
 import importlib
+import logging
 
 from pathlib import Path
 from Src.Logging.logger_factory import Logger_factory
@@ -13,7 +14,8 @@ class ExtensionManager:
         self.descovered_plugins = {}
         self.active_plugins = {}
 
-        self.logger = Logger_factory.get_logger('ExtensionManager')
+        self.logger = logging.getLogger('ExtensionManager')
+        logging.basicConfig(level=logging.INFO)
 
         self._prepare_infrastructure()
 
