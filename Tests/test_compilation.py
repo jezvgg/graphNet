@@ -20,7 +20,6 @@ class test_compilation(DPGUnitTestWithReset):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        dpg.create_viewport(title='Custom Title')
         with open("Tests/logger_config.json") as f:
             config = json.load(f)
 
