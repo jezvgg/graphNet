@@ -23,3 +23,4 @@ class Themes(StrEnum):
     DATASET = 'dataset'
     SIDEBAR = 'sidebar'
     NODE_CARD = 'node_card'
+    PLOT = 'plot'

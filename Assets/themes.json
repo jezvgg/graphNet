@@ -220,3 +220,13 @@
     }
   }
 }
+  "plot":{
+    "mvNode":{
+      "mvNodeCol_TitleBar":[103,58,183,255],
+      "mvNodeCol_TitleBarHovered":[119,74,199,255],
+      "mvNodeCol_TitleBarSelected":[135,90,215,255]},
+      "mvNodeAttribute":{"mvNodeCol_Pin":[103,58,183,255],
+      "mvNodeCol_Link":[103,58,183,255]}
+    }
+}
+
