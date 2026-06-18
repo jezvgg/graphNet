@@ -27,13 +27,13 @@ Developing deep learning models often requires writing boilerplate code to defin
 ### 🖼️ Screenshots & Media
 
 #### Main Workspace
-![graphNet Workspace](Assets/demo.mp4)
+![graphNet Workspace](Assets/preview.jpg)
 *Figure 1: Visual workspace with nodes and connections representing a neural network.*
 
 #### Video Demonstration
 Below is a video demonstrating the workflow, from placing the first node to running the application:
 
-[Watch video demonstration](Assets/IMG_3070.mov)
+<video src="Assets/demo.mp4" width="100%" autoplay loop muted playsinline></video>
 
 ---
 
@@ -149,7 +149,7 @@ make build
 #### Видеодемонстрация работы
 Ниже представлено видео, демонстрирующее процесс создания сети от первой ноды до запуска:
 
-[Смотреть видеодемонстрацию](Assets/demo.mp4)
+<video src="Assets/demo.mp4" width="100%" autoplay loop muted playsinline></video>
 
 ---
 
