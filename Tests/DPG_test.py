@@ -21,8 +21,8 @@ class DPGUnitTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         for item in list(dpg.get_all_items()):
-            try:
+            if dpg.get_item_parent(item) == 0:
                 dpg.delete_item(item)
-            except Exception:
-                pass
+        ThemeManager._created_themes = {}
+        ThemeManager._item_themes = {}
         return super().tearDownClass()
