@@ -147,6 +147,37 @@ class test_annotations(DPGUnitTest):
         assert annotation.set(combo_id, 123) == False
 
         assert TestEnum(annotation.get(combo_id)) == TestEnum.SECOND
-    
 
-    
+
+    def test_check_kwargs_empty_input(self):
+        # Пустой словарь kwargs → пустой результат
+        def func(x: int, y: int): pass
+
+        result = Annotation.check_kwargs(func, {})
+
+        assert result == {}
+
+
+    def test_check_kwargs_no_matching_keys(self):
+        # Если ни один ключ не совпадает с параметрами функции → пустой результат
+        def func(x: int): pass
+
+        result = Annotation.check_kwargs(func, {'a': 1, 'b': 2})
+
+        assert result == {}
+
+
+    def test_AString_empty_string_is_valid(self):
+        # Пустая строка — допустимое значение для AString, хотя "" == falsy в Python
+        input_id = AString.build(parent=self.parent)
+
+        assert AString.set(input_id, "") == True
+        assert AString.get(input_id) == ""
+
+
+    def test_AInteger_negative_value(self):
+        # Отрицательное целое — валидное значение для AInteger
+        input_id = AInteger.build(parent=self.parent)
+
+        assert AInteger.set(input_id, -10) == True
+        assert AInteger.get(input_id) == -10
