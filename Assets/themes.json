@@ -187,7 +187,7 @@
       "mvNodeCol_TitleBarSelected": [245, 101, 151, 255]
     },
     "mvNodeAttribute": { "mvNodeCol_Pin": [255, 144, 144, 255], "mvNodeCol_Link": [255, 144, 144, 255] }
-  },
+ },
   "image_data": {
     "mvNode": {
       "mvNodeCol_TitleBar": [236, 64, 122, 255],
@@ -204,6 +204,22 @@
     },
     "mvNodeAttribute": { "mvNodeCol_Pin": [236, 64, 122, 255], "mvNodeCol_Link": [236, 64, 122, 255] }
   },
+  "sidebar": {
+    "mvChildWindow": {
+      "mvThemeCol_ChildBg": [30, 30, 30, 255],
+      "mvStyleVar_ChildRounding": 0
+    }
+  },
+  "node_card": {
+    "mvChildWindow": {
+      "mvThemeCol_ChildBg": [45, 45, 45, 255],
+      "mvThemeCol_Border": [65, 65, 65, 255],
+      "mvStyleVar_ChildRounding": 4,
+      "mvStyleVar_ChildBorderSize": 1,
+      "mvStyleVar_WindowPadding": [10, 10]
+    }
+  }
+}
   "plot":{
     "mvNode":{
       "mvNodeCol_TitleBar":[103,58,183,255],
