@@ -33,7 +33,7 @@ Developing deep learning models often requires writing boilerplate code to defin
 #### Video Demonstration
 Below is a video demonstrating the workflow, from placing the first node to running the application:
 
-<video src="https://raw.githubusercontent.com/graphicalAI/graphNet/develop/Assets/demo.mp4" width="100%" autoplay loop muted playsinline></video>
+[Video demonstration](Assets/demo.mp4)
 
 ---
 
@@ -149,7 +149,7 @@ make build
 #### Видеодемонстрация работы
 Ниже представлено видео, демонстрирующее процесс создания сети от первой ноды до запуска:
 
-<video src="https://raw.githubusercontent.com/graphicalAI/graphNet/develop/Assets/demo.mp4" width="100%" autoplay loop muted playsinline></video>
+[Видеодемонстрацию работы](Assets/demo.mp4)
 
 ---
 
