@@ -27,8 +27,7 @@ class NodeBuilder:
 
     def __init__(self, 
                  node_list: dict[str: AbstractNode],
-                 delete_callback: Callable,
-                 resize_callback: Callable):
+                 delete_callback: Callable):
         '''
         Args:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
@@ -36,7 +35,6 @@ class NodeBuilder:
         self.logger = logging()("nodes")
         self.delete_callback = delete_callback
         self.node_list = node_list
-        self.resize_callback = resize_callback
 
     def build_list(self, parent: str | int) -> str | int:
         '''
@@ -78,7 +76,6 @@ class NodeBuilder:
         node_id = dpg.generate_uuid()
         node: AbstractNode = node_data.node_type(
             node_id,
-            resize_callback=self.resize_callback,
             **node_data.kwargs
         )
 

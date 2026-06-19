@@ -35,7 +35,7 @@ class NodeEditor:
             *args, **kwargs - передаются в dpg.node_editor
         '''
         self.logger = logging()("nodes")
-        self.builder = NodeBuilder(node_list, self.delete_node, self.on_viewport_resize_callback)
+        self.builder = NodeBuilder(node_list, self.delete_node)
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
         self.__start_nodes = []

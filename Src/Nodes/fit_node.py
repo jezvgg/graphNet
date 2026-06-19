@@ -22,7 +22,7 @@ class FitNode(DataNode):
 
 
     @staticmethod
-    def fit(model: keras.models.Model, resize_callback=None, **kwargs) -> keras.Model:
+    def fit(model: keras.models.Model, **kwargs) -> keras.Model:
         if kwargs['epochs']<=0:
             raise AttributeError("Колличество эпох должно быть больше нуля!")
         
