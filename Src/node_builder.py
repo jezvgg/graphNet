@@ -27,7 +27,8 @@ class NodeBuilder:
 
     def __init__(self, 
                  node_list: dict[str: AbstractNode],
-                 delete_callback: Callable):
+                 delete_callback: Callable,
+                 resize_callback: Callable):
         '''
         Args:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
@@ -35,7 +36,7 @@ class NodeBuilder:
         self.logger = logging()("nodes")
         self.delete_callback = delete_callback
         self.node_list = node_list
-
+        self.resize_callback = resize_callback
 
     def build_list(self, parent: str | int) -> str | int:
         '''
@@ -75,7 +76,11 @@ class NodeBuilder:
             str | int - индетификатор новой dpg.node.
         '''
         node_id = dpg.generate_uuid()
-        node: AbstractNode = node_data.node_type(node_id, **node_data.kwargs)
+        node: AbstractNode = node_data.node_type(
+            node_id,
+            resize_callback=self.resize_callback,
+            **node_data.kwargs
+        )
 
         with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
             if node_data.input:
@@ -171,19 +176,20 @@ class NodeBuilder:
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
         with dpg.window(label="Непревиденная ошибка", modal=True, no_title_bar=True, \
-                        no_resize=True, no_move=True) as error_window:
+                        no_resize=True, no_move=True, show=False, tag="error_window") as error_window:
             dpg.add_text("Произошла непредвиденная ошибка, сообщите пожалуйста разработчикам.")
             dpg.add_text(f"{error_message_type}:")
             dpg.add_text(error_message)
             dpg.add_text(traceback.format_exc())
             dpg.add_button(label="Close", callback=lambda: dpg.configure_item(error_window, show=False))
-
+        self.resize_callback()
+        """
         # TODO: Прикрепить модальное окно на середину при изменении размера
         dpg.set_item_pos(error_window, [
             (dpg.get_viewport_width() - dpg.get_item_width(error_window)) // 4,
             (dpg.get_viewport_height() - dpg.get_item_height(error_window)) // 3
         ])
-
+        """
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
         
 

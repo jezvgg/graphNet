@@ -39,7 +39,7 @@ class AbstractNode(ABC):
 
 
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \
-                 logic: Callable, docs: str = None):
+                 logic: Callable, docs: str = None, resize_callback: Callable = None):
         '''
         Нода (узел графа), класс который используется для сохранения связей в графе, а также информации о ноде. 
 
@@ -55,7 +55,7 @@ class AbstractNode(ABC):
         self.incoming = {}
         self.outgoing = {}
         self.OUTPUT = None
-
+        self.resize_callback = resize_callback
         if not docs: docs = inspect.getdoc(self.logic)
         self.docs = docs
 

@@ -35,7 +35,7 @@ class NodeEditor:
             *args, **kwargs - передаются в dpg.node_editor
         '''
         self.logger = logging()("nodes")
-        self.builder = NodeBuilder(node_list, self.delete_node)
+        self.builder = NodeBuilder(node_list, self.delete_node, self.on_viewport_resize_callback)
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
         self.__start_nodes = []
@@ -59,7 +59,7 @@ class NodeEditor:
                         self.__start_nodes.append(dpg.get_item_user_data(input_id))
 
                     dpg.add_button(label="Собрать модель", 
-                                   callback = lambda: self.builder.compile_graph(self.__start_nodes))
+                    callback = lambda: self.builder.compile_graph(self.__start_nodes))
         
         self.on_viewport_resize_callback()
 
@@ -71,6 +71,14 @@ class NodeEditor:
         if dpg.does_item_exist('node_editor'):
             dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
 
+        modal_windows = [
+            "error_window",
+            "fit_window",
+        ]
+
+        for window in modal_windows:
+            if dpg.does_item_exist(window):
+                dpg.set_item_pos(window, [(dpg.get_viewport_width() - dpg.get_item_width(window)) //2,(dpg.get_viewport_height() - dpg.get_item_height(window)) // 2])
 
     def drop_callback(self, sender: str | int, app_data: str | int) -> str | int:
         '''

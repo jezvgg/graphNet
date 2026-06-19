@@ -22,7 +22,7 @@ class FitNode(DataNode):
 
 
     @staticmethod
-    def fit(model: keras.models.Model, **kwargs) -> keras.Model:
+    def fit(model: keras.models.Model, resize_callback=None, **kwargs) -> keras.Model:
         if kwargs['epochs']<=0:
             raise AttributeError("Колличество эпох должно быть больше нуля!")
         
@@ -36,8 +36,9 @@ class FitNode(DataNode):
             raise AttributeError('Данные содержат неверный формат Y!')
 
         with dpg.window(label="Обучение", modal=True, no_close=True,tag="fit_window") as popup:
-            dpg.add_loading_indicator(width=100, height=100)
-        
+            dpg.add_loading_indicator(width=100, height=100) 
+        if resize_callback:
+            resize_callback()
         history = model.fit(**kwargs, verbose=False)
 
         dpg.delete_item(popup)
