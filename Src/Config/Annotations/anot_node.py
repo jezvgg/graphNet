@@ -70,3 +70,11 @@ class ANode(Annotation):
 
     def set(self, input_id: str | int, value) -> bool:
         return False
+    
+
+    def serialize(self, input_id: str | int):
+        return None
+    
+
+    def deserialize(self, input_id: str | int, value) -> bool:
+        return True

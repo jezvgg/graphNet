@@ -64,3 +64,14 @@ class AEnum(Annotation):
 
         dpg.set_value(input_id, value.value)
         return True
+    
+
+    def serialize(self, input_id: int | str):
+        return self.get(input_id)
+    
+
+    def deserialize(self, input_id: int | str, value: str) -> bool:
+        for member in self.source:
+            if member.value == value:
+                return self.set(input_id, value)
+        return False

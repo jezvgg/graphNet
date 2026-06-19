@@ -29,3 +29,13 @@ class AInteger(Annotation):
         
         dpg.set_value(input_id, value)
         return True 
+    
+    
+    @staticmethod
+    def serialize(input_id: int | str):
+        return AInteger.get(input)
+    
+
+    @staticmethod
+    def deserialize(input_id: int | str, value: int) -> bool:
+        return AInteger.set(input_id, value)

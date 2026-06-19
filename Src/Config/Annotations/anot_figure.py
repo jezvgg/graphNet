@@ -87,3 +87,11 @@ class AFigure(Annotation):
 
     def set(self, input_id: int | str, fig: plt.Figure) -> bool:
         return self.static_set(input_id, fig, self.display)
+    
+
+    def serialize(self, input_id: int | str):
+        return None 
+    
+
+    def deserialize(self, input_id: int | str, value) -> bool:
+        return True

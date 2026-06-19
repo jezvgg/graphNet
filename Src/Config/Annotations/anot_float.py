@@ -29,3 +29,13 @@ class AFloat(Annotation):
         
         dpg.set_value(input_id, value)
         return True
+    
+
+    @staticmethod
+    def serialize(input_id: int | str):
+        return AFloat.get(input_id)
+    
+
+    @staticmethod
+    def deserialize(input_id: int | str, value: float) -> bool:
+        return AFloat.set(input_id, value)

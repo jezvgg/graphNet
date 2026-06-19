@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, Any
 
 
 
@@ -29,3 +29,19 @@ class Annotation(ABC):
     @abstractmethod
     def set(input_id: str| int, value) -> bool: pass
     
+
+    @staticmethod
+    @abstractmethod
+    def serialize(input_id: str | int) -> Any:
+        """
+        Преобразует значение графического виджета в JSON формат.
+        """
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def deserialize(input_id: str | int, value: Any) -> bool:
+        """
+        Принимает JSON-совместимое значение и записывает его в графический виджет.
+        """
+        pass

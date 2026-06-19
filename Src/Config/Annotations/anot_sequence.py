@@ -65,3 +65,12 @@ class ASequence(Annotation):
 
         return True
     
+
+    def serialize(self, input_id: int | str):
+        return self.get(input_id)
+    
+
+    def deserialize(self, input_id: int | str, value: list) -> bool:
+        if value is None:
+            return False
+        return self.set(input_id, value)

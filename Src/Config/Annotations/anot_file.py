@@ -45,3 +45,18 @@ class AFile(Annotation):
         
         dpg.set_item_user_data(input_id, value)
         return True
+
+
+    @staticmethod
+    def serialize(input_id: int | str):
+        paths = AFile.get(input_id)
+        if not paths:
+            return None
+        return [str(path) for path in paths]
+    
+    @staticmethod
+    def deserialize(input_id: int | str, value: str) -> bool:
+        if value is None:
+            return True
+        paths = [Path(p) for p in value]
+        return AFile.set(input_id, value)

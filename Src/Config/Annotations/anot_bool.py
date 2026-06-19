@@ -29,3 +29,13 @@ class ABoolean(Annotation):
         
         dpg.set_value(input_id, value)
         return True
+    
+
+    @staticmethod
+    def serialize(input_id: str | int):
+        return ABoolean.get(input_id)
+    
+
+    @staticmethod
+    def deserialize(input_id: str | int, value : bool) -> bool:
+        return ABoolean.set(input_id, value)

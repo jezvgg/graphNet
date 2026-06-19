@@ -29,3 +29,13 @@ class AString(Annotation):
         
         dpg.set_value(input_id, value)
         return True
+    
+
+    @staticmethod
+    def serialize(input_id: int | str):
+        return AString.get(input_id)
+    
+
+    @staticmethod
+    def deserialize(input_id: int | str, value: str) -> bool:
+        return AString.get(input_id, value)
