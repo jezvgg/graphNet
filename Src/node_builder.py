@@ -9,7 +9,7 @@ from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
-
+from Src.node_editor import on_viewport_resize_callback
 
 
 class NodeBuilder:
@@ -182,7 +182,7 @@ class NodeBuilder:
             dpg.add_text(error_message)
             dpg.add_text(traceback.format_exc())
             dpg.add_button(label="Close", callback=lambda: dpg.configure_item(error_window, show=False))
-        self.resize_callback()
+        on_viewport_resize_callback()
         """
         # TODO: Прикрепить модальное окно на середину при изменении размера
         dpg.set_item_pos(error_window, [
