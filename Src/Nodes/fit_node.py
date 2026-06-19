@@ -6,7 +6,7 @@ import numpy as np
 
 from Src.Enums import Themes
 from Src.Nodes import DataNode
-
+from Src.node_editor import on_viewport_resize_callback
 
 
 class FitNode(DataNode):
@@ -37,8 +37,7 @@ class FitNode(DataNode):
 
         with dpg.window(label="Обучение", modal=True, no_close=True,tag="fit_window") as popup:
             dpg.add_loading_indicator(width=100, height=100) 
-        if resize_callback:
-            resize_callback()
+        on_viewport_resize_callback()
         history = model.fit(**kwargs, verbose=False)
 
         dpg.delete_item(popup)
