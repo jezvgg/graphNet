@@ -10,7 +10,7 @@ from Src.node_builder import NodeBuilder
 from Src.Logging import logging, Logger
 from Src.Config.node_list import node_list, NodeAnnotation
 from Src.Config.Annotations import ANode
-
+from Src.Utils.viewport import on_viewport_resize_callback
 
 
 class NodeEditor:
@@ -40,7 +40,7 @@ class NodeEditor:
         self.__group_tag = dpg.generate_uuid()
         self.__start_nodes = []
 
-        dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
+        dpg.set_viewport_resize_callback(callback=on_viewport_resize_callback)
 
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
@@ -61,25 +61,7 @@ class NodeEditor:
                     dpg.add_button(label="Собрать модель", 
                     callback = lambda: self.builder.compile_graph(self.__start_nodes))
         
-        self.on_viewport_resize_callback()
-
-    @staticmethod
-    def on_viewport_resize_callback(**kwargs):
-        '''
-        Callback для изменения размера node_editor'a
-        '''
-        if dpg.does_item_exist('node_editor'):
-            dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
-
-        modal_windows = [
-            "error_window",
-            "fit_window",
-        ]
-
-        for window in modal_windows:
-            if dpg.does_item_exist(window):
-                dpg.set_item_pos(window, [(dpg.get_viewport_width() - dpg.get_item_width(window)) //2,(dpg.get_viewport_height() - dpg.get_item_height(window)) // 2])
-
+        on_viewport_resize_callback()
     def drop_callback(self, sender: str | int, app_data: str | int) -> str | int:
         '''
         Функция, которая выполняется, при перетягивания блока в окно редакторования графа. Создаём новую ноду в окне.

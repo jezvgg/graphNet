@@ -9,8 +9,7 @@ from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
-from Src.node_editor import on_viewport_resize_callback
-
+from Src.Utils.viewport import on_viewport_resize_callback
 
 class NodeBuilder:
     '''

@@ -6,8 +6,7 @@ import numpy as np
 
 from Src.Enums import Themes
 from Src.Nodes import DataNode
-from Src.node_editor import on_viewport_resize_callback
-
+from Src.Utils.viewport import on_viewport_resize_callback
 
 class FitNode(DataNode):
     theme_name: Themes = Themes.FIT
