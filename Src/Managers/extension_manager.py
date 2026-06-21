@@ -52,13 +52,7 @@ class ExtensionManager:
         if not hasattr(plugin_module, "ExtensionList"):
             return
 
-        valid_nodes = [
-            node for node in getattr(plugin_module, "ExtensionList") 
-            if self._is_valid_node(node)
-        ]
-
-        if not valid_nodes:
-            return  
+        if not (valid_nodes := [node for node in getattr(plugin_module, "ExtensionList") if self._is_valid_node(node)]): return
 
         node_list.setdefault("Plugins", []).extend(valid_nodes)
             
