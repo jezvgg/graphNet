@@ -6,7 +6,6 @@ import numpy as np
 
 from Src.Enums import Themes
 from Src.Nodes import DataNode
-from Src.Utils.viewport import on_viewport_resize_callback
 
 class FitNode(DataNode):
     theme_name: Themes = Themes.FIT
@@ -34,12 +33,7 @@ class FitNode(DataNode):
         if kwargs['y'].dtype == np.object_ or np.isnan(kwargs['y']).any():
             raise AttributeError('Данные содержат неверный формат Y!')
 
-        with dpg.window(label="Обучение", modal=True, no_close=True,tag="fit_window") as popup:
-            dpg.add_loading_indicator(width=100, height=100) 
-        on_viewport_resize_callback()
         history = model.fit(**kwargs, verbose=False)
-
-        dpg.delete_item(popup)
 
         return model
     
