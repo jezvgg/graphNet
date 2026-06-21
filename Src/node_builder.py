@@ -134,7 +134,9 @@ class NodeBuilder:
         '''
         Компиляция графа, от его концов. Работает через обход в ширину. Вызывает метод compile у нода, если все ноды, пришедшие к нему уже скомпилированы. Начинает с нодов, у которых нет входов.
         '''
-
+        with dpg.window(label="Компиляция графа", modal=True, no_title_bar=True, no_resize=True, no_move=True, show=False, tag="compile_window") as complie_window:
+            pass
+        on_viewport_resize_callback()
         visited = set()
         queue = start_nodes[:]
         self.logger.info("Началась сборка графа.")
