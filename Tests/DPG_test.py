@@ -7,12 +7,12 @@ from Src.Managers.theme_manager import ThemeManager
 
 class DPGUnitTest(unittest.TestCase):
     '''
-    Класс реализующий создание контекста и его разрушение, для тестирование элементов DPG
+    Базовый класс для тестов с DPG-контекстом.
+    Контекст создаётся один раз на всю сессию через conftest.py.
     '''
 
     @classmethod
     def setUpClass(cls):
-        cls.context = dpg.create_context()
         cls.parent = "Tests"
         cls.window = dpg.add_window(tag=cls.parent)
         ThemeManager.load_themes("Tests/themes.json")
@@ -20,5 +20,9 @@ class DPGUnitTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        dpg.destroy_context()
+        for item in list(dpg.get_all_items()):
+            if dpg.get_item_parent(item) == 0:
+                dpg.delete_item(item)
+        ThemeManager._created_themes = {}
+        ThemeManager._item_themes = {}
         return super().tearDownClass()

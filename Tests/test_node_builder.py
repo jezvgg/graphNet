@@ -17,7 +17,6 @@ class test_NodeBuilder(DPGUnitTestWithReset):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        dpg.create_viewport(title='Custom Title')
         # Перезагружаем темы явно — после пересоздания контекста
         # старые ID тем из предыдущего тестового класса становятся невалидны
         ThemeManager.load_themes("Tests/themes.json")
