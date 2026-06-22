@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from gettext import install
+from typing import Any
 from typing import Any
 
 import dearpygui.dearpygui as dpg
