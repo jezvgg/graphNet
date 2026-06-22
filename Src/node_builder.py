@@ -59,11 +59,11 @@ class NodeBuilder:
                         with dpg.tree_node(label=subanchor) as tree_subanchor:
 
                             for node in self.node_list[anchor][subanchor]:
-                              self._build_list_node(node_data=node, parent=tree_subanchor)
+                              self.__build_list_node(node_data=node, parent=tree_subanchor)
 
         return list
 
-    def _build_list_node(self, node_data: NodeAnnotation, parent: int | str) -> int | str:
+    def __build_list_node(self, node_data: NodeAnnotation, parent: int | str) -> int | str:
         '''
         Построение элемента списка нод, визуально имитирующего ноду в редакторе.
 
@@ -76,30 +76,23 @@ class NodeBuilder:
         '''
         card_id = dpg.generate_uuid()
 
-        params = [
-            (label, param) for label, param in node_data.annotations.items()
-            if label != 'INPUT' and not isinstance(param.hint, ANode)
-        ]
-        connection_params = [
-            label for label, param in node_data.annotations.items()
-            if label != 'INPUT' and isinstance(param.hint, ANode)
-        ]
+        params = [(label, param) for label, param in node_data.annotations.items() if label != 'INPUT']
 
-        items_count = len(params) + len(connection_params)
+        items_count = len(params)
         if node_data.input: items_count += 1
         if node_data.output: items_count += 1
-        calc_height = 80 + (items_count * 26) 
+        calc_height = 80 + (items_count * 26)
 
         with dpg.child_window(
-            tag=card_id, 
-            parent=parent, 
-            width=self.card_width, 
-            height=calc_height, 
-            no_scrollbar=True, 
-            border=True, 
+            tag=card_id,
+            parent=parent,
+            width=self.card_width,
+            height=calc_height,
+            no_scrollbar=True,
+            border=True,
             user_data=node_data
         ) as card:
-            
+
             with dpg.theme() as card_theme:
                 with dpg.theme_component(dpg.mvChildWindow):
                     dpg.add_theme_style(dpg.mvStyleVar_WindowPadding, 0, 0)
@@ -116,14 +109,14 @@ class NodeBuilder:
                 theme_name = node_data.node_type.theme_name
                 node_colors = ThemeManager._themes_config.get(theme_name, {}).get("mvNode", {})
                 title_color = node_colors.get("mvNodeCol_TitleBar", [50, 50, 50, 255])
-                
+
                 with dpg.theme() as header_theme:
                     with dpg.theme_component(dpg.mvButton):
                         dpg.add_theme_color(dpg.mvThemeCol_Button, title_color)
                         dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, title_color)
                         dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, title_color)
                         dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5)
-                        dpg.add_theme_style(dpg.mvStyleVar_ButtonTextAlign, 0.01, 0.5) 
+                        dpg.add_theme_style(dpg.mvStyleVar_ButtonTextAlign, 0.01, 0.5)
                         dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 4, 8)
                         dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0)
 
@@ -135,24 +128,21 @@ class NodeBuilder:
 
                     header_button = dpg.add_button(label=node_data.label, width=-1)
                     dpg.bind_item_theme(header_button, header_theme)
-                
+
                 dpg.add_spacer(height=2)
 
                 with dpg.group(indent=8) as body_group:
                     with dpg.theme() as body_theme:
                         with dpg.theme_component(dpg.mvGroup):
-                            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 2, 0) 
+                            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 2, 0)
                     dpg.bind_item_theme(body_group, body_theme)
                     if node_data.input:
                         dpg.add_text("INPUT")
-                    
+
                     dpg.add_spacer(height=1)
 
                     with dpg.tree_node(label="Docs"):
                         dpg.add_text(node_data.docs, wrap=self.card_width - 30)
-
-                    for label in connection_params:
-                        dpg.add_text(label)
 
                     for label, param in params:
                         parameter = param.hint.build(label=label, parent=body_group, width=Annotation.BASE_WIDTH, enabled=False)
@@ -166,7 +156,7 @@ class NodeBuilder:
                         dpg.add_text("OUTPUT")
 
         dpg.add_spacer(height=10)
-        return card_id    
+        return card_id
 
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
@@ -185,7 +175,7 @@ class NodeBuilder:
         with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
             if node_data.input:
                 node_data.input.build(label="INPUT", parent=node_id)
-                
+
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
                 with dpg.tree_node(label="Docs"):
                     dpg.add_text(node.docs)
@@ -204,7 +194,7 @@ class NodeBuilder:
         node.default_theme()
 
         return node_id
-    
+
 
     def build_input(self, parent: str | int) -> str | int:
         '''
@@ -220,7 +210,7 @@ class NodeBuilder:
         # TODO: Сделать типизированную передачу у shape TableDataNode
         layer = NodeAnnotation(
             label="Input",
-            node_type=InputLayerNode, 
+            node_type=InputLayerNode,
             logic = InputLayerNode.create_input,
             annotations = {
                     "shape": Parameter(AttrType.INPUT, ANode[Single[object]]),
@@ -232,7 +222,7 @@ class NodeBuilder:
         node_id = self.build_node(layer, parent=parent)
 
         return node_id
-    
+
 
     def compile_graph(self, start_nodes: list[AbstractNode]) -> set[AbstractNode]:
         '''
@@ -261,7 +251,7 @@ class NodeBuilder:
                     status = False
 
                 if not status: break
-                
+
                 self.logger.debug(f"resulted OUTPUT - {current_node.OUTPUT}")
 
                 for attr_id in chain(*current_node.outgoing.values()):
@@ -272,7 +262,7 @@ class NodeBuilder:
                 visited.add(current_node)
 
         return visited
-    
+
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
         with dpg.window(label="Непревиденная ошибка", modal=True, no_title_bar=True, \
@@ -290,4 +280,3 @@ class NodeBuilder:
         ])
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
-        

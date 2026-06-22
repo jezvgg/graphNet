@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from os import stat
 from typing import Callable
 
 
@@ -8,12 +9,12 @@ class Annotation(ABC):
     field_id: str | int
 
 
-    @classmethod
-    def check_kwargs(cls, func: Callable, kwargs: dict):
+    @staticmethod
+    def check_kwargs(func: Callable, kwargs: dict):
         annotations = func.__annotations__ | getattr(getattr(func, '__wrapped__', None), '__annotations__', {})
         union_annotations = dict([(key, kwargs[key]) for key in kwargs if key in annotations])
         return union_annotations
-    
+
 
     @staticmethod
     @abstractmethod
@@ -28,4 +29,3 @@ class Annotation(ABC):
     @staticmethod
     @abstractmethod
     def set(input_id: str| int, value) -> bool: pass
-    
