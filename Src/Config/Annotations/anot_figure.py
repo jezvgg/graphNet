@@ -12,7 +12,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from Src.Config.Annotations import AParam
 from Src.Enums import DPGType
-from Src.Utils.instancelessmethod import instancelessmethod
+from Src.Utils import instancelessmethod
 
 
 @dataclass
@@ -21,6 +21,7 @@ class AFigure(AParam):
     single: bool = field(default=True, init=False)
     node_type: type = field(default=object, init=False)
 
+    @instancelessmethod
     def _build(self, *args: Any, **kwargs: Any) -> int | str:
         if not dpg.does_alias_exist("figure_texture_registry"):
             dpg.add_texture_registry(tag="figure_texture_registry")

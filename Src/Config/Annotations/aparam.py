@@ -10,7 +10,7 @@ from Src.Utils.instancelessmethod import instancelessmethod
 
 class AParam(Annotation, ABC):
 
-    @abstractmethod
+    @instancelessmethod
     def _build(self, *args, **kwargs) -> str | int: pass
 
     @instancelessmethod

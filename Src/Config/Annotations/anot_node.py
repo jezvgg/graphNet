@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import dearpygui.dearpygui as dpg
 
+from Src.Utils import instancelessmethod
 from Src.Config.Annotations import AParam
 from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
@@ -21,6 +22,7 @@ class ANode(AParam):
         return ANode(item, False)
 
 
+    @instancelessmethod
     def _build(self, *args, **kwargs) -> str | int:
         if hasattr(self.node_type, 'theme_name'):
             ThemeManager.apply_theme(kwargs['parent'], self.node_type.theme_name)
