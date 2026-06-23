@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from os import stat
 from typing import Callable
 
 
