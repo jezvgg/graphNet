@@ -1,4 +1,5 @@
 from Src.Config.Annotations.annotation import Annotation
+from Src.Config.Annotations.aparam import AParam
 
 from Src.Config.Annotations.anot_bool import ABoolean
 from Src.Config.Annotations.anot_file import AFile

@@ -2,7 +2,8 @@ from dataclasses import dataclass
 
 import dearpygui.dearpygui as dpg
 
-from Src.Config.Annotations.annotation import Annotation
+from Src.Utils import instancelessmethod
+from Src.Config.Annotations import AParam
 from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
 from Src.Managers import ThemeManager
@@ -11,7 +12,7 @@ from Src.Managers import ThemeManager
 
 
 @dataclass
-class ANode(Annotation):
+class ANode(AParam):
     node_type: type = object
     single: bool = False
 
@@ -21,25 +22,12 @@ class ANode(Annotation):
         return ANode(item, False)
 
 
-    def build(self, parent: int | str, *args, **kwargs):
-        if DPGType(parent) != DPGType.NODE_ATTRIBUTE:
-            raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
-
-        new_parent = dpg.get_item_parent(parent)
-        dpg.delete_item(parent)
-        kwargs = Annotation.check_kwargs(dpg.node_attribute, kwargs)
-        kwargs['parent'] = new_parent
-        kwargs['user_data'] = []
-        if 'attribute_type' not in kwargs.keys():
-            kwargs['attribute_type'] = dpg.mvNode_Attr_Input
-
-        with dpg.node_attribute(*args, **kwargs) as attr:
-            input_id = dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
-
+    @instancelessmethod
+    def _build(self, *args, **kwargs) -> str | int:
         if hasattr(self.node_type, 'theme_name'):
-            ThemeManager.apply_theme(attr, self.node_type.theme_name)
+            ThemeManager.apply_theme(kwargs['parent'], self.node_type.theme_name)
 
-        return input_id
+        return dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
 
 
     def get(self, input_id: int | str):
