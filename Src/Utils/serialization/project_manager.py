@@ -58,4 +58,49 @@ class ProjectManager:
         return None
 
 
-    
+    def load_project(self, filepath: Path | str):
+        """
+        Очищает текущий граф, читает JSON и воссоздает узлы и связи.
+        """
+        try:
+            with open(filepath, 'r', encoding="utf-8"):
+                project_data = json.load(f)
+        except Exception as e:
+            logger.error("Ошибка при чтении файла ", e)
+            return
+        
+        self.clear_board()
+        id_mapping = {}
+
+        for node_info in project_data.get("nodes", []):
+            node_label = node_info.get("label")
+            if not node_label:
+                continue
+            
+            new_node_id = self.builder.build_node(node_label, parent=self.node_editor_tag)
+            new_node = dpg.get_item_user_data(new_node_id)
+
+            deserialize_node(new_node, node_info)
+            id_mapping[node_info["id"]] = new_node_id
+            self.start_nodes.append(new_node)
+
+        for link_info in project_data.get("links", []):
+            sender_old_id = link_info.get("sender_node_id")
+            receiver_old_id = link_info.get("receiver_node_id")
+            
+            if sender_old_id not in id_mapping or receiver_old_id not in id_mapping:
+                logger.warning("Невозможно восстановить связь")
+
+            sender_new_id = id_mapping[sender_old_id]
+            receiver_new_id = id_mapping[receiver_old_id]
+
+            sender_attr = self._find_attribute_by_label(sender_new_id, link_info.get("sender_pin"))
+            receiver_attr = self._find_attribute_by_label(receiver_new_id, link_info.get("receiver_pin"))
+
+            if sender_attr and receiver_attr:
+                dpg.add_node_link(sender_attr, receiver_attr, parent=self.node_editor_tag)
+                
+                if self.link_callback:
+                    self.link_callback(sender_attr, receiver_attr)
+                    
+        logger.info(f"Проект успешно загружен из {filepath}")
