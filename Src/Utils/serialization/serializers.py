@@ -107,26 +107,28 @@ def serialize_project(nodes: list[AbstractNode]) -> dict:
     for node in nodes:
         node_data = encoder.serialize(node)
 
-        node_data["id"] = node_tag_to_id(node.node_tag)
+        node_data["id"] = node_tag_to_id[node.node_tag]
         serialized_nodes.append(node_data)
+        
         for attr_incoming, attr_outgoing_list in node.incoming.items():
-
             receiver_pin_label = dpg.get_item_label(attr_incoming)
 
             for attr_outgoing in attr_outgoing_list:
-                receiver_pin_label = dpg.get_item_label(attr_incoming)
-                for attr_outgoing in attr_outgoing_list:
-                    sender_node_tag = dpg.get_item_parent(attr_outgoing)
-                    sender_node = dpg.get_item_user_data(sender_node_tag)
-                    sender_pin_label = dpg.get_item_label(attr_outgoing)
+                sender_node_tag = dpg.get_item_parent(attr_outgoing)
+                sender_node = dpg.get_item_user_data(sender_node_tag)
+                
+                if sender_node.node_tag not in node_tag_to_id:
+                    continue
+                    
+                sender_pin_label = dpg.get_item_label(attr_outgoing)
 
-                    link_data = {
-                        "sender_node_id": node_tag_to_id[sender_node.node_tag],
-                        "sender_pin": sender_pin_label,
-                        "receiver_node_id": node_tag_to_id[node.node_tag],
-                        "receiver_pin": receiver_pin_label
-                    }
-                    serialized_links.append(link_data)
+                link_data = {
+                    "sender_node_id": node_tag_to_id[sender_node.node_tag],
+                    "sender_pin": sender_pin_label,
+                    "receiver_node_id": node_tag_to_id[node.node_tag],
+                    "receiver_pin": receiver_pin_label
+                }
+                serialized_links.append(link_data)
 
     return {
         "nodes": serialized_nodes,

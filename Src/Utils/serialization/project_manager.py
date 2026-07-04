@@ -24,15 +24,24 @@ class ProjectManager:
         Собирает текущее состояние графа и сохраняет его в JSON.
         """
         try:
-            project_data = serialize_project(self.start_nodes)
+            all_nodes = []
+            children = dpg.get_item_children(self.node_editor_tag, slot=1)
+            if children:
+                for item in children:
+                    if dpg.get_item_type(item) == "mvAppItemType::mvNode":
+                        node = dpg.get_item_user_data(item)
+                        if node:
+                            all_nodes.append(node)
+
+            project_data = serialize_project(all_nodes)
             with open(filepath, 'w', encoding="utf-8") as f:
                 json.dump(project_data, f)
-            logger.info("Проект сохранен в ", filepath)
+            logger.info(f"Проект сохранен в {filepath}")
         except Exception as e:
-            logger.error("Ошибка при сохранении проекта ", e)
+            logger.error(f"Ошибка при сохранении проекта {e}")
 
 
-    def clear_board(self):
+    def clear_board(self, recreate_input: bool = False):
         """
         Очищает холст редактора узлов перед загрузкой нового проекта.
         """
@@ -42,9 +51,14 @@ class ProjectManager:
                 for item in slot:
                     if dpg.does_item_exist(item):
                         dpg.delete_item(item)
-
+        
+        # Очищаем внутренний список узлов
         self.start_nodes.clear()
-        logger.debug("Рабочая область очищена")
+        logger.debug("Рабочая область очищена.")
+
+        if recreate_input and self.builder:
+            input_id = self.builder.build_input(self.node_editor_tag)
+            self.start_nodes.append(dpg.get_item_user_data(input_id))
 
 
     def _find_attribute_by_label(self, node_id: int | str, pin_label: str):
@@ -63,13 +77,13 @@ class ProjectManager:
         Очищает текущий граф, читает JSON и воссоздает узлы и связи.
         """
         try:
-            with open(filepath, 'r', encoding="utf-8"):
+            with open(filepath, 'r', encoding="utf-8") as f:
                 project_data = json.load(f)
         except Exception as e:
-            logger.error("Ошибка при чтении файла ", e)
+            logger.error(f"Ошибка при чтении файла {e}")
             return
         
-        self.clear_board()
+        self.clear_board(recreate_input=False)
         id_mapping = {}
 
         for node_info in project_data.get("nodes", []):
@@ -77,7 +91,26 @@ class ProjectManager:
             if not node_label:
                 continue
             
-            new_node_id = self.builder.build_node(node_label, parent=self.node_editor_tag)
+            new_node_id = None
+            if node_label == "Input":
+                new_node_id = self.builder.build_input(parent=self.node_editor_tag)
+            else:
+                node_data = None
+                for category in self.builder.node_list.values():
+                    for subcategory in category.values():
+                        for node in subcategory:
+                            if node.label == node_label:
+                                node_data = node
+                                break
+                        if node_data: break
+                    if node_data: break
+                
+                if not node_data:
+                    logger.error(f"Неизвестный тип узла: {node_label}")
+                    continue
+                
+                new_node_id = self.builder.build_node(node_data, parent=self.node_editor_tag)
+
             new_node = dpg.get_item_user_data(new_node_id)
 
             deserialize_node(new_node, node_info)

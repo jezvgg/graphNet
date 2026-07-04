@@ -10,7 +10,7 @@ from Src.node_builder import NodeBuilder
 from Src.Logging import logging, Logger
 from Src.Config.node_list import node_list, NodeAnnotation
 from Src.Config.Annotations import ANode
-
+from Src.Utils.serialization.project_manager import ProjectManager
 
 
 class NodeEditor:
@@ -22,6 +22,7 @@ class NodeEditor:
     '''
     logger: Logger
     builder: NodeBuilder
+    project_manager: ProjectManager
     __stage_tag: str | int
     __group_tag: str | int
     __start_nodes: list[AbstractNode]
@@ -36,11 +37,23 @@ class NodeEditor:
         '''
         self.logger = logging()("nodes")
         self.builder = NodeBuilder(node_list, self.delete_node)
+        self.filepath = ""
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
         self.__start_nodes = []
+        
+        self.project_manager = ProjectManager("node_editor", self.builder, self.__start_nodes, self.link_callback)
+
 
         dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
+
+        with dpg.file_dialog(directory_selector=False, show=False, callback=self._on_save_file_selected, tag="save_project_dialog", width=600, height=400):
+            dpg.add_file_extension(".json", color=(255, 255, 0, 255))
+            dpg.add_file_extension(".*")
+
+        with dpg.file_dialog(directory_selector=False, show=False, callback=self._on_load_file_selected, tag="load_project_dialog", width=600, height=400):
+            dpg.add_file_extension(".json", color=(0, 255, 0, 255))
+            dpg.add_file_extension(".*")
 
         with dpg.stage(tag=self.__stage_tag):
             # Делим окно на 2, чтоб слева были блоки, а справа конструктор графа
@@ -58,9 +71,16 @@ class NodeEditor:
                         input_id = self.builder.build_input("node_editor")
                         self.__start_nodes.append(dpg.get_item_user_data(input_id))
 
-                    dpg.add_button(label="Собрать модель", 
-                                   callback = lambda: self.builder.compile_graph(self.__start_nodes))
-        
+                    with dpg.group(horizontal=True):
+                        dpg.add_button(label="Собрать модель", 
+                                      callback = lambda: self.builder.compile_graph(self.__start_nodes))
+                        dpg.add_button(label="Сохранить проект",
+                                      callback = lambda: dpg.show_item("save_project_dialog"))
+                        dpg.add_button(label="Загрузить проект",
+                                      callback = lambda: dpg.show_item("load_project_dialog"))
+                        dpg.add_button(label="Очистить доску", 
+                                      callback = lambda: self.project_manager.clear_board(recreate_input=False))
+          
         self.on_viewport_resize_callback()
 
 
@@ -86,14 +106,18 @@ class NodeEditor:
         # потому что координаты в node_editor отличаются от координат мыши
         # поэтому координаты размещения нового нода рассчитываются относительно уже стоящего нода (input_node)
         pos = dpg.get_mouse_pos(local=False)
-        ref_node = dpg.get_item_children("node_editor", slot=1)[0]
-        ref_screen_pos = dpg.get_item_rect_min(ref_node)
-        ref_grid_pos = dpg.get_item_pos(ref_node)
+        nodes_on_board = dpg.get_item_children("node_editor", slot=1)
+        if nodes_on_board:
+            ref_node = dpg.get_item_children("node_editor", slot=1)[0]
+            ref_screen_pos = dpg.get_item_rect_min(ref_node)
+            ref_grid_pos = dpg.get_item_pos(ref_node)
 
-        NODE_PADDING = (8, 8)
+            NODE_PADDING = (8, 8)
 
-        pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
-        pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
+            pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
+            pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
+        else:
+            pos = [50, 50]
 
         self.logger.info(f"Узел поставлен на позиции - {pos}")
 
@@ -246,3 +270,21 @@ class NodeEditor:
         Спрятать элемент
         '''
         dpg.move_item(self.__group_tag, parent=self.__stage_tag)
+
+
+    def _on_save_file_selected(self, sender: str | int, app_data: dict):
+        '''
+        Callback для файлового менеджера при сохранении проекта.
+        '''
+        self.filepath = app_data['file_path_name']
+        self.logger.info(f"Сохранение в файл: {self.filepath}")
+        self.project_manager.save_project(self.filepath)
+
+
+    def _on_load_file_selected(self, sender: str | int, app_data: dict):
+        '''
+        Callback для файлового менеджера при выгрузке (загрузке) проекта.
+        '''
+        self.filepath = app_data['file_path_name']
+        self.logger.info(f"Загрузка из файла: {self.filepath}")
+        self.project_manager.load_project(self.filepath)
