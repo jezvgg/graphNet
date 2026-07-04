@@ -45,3 +45,4 @@ class AFile(Annotation):
         
         dpg.set_item_user_data(input_id, value)
         return True
+
