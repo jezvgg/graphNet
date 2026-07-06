@@ -89,7 +89,7 @@ class test_compilation(DPGUnitTest):
         # Компилируем
         visited = self.node_editor.builder.compile_graph(self.node_editor._NodeEditor__start_nodes)
 
-        assert all([dpg.get_item_user_data(node) in visited for node in nodes])
+        assert all([get_userdata(node) in visited for node in nodes])
 
         filepath: Path = Path(AString.get(dpg.get_item_children(get_attr("fname", save), slot=1)[0]))
         assert filepath.exists()

@@ -6,7 +6,7 @@ from Src.Config.Annotations.annotation import Annotation
 from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
 from Src.Managers import ThemeManager
-from Src.Utils import lateinit
+from Src.Utils import lateinit, get_userdata
 
 
 
@@ -15,7 +15,7 @@ class ANode(Annotation):
     __themes = lateinit(ThemeManager)
     node_type: type = object
     single: bool = False
-    
+
 
     def __init__(self, node_type: type = object, single: bool = False):
         self.node_type = node_type
@@ -56,10 +56,10 @@ class ANode(Annotation):
         if DPGType(dpg.get_item_type(parent)) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent of item {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
-        user_data = dpg.get_item_user_data(parent)
+        user_data = get_userdata(parent)
 
         node_in: list[tuple[str, AbstractNode]] = [(dpg.get_item_label(attribute),
-                                                    dpg.get_item_user_data(dpg.get_item_parent(attribute)))
+                                                    get_userdata(dpg.get_item_parent(attribute)))
                                                    for attribute in user_data]
 
         results = []

@@ -46,11 +46,12 @@ class App:
         self.font_manager = FontManager(Path(font_path))
         self.theme_manager = ThemeManager(Path(themes_path))
         self.event_manager = EventManager()
-        self.size_manager = SizeManager()
 
         dpg.setup_dearpygui()
 
         self._create_ui()
+
+        self.size_manager = SizeManager()
 
 
     def _setup_logging(self):
@@ -77,7 +78,8 @@ class App:
             minimap_location=dpg.mvNodeMiniMap_Location_TopRight
         )
 
-        with dpg.window(tag="Prime"):
+        with dpg.window(tag="Prime") as wnd:
+            print('!'*20,wnd)
             self.node_editor.show("Prime")
 
         dpg.set_primary_window("Prime", True)
@@ -88,7 +90,7 @@ class App:
             )
         self.logger.info("UI создан.")
 
-    
+
     def __size_increase(self, sender, app_data: int):
         sizing_method = self.size_manager.increase if app_data > 0 else self.size_manager.reduce
         height, width = self.size_manager.get_bbox("node_editor")
@@ -98,7 +100,7 @@ class App:
         elif dpg.is_item_hovered("node_editor"):
             ratio = sizing_method("node_editor")
             self.node_editor.zoom(ratio)
-        
+
         self.size_manager.set_bbox("node_editor", height, width)
 
 

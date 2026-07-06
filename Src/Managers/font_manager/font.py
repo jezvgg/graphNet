@@ -2,7 +2,7 @@ from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
-from Src.Utils import lateinit, singleton
+from Src.Utils import lateinit, singleton, set_userdata
 
 
 class FontUnit:
@@ -26,8 +26,8 @@ class FontUnit:
     __registry: int | str = lateinit(singleton(dpg.add_font_registry))
 
 
-    def __init__(self, path: Path, hints: list[str], 
-                name: str, size: int, id: str | int, 
+    def __init__(self, path: Path, hints: list[str],
+                name: str, size: int, id: str | int,
                 prev: "FontUnit" = None, next: "FontUnit" = None):
         # Негде не сохраняю path и hints будем надееться, что не понадобяться
         self.name = name
@@ -40,4 +40,4 @@ class FontUnit:
             for hint in hints:
                 dpg.add_font_range_hint(self.__range_map[hint], parent=self.id)
 
-        dpg.set_item_user_data(self.id, self)
+        set_userdata(self.id, value=self)

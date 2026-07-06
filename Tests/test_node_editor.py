@@ -84,9 +84,9 @@ class test_NodeEditor(DPGUnitTest):
         node_id2 = self.node_editor.builder.build_node(anode2, "node_editor")
         node_id3 = self.node_editor.builder.build_node(anode3, "node_editor")
 
-        node1: AbstractNode = dpg.get_item_user_data(node_id1)
-        node2: AbstractNode = dpg.get_item_user_data(node_id2)
-        node3: AbstractNode = dpg.get_item_user_data(node_id3)
+        node1: AbstractNode = get_userdata(node_id1)
+        node2: AbstractNode = get_userdata(node_id2)
+        node3: AbstractNode = get_userdata(node_id3)
         self.node_editor._NodeEditor__start_nodes += [node1, node2, node3]
 
         node_attr1 = None
@@ -145,11 +145,11 @@ class test_NodeEditor(DPGUnitTest):
                         "x": Parameter(AttrType.INPUT, ANode[object])
                         }
                     )
-        
+
         node_id1 = self.node_editor.builder.build_node(anode1, "node_editor")
         node_id2 = self.node_editor.builder.build_node(anode2, "node_editor")
-        node1: AbstractNode = dpg.get_item_user_data(node_id1)
-        node2: AbstractNode = dpg.get_item_user_data(node_id2)
+        node1: AbstractNode = get_userdata(node_id1)
+        node2: AbstractNode = get_userdata(node_id2)
         self.node_editor._NodeEditor__start_nodes += [node1, node2]
         node_attr1 = None
         node_attr2 = None
@@ -168,8 +168,8 @@ class test_NodeEditor(DPGUnitTest):
 
         self.node_editor.link_callback("node_editor", (node_attr1, node_attr2))
 
-        assert dpg.get_item_user_data(node_attr1) == [node_attr2]
-        assert dpg.get_item_user_data(node_attr2) == [node_attr1]
+        assert get_userdata(node_attr1) == [node_attr2]
+        assert get_userdata(node_attr2) == [node_attr1]
 
         link_id = dpg.get_item_children("node_editor", slot=0)[-1]
 
@@ -178,8 +178,8 @@ class test_NodeEditor(DPGUnitTest):
         assert node_attr1 not in node1.outgoing
         assert node_attr2 not in node2.incoming
 
-        assert dpg.get_item_user_data(node_attr1) == []
-        assert dpg.get_item_user_data(node_attr2) == []
+        assert get_userdata(node_attr1) == []
+        assert get_userdata(node_attr2) == []
 
 
     def test_delete_node(self):
@@ -199,11 +199,11 @@ class test_NodeEditor(DPGUnitTest):
                         "x": Parameter(AttrType.INPUT, ANode[object])
                         }
                     )
-        
+
         node_id1 = self.node_editor.builder.build_node(anode1, "node_editor")
         node_id2 = self.node_editor.builder.build_node(anode2, "node_editor")
-        node1: AbstractNode = dpg.get_item_user_data(node_id1)
-        node2: AbstractNode = dpg.get_item_user_data(node_id2)
+        node1: AbstractNode = get_userdata(node_id1)
+        node2: AbstractNode = get_userdata(node_id2)
         self.node_editor._NodeEditor__start_nodes += [node1, node2]
         node_attr1 = None
         node_attr2 = None
@@ -231,5 +231,3 @@ class test_NodeEditor(DPGUnitTest):
         assert len(dpg.get_item_children("node_editor", slot=1)) == nodes_count - 1
         assert node_attr2 not in node2.incoming
         assert node2 in self.node_editor._NodeEditor__start_nodes
-
-

@@ -12,5 +12,3 @@ def get_children(item: str | int, depth: int = None, slot: int = 1) -> set[int |
         children += dpg.get_item_children(child, slot=slot)
 
     return set(children)
-
-

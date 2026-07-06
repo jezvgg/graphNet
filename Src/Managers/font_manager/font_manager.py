@@ -1,14 +1,13 @@
 from pathlib import Path
 import json
-from collections import defaultdict, namedtuple
-from itertools import cycle
-from dataclasses import dataclass
+from collections import defaultdict
 
 import dearpygui.dearpygui as dpg
 
 from Src.Managers.font_manager.font import FontUnit
 from Src.Utils import singleton, lateinit, get_children
 from Src.Logging import logging
+from Src.Utils import set_userdata, get_userdata
 
 
 
@@ -17,10 +16,10 @@ class FontManager:
     __logger = lateinit(logging(), 'managers')
     __registry: str | int
     fonts: dict[str, dict[int, FontUnit]]
-    default: str | int
+    default: FontUnit
 
 
-    def __init__(self, path_config: Path): 
+    def __init__(self, path_config: Path):
         if not path_config.exists():
             self.__logger.error(f"Не существует конфигационного файла {font_config}")
             return
@@ -29,27 +28,28 @@ class FontManager:
         self.fonts = defaultdict(defaultdict)
         self.default = None
         for font_name, font_config in config.items():
-            
+
             font_ids = [dpg.generate_uuid() for _ in font_config['sizes']]
 
-            font = FontUnit(font_config['path'], font_config['hints'], 
+            font = FontUnit(font_config['path'], font_config['hints'],
                             font_name, font_config['sizes'][0], font_ids[0])
             self.fonts[font_name][font_config['sizes'][0]] = font
 
             for size, curr_id, next_id in zip(font_config['sizes'][1:], font_ids[:-1], font_ids[1:]):
-                
-                font: FontUnit = dpg.get_item_user_data(curr_id)
-                next_font = FontUnit(Path(font_config['path']).resolve(), font_config['hints'], 
+
+                font: FontUnit = get_userdata(curr_id)
+                next_font = FontUnit(Path(font_config['path']).resolve(), font_config['hints'],
                                      font_name, size, next_id, prev = font)
                 font.next = next_font
                 self.fonts[font_name][size] = font
-                
+
             if not font_config.get('default'): continue
             if self.default:
                 self.__logger.error(f"Конфигурация шрифтов имеет несколько стандартных шрифтов! Установите один.")
 
             self.default = self.fonts[font_name][font_config.get('default_size', 14)]
             dpg.bind_font(self.default.id)
+
         self.__logger.info("Шрифты инициализированы!")
 
 
@@ -59,10 +59,15 @@ class FontManager:
 
         for item in items:
             dpg.bind_item_font(item, font.id)
+            if get_userdata(item, 'min_font_size'): continue
+            set_userdata(item, 'min_font_size', min(self.fonts[font.name].items(), key=lambda x: x[0])[1])
 
 
     def get(self, item: str | int) -> FontUnit:
-        return dpg.get_item_user_data(dpg.get_item_font(item) or self.default.id)
+        font = get_userdata(dpg.get_item_font(item) or self.default.id)
+        if not get_userdata(item, 'min_font_size'):
+            set_userdata(item, 'min_font_size', min(self.fonts[font.name].items(), key=lambda x: x[0])[1])
+        return font
 
 
     def increase(self, item: str | int, children: bool = True) -> FontUnit:

@@ -9,7 +9,7 @@ from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single, Annotation
-from Src.Utils import lateinit
+from Src.Utils import lateinit, set_userdata
 from Src.Managers import SizeManager, FontManager
 
 
@@ -29,7 +29,7 @@ class NodeBuilder:
     size_manager: SizeManager = lateinit(SizeManager)
 
 
-    def __init__(self, 
+    def __init__(self,
                  node_list: dict[str: AbstractNode],
                  delete_callback: Callable):
         '''
@@ -59,7 +59,7 @@ class NodeBuilder:
 
                             for node in self.node_list[anchor][subanchor]:
                                 btn = dpg.add_button(label=node.label, user_data=node)
-                                
+
                                 with dpg.drag_payload(parent=btn, drag_data=btn):
                                     dpg.add_text(node.label)
 
@@ -80,10 +80,10 @@ class NodeBuilder:
         node_id = dpg.generate_uuid()
         node: AbstractNode = node_data.node_type(node_id, **node_data.kwargs)
 
-        with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
+        with dpg.node(label=node_data.label, parent=parent, tag=node_id):
             if node_data.input:
                 node_data.input.build(label="INPUT", parent=node_id)
-                
+
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
                 dpg.add_spacer(width=Annotation.BASE_WIDTH)
                 with dpg.tree_node(label="Docs"):
@@ -100,6 +100,8 @@ class NodeBuilder:
             if node_data.output:
                 node_data.output.build(label="OUTPUT", parent=node_id)
 
+        set_userdata(node_id, value=node)
+
         font = self.font_manager.get("node_editor")
         default_font = self.font_manager.get(node_id)
         self.font_manager.set(node_id, font.name, font.size)
@@ -108,7 +110,7 @@ class NodeBuilder:
         node.default_theme()
 
         return node_id
-    
+
 
     def build_input(self, parent: str | int) -> str | int:
         '''
@@ -124,7 +126,7 @@ class NodeBuilder:
         # TODO: Сделать типизированную передачу у shape TableDataNode
         layer = NodeAnnotation(
             label="Input",
-            node_type=InputLayerNode, 
+            node_type=InputLayerNode,
             logic = InputLayerNode.create_input,
             annotations = {
                     "shape": Parameter(AttrType.INPUT, ANode[Single[object]]),
@@ -136,7 +138,7 @@ class NodeBuilder:
         node_id = self.build_node(layer, parent=parent)
 
         return node_id
-    
+
 
     def compile_graph(self, start_nodes: list[AbstractNode]) -> set[AbstractNode]:
         '''
@@ -153,7 +155,7 @@ class NodeBuilder:
             current_node = queue.pop(0)
             self.logger.debug(f"Текущая нода - {current_node}")
 
-            if all([dpg.get_item_user_data(dpg.get_item_parent(value)) in visited \
+            if all([get_userdata(dpg.get_item_parent(value)) in visited \
                 for value in chain(*current_node.incoming.values())]):
                 self.logger.debug("Нода подошла.")
 
@@ -165,18 +167,18 @@ class NodeBuilder:
                     status = False
 
                 if not status: break
-                
+
                 self.logger.debug(f"resulted OUTPUT - {current_node.OUTPUT}")
 
                 for attr_id in chain(*current_node.outgoing.values()):
-                    neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
+                    neightbor: AbstractNode = get_userdata(dpg.get_item_parent(attr_id))
                     if neightbor not in queue:
                         queue.append(neightbor)
 
                 visited.add(current_node)
 
         return visited
-    
+
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
         with dpg.window(label="Непревиденная ошибка", modal=True, no_title_bar=True, \
@@ -194,5 +196,3 @@ class NodeBuilder:
         ])
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
-        
-
