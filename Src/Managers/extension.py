@@ -13,9 +13,6 @@ class Extension:
 
     def __post_init__(self):
         self.name = self.path.name
-        self.__validate_structure()
-
-    def __validate_structure(self):
         has_init = (self.path / "__init__.py").exists()
         has_config = (self.path / "extension_config.py").exists()
         if has_init and has_config:
