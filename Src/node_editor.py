@@ -2,14 +2,12 @@ import dearpygui.dearpygui as dpg
 
 from Src.Nodes import AbstractNode, node_link
 from Src.node_builder import NodeBuilder
-from Src.size_manager import SizeManager
 from Src.Logging import logging, Logger
 from Src.Config.node_list import node_list, NodeAnnotation
 from Src.Config.Annotations import ANode
-from Src.Utils import lateinit, get_userdata
+from Src.Utils import lateinit, get_userdata, set_userdata
 from Src.Managers import EventManager
 from Src.Enums import EventType
-from Src.Nodes.abstract_node import AbstractNode
 
 
 

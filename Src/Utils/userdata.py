@@ -2,6 +2,8 @@ from typing import Any, TypeVar
 
 import dearpygui.dearpygui as dpg
 
+T = TypeVar("T")
+
 
 def get_userdata(id: int | str, key: str = "self") -> Any:
     """
@@ -15,7 +17,7 @@ def get_userdata(id: int | str, key: str = "self") -> Any:
     return obj.get(key)
 
 
-def set_userdata(id: int | str, key: str = "self", value: Any = None) -> None:
+def set_userdata(id: int | str, key: str = "self", value: T = None) -> T:
     """
     Функция для взаимодействия с userdata объектов DPG.
     Позволяет удобно вставлять значения по ключу.
@@ -25,3 +27,4 @@ def set_userdata(id: int | str, key: str = "self", value: Any = None) -> None:
     obj: dict = dpg.get_item_user_data(id) or {}
     obj[key] = value
     dpg.set_item_user_data(id, obj)
+    return value

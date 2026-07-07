@@ -58,7 +58,8 @@ class NodeBuilder:
                         with dpg.tree_node(label=subanchor) as tree_subanchor:
 
                             for node in self.node_list[anchor][subanchor]:
-                                btn = dpg.add_button(label=node.label, user_data=node)
+                                btn = dpg.add_button(label=node.label)
+                                set_userdata(btn, value=node)
 
                                 with dpg.drag_payload(parent=btn, drag_data=btn):
                                     dpg.add_text(node.label)
@@ -102,6 +103,10 @@ class NodeBuilder:
 
         set_userdata(node_id, value=node)
 
+
+        #
+        # Переписать на новую методику
+        #
         font = self.font_manager.get("node_editor")
         default_font = self.font_manager.get(node_id)
         self.font_manager.set(node_id, font.name, font.size)

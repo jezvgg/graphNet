@@ -79,7 +79,6 @@ class App:
         )
 
         with dpg.window(tag="Prime") as wnd:
-            print('!'*20,wnd)
             self.node_editor.show("Prime")
 
         dpg.set_primary_window("Prime", True)
@@ -98,8 +97,15 @@ class App:
             sizing_method("Prime")
 
         elif dpg.is_item_hovered("node_editor"):
-            ratio = sizing_method("node_editor")
-            self.node_editor.zoom(ratio)
+            # Приближение увеличивает узлы, у которых размер рассчитывается абсолютно
+            # для избежания накопления ошибки плавающей точки
+            # С изменением позиции для имитации зума так не получиться, поэтому
+            # там рассчитывается относительный ratio
+
+            prev_size = self.font_manager.get("node_editor").size
+            sizing_method("node_editor")
+            actual_size = self.font_manager.get("node_editor").size
+            self.node_editor.zoom(actual_size / prev_size)
 
         self.size_manager.set_bbox("node_editor", height, width)
 
