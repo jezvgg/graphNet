@@ -31,10 +31,6 @@ class ExtensionManager:
             sys.path.insert(0, str(self.base_dir))
 
 
-    def __is_valid_node(self, node_class) -> bool:
-        return inspect.isclass(node_class) and issubclass(node_class, AbstractNode)
-
-
     def __import_extension(self, extension: Extension):
         plugin_module = importlib.import_module(f"Extensions.{extension.name}.extension_config")
             
@@ -42,7 +38,10 @@ class ExtensionManager:
             return
 
         if not (
-            valid_nodes := [node for node in getattr(plugin_module, "ExtensionList") if self.__is_valid_node(node)]
+            valid_nodes := [
+                node for node in getattr(plugin_module, "ExtensionList")
+                if inspect.isclass(node) and issubclass(node, AbstractNode)
+            ]
         ):
             return
 
