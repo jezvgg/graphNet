@@ -10,6 +10,7 @@ from Src.Nodes import AbstractNode
 from Src.Config.node_list import node_list
 from Src.Enums import ExtensionStatus
 from Src.Managers.extension import Extension 
+from Src.Logging import logging, Logger
 
 
 class ExtensionManager:
@@ -19,8 +20,9 @@ class ExtensionManager:
         self.base_dir = Path(__file__).resolve().parent.parent.parent
         self.extensions_dir = self.base_dir / 'Extensions'
 
-        self.discovered_extensions: list[Extension] = [] 
-        self.active_extensions: dict[str, Any] = {}
+        self.extensions: list[Extension] = []
+
+        self.logger: Logger = logging()("extensions")
 
         self.__prepare_infrastructure()
 
@@ -29,12 +31,15 @@ class ExtensionManager:
         self.extensions_dir.mkdir(parents=True, exist_ok=True)
         if str(self.base_dir) not in sys.path:
             sys.path.insert(0, str(self.base_dir))
+        self.logger.info(f"Инфраструктура расширений подготовлена: {self.extensions_dir}")
 
 
     def __import_extension(self, extension: Extension):
+        self.logger.info(f"Импорт расширения: {extension.name}")
         plugin_module = importlib.import_module(f"Extensions.{extension.name}.extension_config")
             
         if not hasattr(plugin_module, "ExtensionList"):
+            self.logger.warning(f"Расширение '{extension.name}' не содержит ExtensionList")
             return
 
         if not (
@@ -43,37 +48,51 @@ class ExtensionManager:
                 if inspect.isclass(node) and issubclass(node, AbstractNode)
             ]
         ):
+            self.logger.warning(f"Расширение '{extension.name}' не содержит валидных узлов")
             return
 
         node_list.setdefault("Plugins", []).extend(valid_nodes)
         
-        self.active_extensions[extension.name] = plugin_module
         extension.module = plugin_module
         extension.status = ExtensionStatus.LOADED
+        self.logger.info(f"Расширение '{extension.name}' успешно загружено. Узлов: {len(valid_nodes)}")
 
 
     def discover_extensions(self) -> list[Extension]:
-        self.discovered_extensions.clear()
+        self.extensions.clear()
+        self.logger.info("Поиск расширений...")
         
         candidates = (p for p in self.extensions_dir.iterdir() if p.is_dir() and p.name.startswith('ext_'))
         
         for path in candidates:
             ext = Extension(path)
-            
-            if ext.status == ExtensionStatus.DISCOVERED:
-                self.discovered_extensions.append(ext)
-                
-        return self.discovered_extensions
+            self.extensions.append(ext)
 
-    def load_active_extensions(self, extensions_to_load: list[Extension]):
+            if ext.status == ExtensionStatus.DISCOVERED:
+                self.logger.info(f"Обнаружено расширение: {ext.name}")
+            else:
+                self.logger.warning(f"Расширение '{path.name}' не прошло валидацию структуры")
+                
+        self.logger.info(f"Найдено расширений: {len(self.extensions)}")
+        return self.extensions
+
+    def load_active_extensions(self, extensions_to_load: list[Extension] = None):
+        if extensions_to_load is None:
+            extensions_to_load = [
+                ext for ext in self.extensions 
+                if ext.status == ExtensionStatus.DISCOVERED
+            ]
+        self.logger.info(f"Загрузка расширений: {len(extensions_to_load)} шт.")
         for extension in extensions_to_load:
             self.__import_extension(extension)
 
             
     def install_from_zip(self, zip_path: Path, overwrite: bool = False) -> Extension:
+        self.logger.info(f"Установка расширения из архива: {zip_path}")
         target_dir = self.extensions_dir / (zip_path.stem if zip_path.stem.startswith("ext_") else f"ext_{zip_path.stem}")
 
         if target_dir.exists() and not overwrite:
+            self.logger.error(f"Расширение '{target_dir.name}' уже установлено")
             raise FileExistsError(f"Расширение '{target_dir.name}' уже установлено.")
         
         shutil.rmtree(target_dir, ignore_errors=True)
@@ -90,7 +109,9 @@ class ExtensionManager:
         extension = Extension(target_dir)
         if extension.status != ExtensionStatus.DISCOVERED:
             shutil.rmtree(target_dir, ignore_errors=True)
+            self.logger.error(f"Неверная структура расширения: {target_dir.name}")
             raise ValueError("Неверная структура расширения. Отсутствуют обязательные файлы.")
 
-        self.discovered_extensions.append(extension)
+        self.extensions.append(extension)
+        self.logger.info(f"Расширение '{extension.name}' успешно установлено из архива")
         return extension
