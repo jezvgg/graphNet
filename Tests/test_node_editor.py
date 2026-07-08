@@ -1,5 +1,3 @@
-import json
-
 import dearpygui.dearpygui as dpg
 
 from Src.node_editor import NodeEditor
@@ -7,127 +5,166 @@ from Src.Config import NodeAnnotation, Parameter
 from Src.Config.Annotations import ANode
 from Src.Nodes import AbstractNode
 from Src.Enums.attr_type import AttrType
-from Src.Logging.logger_factory import Logger_factory
-from Tests.DPG_test import DPGUnitTest
+
+def test_initialize(node_editor):
+    assert isinstance(node_editor, NodeEditor)
 
 
+def test_drop_callback(node_editor):
+    node = NodeAnnotation(
+                label="Example",
+                node_type=AbstractNode,
+                logic = lambda x:x,
+                annotations={}
+                )
+
+    with dpg.window():
+        btn = dpg.add_button(label=node.label, user_data=node)
+
+    nodes_count = len(dpg.get_item_children("node_editor", slot=1))
+
+    node_editor.drop_callback("node_editor", btn)
+    assert dpg.get_item_pos(node_editor._NodeEditor__start_nodes[-1].node_tag) == [8,8]
+    assert len(dpg.get_item_children("node_editor", slot=1)) == nodes_count + 1
+    assert dpg.get_item_label(dpg.get_item_children("node_editor", slot=1)[-1]) == "Example"
 
 
-class test_NodeEditor(DPGUnitTest):
-    '''
-    Проверка объектов аннотации и их работоспособности
-    '''
-    node_editor: NodeEditor
-
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        dpg.create_viewport(title='Custom Title')
-        with open("Tests/logger_config.json") as f:
-            config = json.load(f)
-
-        log_factory = Logger_factory(config)
-        cls.node_editor = NodeEditor()
-
-
-    def test_initialize(self):
-        assert isinstance(self.node_editor, NodeEditor)
-
-
-    def test_drop_callback(self):
-        node = NodeAnnotation(
-                    label="Example",
-                    node_type=AbstractNode,
-                    logic = lambda x:x,
-                    annotations={}
-                    )
-
-        with dpg.window():
-            btn = dpg.add_button(label=node.label, user_data=node)
-
-        nodes_count = len(dpg.get_item_children("node_editor", slot=1))
-
-        self.node_editor.drop_callback("node_editor", btn)
-        assert dpg.get_item_pos(self.node_editor._NodeEditor__start_nodes[-1].node_tag) == [8,8]
-        assert len(dpg.get_item_children("node_editor", slot=1)) == nodes_count + 1
-        assert dpg.get_item_label(dpg.get_item_children("node_editor", slot=1)[-1]) == "Example"
-
-
-    def test_link_callback(self):
-        anode1 = NodeAnnotation(
-                    label="Example",
-                    node_type=AbstractNode,
-                    logic = lambda x:x,
-                    annotations={
-                        "x": Parameter(AttrType.OUTPUT, ANode[object])
-                        }
-                    )
-        anode2 = NodeAnnotation(
-                    label="Example In 1",
-                    node_type=AbstractNode,
-                    logic = lambda x: x,
-                    annotations={
-                        "x": Parameter(AttrType.INPUT, ANode[object])
+def test_link_callback(node_editor):
+    anode1 = NodeAnnotation(
+                label="Example",
+                node_type=AbstractNode,
+                logic = lambda x:x,
+                annotations={
+                    "x": Parameter(AttrType.OUTPUT, ANode[object])
                     }
-        )
-        anode3 = NodeAnnotation(
-                    label="Example In 2",
-                    node_type=AbstractNode,
-                    logic = lambda x: x,
-                    annotations={
-                        "x": Parameter(AttrType.INPUT, ANode[object])
+                )
+    anode2 = NodeAnnotation(
+                label="Example In 1",
+                node_type=AbstractNode,
+                logic = lambda x: x,
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[object])
+                }
+    )
+    anode3 = NodeAnnotation(
+                label="Example In 2",
+                node_type=AbstractNode,
+                logic = lambda x: x,
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[object])
+                }
+    )
+
+    node_id1 = node_editor.builder.build_node(anode1, "node_editor")
+    node_id2 = node_editor.builder.build_node(anode2, "node_editor")
+    node_id3 = node_editor.builder.build_node(anode3, "node_editor")
+
+    node1: AbstractNode = dpg.get_item_user_data(node_id1)
+    node2: AbstractNode = dpg.get_item_user_data(node_id2)
+    node3: AbstractNode = dpg.get_item_user_data(node_id3)
+    node_editor._NodeEditor__start_nodes += [node1, node2, node3]
+
+    node_attr1 = None
+    node_attr2 = None
+    node_attr3 = None
+
+    for attribute in dpg.get_item_children(node_id1, slot=1):
+        for field in dpg.get_item_children(attribute, slot=1):
+            if dpg.get_item_label(field) == "x":
+                node_attr1 = attribute
+                break
+
+    for attribute in dpg.get_item_children(node_id2, slot=1):
+        for field in dpg.get_item_children(attribute, slot=1):
+            if dpg.get_item_label(field) == "x":
+                node_attr2 = attribute
+                break
+
+    for attribute in dpg.get_item_children(node_id3, slot=1):
+        for field in dpg.get_item_children(attribute, slot=1):
+            if dpg.get_item_label(field) == "x":
+                node_attr3 = attribute
+                break
+
+    node_editor.link_callback("node_editor", (node_attr1, node_attr2))
+    node_editor.link_callback("node_editor", (node_attr1, node_attr3))
+
+    assert node2 not in node_editor._NodeEditor__start_nodes
+    assert node3 not in node_editor._NodeEditor__start_nodes
+
+    assert isinstance(node1.outgoing[node_attr1], list)
+
+    assert len(node1.outgoing[node_attr1]) == 2
+
+    assert node_attr2 in node1.outgoing[node_attr1]
+    assert node_attr3 in node1.outgoing[node_attr1]
+
+    assert node_attr1 in node2.incoming[node_attr2]
+    assert node_attr1 in node3.incoming[node_attr3]
+
+
+def test_delink_callback(node_editor):
+    anode1 = NodeAnnotation(
+                label="Example",
+                node_type=AbstractNode,
+                logic = lambda x:x,
+                annotations={
+                    "x": Parameter(AttrType.OUTPUT, ANode[object])
                     }
-        )
+                )
+    anode2 = NodeAnnotation(
+                label="Example",
+                node_type=AbstractNode,
+                logic = lambda x:x,
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[object])
+                    }
+                )
+    
+    node_id1 = node_editor.builder.build_node(anode1, "node_editor")
+    node_id2 = node_editor.builder.build_node(anode2, "node_editor")
+    node1: AbstractNode = dpg.get_item_user_data(node_id1)
+    node2: AbstractNode = dpg.get_item_user_data(node_id2)
+    node_editor._NodeEditor__start_nodes += [node1, node2]
+    node_attr1 = None
+    node_attr2 = None
 
-        node_id1 = self.node_editor.builder.build_node(anode1, "node_editor")
-        node_id2 = self.node_editor.builder.build_node(anode2, "node_editor")
-        node_id3 = self.node_editor.builder.build_node(anode3, "node_editor")
+    for attribute in dpg.get_item_children(node_id1, slot=1):
+        for field in dpg.get_item_children(attribute, slot=1):
+            if dpg.get_item_label(field) == "x":
+                node_attr1 = attribute
+                break
 
+<<<<<<< HEAD
         node1: AbstractNode = get_userdata(node_id1)
         node2: AbstractNode = get_userdata(node_id2)
         node3: AbstractNode = get_userdata(node_id3)
         self.node_editor._NodeEditor__start_nodes += [node1, node2, node3]
+=======
+    for attribute in dpg.get_item_children(node_id2, slot=1):
+        for field in dpg.get_item_children(attribute, slot=1):
+            if dpg.get_item_label(field) == "x":
+                node_attr2 = attribute
+                break
+>>>>>>> origin/develop
 
-        node_attr1 = None
-        node_attr2 = None
-        node_attr3 = None
+    node_editor.link_callback("node_editor", (node_attr1, node_attr2))
 
-        for attribute in dpg.get_item_children(node_id1, slot=1):
-            for field in dpg.get_item_children(attribute, slot=1):
-                if dpg.get_item_label(field) == "x":
-                    node_attr1 = attribute
-                    break
+    assert dpg.get_item_user_data(node_attr1) == [node_attr2]
+    assert dpg.get_item_user_data(node_attr2) == [node_attr1]
 
-        for attribute in dpg.get_item_children(node_id2, slot=1):
-            for field in dpg.get_item_children(attribute, slot=1):
-                if dpg.get_item_label(field) == "x":
-                    node_attr2 = attribute
-                    break
+    link_id = dpg.get_item_children("node_editor", slot=0)[-1]
 
-        for attribute in dpg.get_item_children(node_id3, slot=1):
-            for field in dpg.get_item_children(attribute, slot=1):
-                if dpg.get_item_label(field) == "x":
-                    node_attr3 = attribute
-                    break
+    node_editor.delink_callback("node_editor", link_id)
 
-        self.node_editor.link_callback("node_editor", (node_attr1, node_attr2))
-        self.node_editor.link_callback("node_editor", (node_attr1, node_attr3))
+    assert node_attr1 not in node1.outgoing
+    assert node_attr2 not in node2.incoming
 
-        assert node2 not in self.node_editor._NodeEditor__start_nodes
-        assert node3 not in self.node_editor._NodeEditor__start_nodes
-
-        assert isinstance(node1.outgoing[node_attr1], list)
-
-        assert len(node1.outgoing[node_attr1]) == 2
-
-        assert node_attr2 in node1.outgoing[node_attr1]
-        assert node_attr3 in node1.outgoing[node_attr1]
-
-        assert node_attr1 in node2.incoming[node_attr2]
-        assert node_attr1 in node3.incoming[node_attr3]
+    assert dpg.get_item_user_data(node_attr1) == []
+    assert dpg.get_item_user_data(node_attr2) == []
 
 
+<<<<<<< HEAD
     def test_delink_callback(self):
         anode1 = NodeAnnotation(
                     label="Example",
@@ -153,26 +190,59 @@ class test_NodeEditor(DPGUnitTest):
         self.node_editor._NodeEditor__start_nodes += [node1, node2]
         node_attr1 = None
         node_attr2 = None
+=======
+def test_delete_node(node_editor):
+    anode1 = NodeAnnotation(
+                label="Example",
+                node_type=AbstractNode,
+                logic = lambda x:x,
+                annotations={
+                    "x": Parameter(AttrType.OUTPUT, ANode[object])
+                    }
+                )
+    anode2 = NodeAnnotation(
+                label="Example",
+                node_type=AbstractNode,
+                logic = lambda x:x,
+                annotations={
+                    "x": Parameter(AttrType.INPUT, ANode[object])
+                    }
+                )
+    
+    node_id1 = node_editor.builder.build_node(anode1, "node_editor")
+    node_id2 = node_editor.builder.build_node(anode2, "node_editor")
+    node1: AbstractNode = dpg.get_item_user_data(node_id1)
+    node2: AbstractNode = dpg.get_item_user_data(node_id2)
+    node_editor._NodeEditor__start_nodes += [node1, node2]
+    node_attr1 = None
+    node_attr2 = None
+>>>>>>> origin/develop
 
-        for attribute in dpg.get_item_children(node_id1, slot=1):
-            for field in dpg.get_item_children(attribute, slot=1):
-                if dpg.get_item_label(field) == "x":
-                    node_attr1 = attribute
-                    break
+    for attribute in dpg.get_item_children(node_id1, slot=1):
+        for field in dpg.get_item_children(attribute, slot=1):
+            if dpg.get_item_label(field) == "x":
+                node_attr1 = attribute
+                break
 
-        for attribute in dpg.get_item_children(node_id2, slot=1):
-            for field in dpg.get_item_children(attribute, slot=1):
-                if dpg.get_item_label(field) == "x":
-                    node_attr2 = attribute
-                    break
+    for attribute in dpg.get_item_children(node_id2, slot=1):
+        for field in dpg.get_item_children(attribute, slot=1):
+            if dpg.get_item_label(field) == "x":
+                node_attr2 = attribute
+                break
 
-        self.node_editor.link_callback("node_editor", (node_attr1, node_attr2))
+    node_editor.link_callback("node_editor", (node_attr1, node_attr2))
 
+<<<<<<< HEAD
         assert get_userdata(node_attr1) == [node_attr2]
         assert get_userdata(node_attr2) == [node_attr1]
+=======
+    links_count = len(dpg.get_item_children("node_editor", slot=0))
+    nodes_count = len(dpg.get_item_children("node_editor", slot=1))
+>>>>>>> origin/develop
 
-        link_id = dpg.get_item_children("node_editor", slot=0)[-1]
+    node_editor.delete_node(node_id1)
 
+<<<<<<< HEAD
         self.node_editor.delink_callback("node_editor", link_id)
 
         assert node_attr1 not in node1.outgoing
@@ -231,3 +301,29 @@ class test_NodeEditor(DPGUnitTest):
         assert len(dpg.get_item_children("node_editor", slot=1)) == nodes_count - 1
         assert node_attr2 not in node2.incoming
         assert node2 in self.node_editor._NodeEditor__start_nodes
+=======
+    assert len(dpg.get_item_children("node_editor", slot=0)) == links_count - 1
+    assert len(dpg.get_item_children("node_editor", slot=1)) == nodes_count - 1
+    assert node_attr2 not in node2.incoming
+    assert node2 in node_editor._NodeEditor__start_nodes
+
+
+def test_node_editor_tag_in_dpg(node_editor):
+    assert dpg.does_item_exist("node_editor")
+
+
+def test_drop_callback_returns_node_id(node_editor):
+    node = NodeAnnotation(
+        label="Example",
+        node_type=AbstractNode,
+        logic=lambda x: x,
+        annotations={}
+    )
+
+    with dpg.window():
+        btn = dpg.add_button(label=node.label, user_data=node)
+
+    node_id = node_editor.drop_callback("node_editor", btn)
+
+    assert node_id in dpg.get_all_items()
+>>>>>>> origin/develop

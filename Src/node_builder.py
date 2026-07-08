@@ -3,14 +3,14 @@ from itertools import chain
 import traceback
 
 import dearpygui.dearpygui as dpg
-from keras import layers
 
-from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single, Annotation
 from Src.Utils import lateinit, set_userdata
-from Src.Managers import SizeManager, FontManager
+from Src.Managers import SizeManager, FontManager, ThemeManager
+from Src.Enums import Themes, AttrType
+
 
 
 
@@ -22,23 +22,24 @@ class NodeBuilder:
         factory: InputsFactory - фабрика конвертации аннотаций в инпуты
         layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
     '''
+    card_width: int = Annotation.BASE_WIDTH + 115
     node_list: dict[str, dict[str, list[NodeAnnotation]]]
     delete_callback: Callable
     logger: Logger = lateinit(logging(), "nodes")
+    theme_manager: ThemeManager = lateinit(ThemeManager)
     font_manager: FontManager = lateinit(FontManager)
     size_manager: SizeManager = lateinit(SizeManager)
 
 
     def __init__(self,
                  node_list: dict[str: AbstractNode],
-                 delete_callback: Callable):
+                 delete_callback: Callable,):
         '''
         Args:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
         '''
         self.delete_callback = delete_callback
         self.node_list = node_list
-
 
     def build_list(self, parent: str | int) -> str | int:
         '''
@@ -58,13 +59,69 @@ class NodeBuilder:
                         with dpg.tree_node(label=subanchor) as tree_subanchor:
 
                             for node in self.node_list[anchor][subanchor]:
-                                btn = dpg.add_button(label=node.label)
-                                set_userdata(btn, value=node)
-
-                                with dpg.drag_payload(parent=btn, drag_data=btn):
-                                    dpg.add_text(node.label)
+                              self.__build_list_node(node_data=node, parent=tree_subanchor)
 
         return list
+
+    def __build_list_node(self, node_data: NodeAnnotation, parent: int | str) -> int | str:
+        '''
+        Построение элемента списка нод, визуально имитирующего ноду в редакторе.
+
+        Args:
+            node_data: NodeAnnotation - аннотация ноды из node_list
+            parent:    int | str      - родительский элемент (tree_node подкатегории)
+
+        Returns:
+            int | str - идентификатор созданной группы
+        '''
+        card_id = dpg.generate_uuid()
+
+        params = [(label, param) for label, param in node_data.annotations.items() if label != 'INPUT']
+
+        items_count = len(params)
+        if node_data.input: items_count += 1
+        if node_data.output: items_count += 1
+        calc_height = 80 + (items_count * 26)
+
+        with dpg.child_window(
+            tag=card_id,
+            parent=parent,
+            width=self.card_width,
+            height=calc_height,
+            no_scrollbar=True,
+            border=True,
+            user_data={'self': node_data} # Костыль, нужно заменить с использованием set_userdata
+        ) as card:
+
+            with dpg.group() as drag_group:
+                with dpg.drag_payload(parent=drag_group, drag_data=card_id):
+                    dpg.add_text(node_data.label)
+
+                header_button = dpg.add_button(label=node_data.label, width=-1)
+
+                dpg.add_spacer(height=2)
+
+                with dpg.group(indent=8) as body_group:
+                    if node_data.input:
+                        dpg.add_text("INPUT")
+
+                    dpg.add_spacer(height=1)
+
+                    with dpg.tree_node(label="Docs"):
+                        dpg.add_text(node_data.docs, wrap=self.card_width - 30)
+
+                    for label, param in params:
+                        parameter = param.hint.build(label=label, parent=body_group, width=Annotation.BASE_WIDTH, enabled=False)
+
+                    delete_button = dpg.add_button(label="Delete")
+
+                    if node_data.output: dpg.add_text("OUTPUT")
+
+        self.theme_manager.apply(card, Themes.CARD)
+        self.theme_manager.apply(body_group, Themes.CARD)
+        self.theme_manager.apply(header_button, node_data.node_type.theme_name)
+        dpg.add_spacer(height=10)
+        return card_id
 
 
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
@@ -96,7 +153,7 @@ class NodeBuilder:
                 attr = attribute.build(label=label, parent=node_id)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
-                dpg.add_button(label="Delete", callback=lambda: self.delete_callback(node_id))
+                delete = dpg.add_button(label="Delete", callback=lambda: self.delete_callback(node_id))
 
             if node_data.output:
                 node_data.output.build(label="OUTPUT", parent=node_id)
@@ -112,6 +169,7 @@ class NodeBuilder:
         self.font_manager.set(node_id, font.name, font.size)
         self.size_manager.transform(node_id, font.size / default_font.size, True)
 
+        self.theme_manager.apply(delete, Themes.DEFAULT)
         node.default_theme()
 
         return node_id

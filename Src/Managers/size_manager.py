@@ -9,11 +9,10 @@ from Src.Enums import DPGType
 
 @singleton
 class SizeManager:
-    SIZE_RATIO = 0.6
+    SIZE_RATIO = 1 # Костыль, который появился из-за отсутствия изменения спейсинга и падинга
 
     __logger = lateinit(logging(), 'managers')
     __font_manager: FontManager = lateinit(FontManager)
-
 
 
     def __init__(self):

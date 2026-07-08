@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import dearpygui.dearpygui as dpg
 
-from Src.Enums.attr_type import AttrType
+from Src.Enums import AttrType, DPGType
 from Src.Config.Annotations import Annotation, ANode
 from Src.Utils import Backfield
 
@@ -17,7 +17,7 @@ class Parameter:
 
 
     def build(self, parent: int | str, *args, **kwargs) -> str | int:
-        if (dpg.get_item_type(parent) != 'mvAppItemType::mvNode'):
+        if DPGType(parent) != DPGType.NODE:
             raise Exception(f"Incompatable parent {dpg.get_item_type(parent)} must be mvAppItemType::mvNode")
 
         kwargs['parent'] = parent
@@ -37,7 +37,7 @@ class Parameter:
             input_id = self.hint.build(*args, **kwargs)
 
         if isinstance(self.backfield, Backfield): 
-            self.backfield.callback = lambda x: self.hint.set(input_id, x)
+            self.backfield.bind(dpg.get_item_user_data(parent), lambda x: self.hint.set(input_id, x)) 
 
         if self.default: self.set_value(attr, self.default)
 

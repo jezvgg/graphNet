@@ -4,3 +4,4 @@ from Src.Utils.factory_method import factorymethod
 from Src.Utils.lateinit import lateinit
 from Src.Utils.singleton import singleton
 from Src.Utils.userdata import get_userdata, set_userdata
+from Src.Utils.instancelessmethod import instancelessmethod

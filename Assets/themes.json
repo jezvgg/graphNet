@@ -98,6 +98,11 @@
       "mvThemeCol_NavWindowingDimBg": [204, 204, 204, 51],
       "mvThemeCol_ModalWindowDimBg": [20, 20, 20, 89],
       "mvThemeCol_PopupBg": [20, 20, 20, 240]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [51, 51, 55, 255],
+      "mvThemeCol_ButtonHovered": [29, 151, 236, 163],
+      "mvThemeCol_ButtonActive": [0, 119, 208, 153]
     }
   },
   "error": {
@@ -114,7 +119,15 @@
       "mvNodeCol_TitleBarHovered": [65, 65, 65, 255],
       "mvNodeCol_TitleBarSelected": [75, 75, 75, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [50, 50, 50, 255], "mvNodeCol_Link": [50, 50, 50, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [50, 50, 50, 255],
+      "mvNodeCol_Link": [50, 50, 50, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [50, 50, 50, 255],
+      "mvThemeCol_ButtonHovered": [65, 65, 65, 255],
+      "mvThemeCol_ButtonActive": [75, 75, 75, 255]
+    }
   },
   "compile": {
     "mvNode": {
@@ -122,7 +135,15 @@
       "mvNodeCol_TitleBarHovered": [117, 202, 121, 255],
       "mvNodeCol_TitleBarSelected": [128, 214, 132, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [102, 187, 106, 255], "mvNodeCol_Link": [102, 187, 106, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [102, 187, 106, 255],
+      "mvNodeCol_Link": [102, 187, 106, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [102, 187, 106, 255],
+      "mvThemeCol_ButtonHovered": [117, 202, 121, 255],
+      "mvThemeCol_ButtonActive": [128, 214, 132, 255]
+    }
   },
   "data": {
     "mvNode": {
@@ -130,7 +151,15 @@
       "mvNodeCol_TitleBarHovered": [188, 86, 205, 255],
       "mvNodeCol_TitleBarSelected": [200, 99, 219, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [171, 71, 188, 255], "mvNodeCol_Link": [171, 71, 188, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [171, 71, 188, 255],
+      "mvNodeCol_Link": [171, 71, 188, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [171, 71, 188, 255],
+      "mvThemeCol_ButtonHovered": [188, 86, 205, 255],
+      "mvThemeCol_ButtonActive": [200, 99, 219, 255]
+    }
   },
   "fit": {
     "mvNode": {
@@ -138,7 +167,15 @@
       "mvNodeCol_TitleBarHovered": [255, 130, 25, 255],
       "mvNodeCol_TitleBarSelected": [255, 145, 51, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 111, 0, 255], "mvNodeCol_Link": [255, 111, 0, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [255, 111, 0, 255],
+      "mvNodeCol_Link": [255, 111, 0, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [255, 111, 0, 255],
+      "mvThemeCol_ButtonHovered": [255, 130, 25, 255],
+      "mvThemeCol_ButtonActive": [255, 145, 51, 255]
+    }
   },
   "layer": {
     "mvNode": {
@@ -146,7 +183,15 @@
       "mvNodeCol_TitleBarHovered": [83, 179, 247, 255],
       "mvNodeCol_TitleBarSelected": [96, 188, 250, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [66, 165, 245, 255], "mvNodeCol_Link": [66, 165, 245, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [66, 165, 245, 255],
+      "mvNodeCol_Link": [66, 165, 245, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [66, 165, 245, 255],
+      "mvThemeCol_ButtonHovered": [83, 179, 247, 255],
+      "mvThemeCol_ButtonActive": [96, 188, 250, 255]
+    }
   },
   "metric": {
     "mvNode": {
@@ -154,7 +199,15 @@
       "mvNodeCol_TitleBarHovered": [61, 194, 248, 255],
       "mvNodeCol_TitleBarSelected": [77, 203, 250, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 202, 40, 255], "mvNodeCol_Link": [255, 202, 40, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [255, 202, 40, 255],
+      "mvNodeCol_Link": [255, 202, 40, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [41, 182, 246, 255],
+      "mvThemeCol_ButtonHovered": [61, 194, 248, 255],
+      "mvThemeCol_ButtonActive": [77, 203, 250, 255]
+    }
   },
   "predict": {
     "mvNode": {
@@ -162,7 +215,15 @@
       "mvNodeCol_TitleBarHovered": [61, 194, 248, 255],
       "mvNodeCol_TitleBarSelected": [77, 203, 250, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [41, 182, 246, 255], "mvNodeCol_Link": [41, 182, 246, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [41, 182, 246, 255],
+      "mvNodeCol_Link": [41, 182, 246, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [41, 182, 246, 255],
+      "mvThemeCol_ButtonHovered": [61, 194, 248, 255],
+      "mvThemeCol_ButtonActive": [77, 203, 250, 255]
+    }
   },
   "shape": {
     "mvNode": {
@@ -170,7 +231,15 @@
       "mvNodeCol_TitleBarHovered": [55, 180, 168, 255],
       "mvNodeCol_TitleBarSelected": [68, 191, 180, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [38, 166, 154, 255], "mvNodeCol_Link": [38, 166, 154, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [38, 166, 154, 255],
+      "mvNodeCol_Link": [38, 166, 154, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [38, 166, 154, 255],
+      "mvThemeCol_ButtonHovered": [55, 180, 168, 255],
+      "mvThemeCol_ButtonActive": [68, 191, 180, 255]
+    }
   },
   "utils": {
     "mvNode": {
@@ -178,7 +247,15 @@
       "mvNodeCol_TitleBarHovered": [136, 160, 172, 255],
       "mvNodeCol_TitleBarSelected": [148, 171, 183, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [120, 144, 156, 255], "mvNodeCol_Link": [120, 144, 156, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [120, 144, 156, 255],
+      "mvNodeCol_Link": [120, 144, 156, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [120, 144, 156, 255],
+      "mvThemeCol_ButtonHovered": [136, 160, 172, 255],
+      "mvThemeCol_ButtonActive": [148, 171, 183, 255]
+    }
   },
   "table_data": {
     "mvNode": {
@@ -186,7 +263,15 @@
       "mvNodeCol_TitleBarHovered": [240, 83, 137, 255],
       "mvNodeCol_TitleBarSelected": [245, 101, 151, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [255, 144, 144, 255], "mvNodeCol_Link": [255, 144, 144, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [255, 144, 144, 255],
+      "mvNodeCol_Link": [255, 144, 144, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [236, 64, 122, 255],
+      "mvThemeCol_ButtonHovered": [240, 83, 137, 255],
+      "mvThemeCol_ButtonActive": [245, 101, 151, 255]
+    }
   },
   "image_data": {
     "mvNode": {
@@ -194,7 +279,15 @@
       "mvNodeCol_TitleBarHovered": [240, 83, 137, 255],
       "mvNodeCol_TitleBarSelected": [245, 101, 151, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [236, 64, 122, 255], "mvNodeCol_Link": [236, 64, 122, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [236, 64, 122, 255],
+      "mvNodeCol_Link": [236, 64, 122, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [236, 64, 122, 255],
+      "mvThemeCol_ButtonHovered": [240, 83, 137, 255],
+      "mvThemeCol_ButtonActive": [245, 101, 151, 255]
+    }
   },
   "dataset": {
     "mvNode": {
@@ -202,6 +295,54 @@
       "mvNodeCol_TitleBarHovered": [240, 83, 137, 255],
       "mvNodeCol_TitleBarSelected": [245, 101, 151, 255]
     },
-    "mvNodeAttribute": { "mvNodeCol_Pin": [236, 64, 122, 255], "mvNodeCol_Link": [236, 64, 122, 255] }
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [236, 64, 122, 255],
+      "mvNodeCol_Link": [236, 64, 122, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [236, 64, 122, 255],
+      "mvThemeCol_ButtonHovered": [240, 83, 137, 255],
+      "mvThemeCol_ButtonActive": [245, 101, 151, 255]
+    }
+  },
+  "sidebar": {
+    "mvChildWindow": {
+      "mvThemeCol_ChildBg": [30, 30, 30, 255],
+      "mvStyleVar_ChildRounding": 0
+    }
+  },
+  "plot": {
+    "mvNode": {
+      "mvNodeCol_TitleBar": [103, 58, 183, 255],
+      "mvNodeCol_TitleBarHovered": [119, 74, 199, 255],
+      "mvNodeCol_TitleBarSelected": [135, 90, 215, 255]
+    },
+    "mvNodeAttribute": {
+      "mvNodeCol_Pin": [103, 58, 183, 255],
+      "mvNodeCol_Link": [103, 58, 183, 255]
+    },
+    "mvButton": {
+      "mvThemeCol_Button": [103, 58, 183, 255],
+      "mvThemeCol_ButtonHovered": [119, 74, 199, 255],
+      "mvThemeCol_ButtonActive": [135, 90, 215, 255]
+    }
+  },
+  "card": {
+    "mvChildWindow": {
+      "mvStyleVar_WindowPadding": [0, 0],
+      "mvStyleVar_ChildRounding": 8,
+      "mvStyleVar_ChildBorderSize": 1,
+      "mvThemeCol_ChildBg": [50, 50, 50, 255],
+      "mvThemeCol_Border": [100, 100, 100, 255]
+    },
+    "mvButton": {
+      "mvStyleVar_FrameRounding": 5,
+      "mvStyleVar_ButtonTextAlign": [0.01, 0.5],
+      "mvStyleVar_FramePadding": [4, 8],
+      "mvStyleVar_FrameBorderSize": 0
+    },
+    "mvGroup": {
+      "mvStyleVar_ItemSpacing": [0, 0]
+    }
   }
 }

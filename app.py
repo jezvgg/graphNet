@@ -3,6 +3,8 @@ from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
+from Src.Enums import Themes
+from Src.Enums.dpg_types import DPGType
 from Src.Logging import logging
 from Src.node_editor import NodeEditor
 from Src.Managers import EventManager, ThemeManager, FontManager, SizeManager
@@ -52,6 +54,7 @@ class App:
         self._create_ui()
 
         self.size_manager = SizeManager()
+        self.theme_manager.get_component(Themes.DEFAULT, component=DPGType.NODE)
 
 
     def _setup_logging(self):

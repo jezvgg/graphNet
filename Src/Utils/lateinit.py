@@ -11,9 +11,8 @@ class lateinit:
         self.owner = owner
         self.name = name
 
-    
+
     def __get__(self, instance, owner: type = None):
         value = self.__value(*self.__args, **self.__kwargs)
         setattr(instance, self.name, value)
         return value
-        

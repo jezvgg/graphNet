@@ -5,8 +5,9 @@ from pathlib import Path
 
 import dearpygui.dearpygui as dpg
 
-from Src.Enums import Themes
-from Src.Utils import singleton
+from Src.Enums import Themes, DPGType
+from Src.Enums.theme_elements import ThemeElement
+from Src.Utils import singleton, set_userdata
 
 
 
@@ -21,9 +22,10 @@ class ThemeManager:
     __created_themes: dict[tuple[Themes], int | str] = {}
     __item_themes: dict[int | str, set[Themes]] = {}
     __themes_categories = {
-        "mvNodeCol": dpg.mvThemeCat_Nodes,
-        "mvPlotCol": dpg.mvThemeCat_Plots,
-        "mvThemeCol": dpg.mvThemeCat_Core,
+        "mvNode": dpg.mvThemeCat_Nodes,
+        "mvPlot": dpg.mvThemeCat_Plots,
+        "mvThem": dpg.mvThemeCat_Core,
+        "mvStyl": dpg.mvThemeCat_Core
     }
 
 
@@ -36,7 +38,7 @@ class ThemeManager:
         with open(theme_path, "r") as f:
             self.__themes_config = json.load(f)
 
-    
+
     def apply(self, item_id: str | int, *theme_names: Themes):
         """
         Находит (или создает) и применяет тему к указанному элементу.
@@ -85,6 +87,19 @@ class ThemeManager:
         return self.__created_themes[theme_key]
 
 
+    def get_component(self, *theme_names: Themes, component: DPGType) -> str:
+        theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
+        theme_tag = "-".join(theme_key)
+        component_tag = f"{theme_tag}_{component.mvName}"
+        return component_tag
+
+
+    def get_element(self, *theme_names: Themes, component: DPGType, element: ThemeElement) -> str:
+        theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
+        theme_tag = "-".join(theme_key)
+        element_tag = f"{theme_tag}_{component.mvName}_{element.name}"
+        return element_tag
+
     def __create_theme(self, *theme_names: Themes):
         """
         Создает тему по параметрам указанных тем.
@@ -92,29 +107,39 @@ class ThemeManager:
         args:
             *theme_names: Themes - список тем, используемых для создания
         """
-        theme_key = tuple(sorted(theme_names))
+        theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
+        theme_tag = "-".join(theme_key)
 
         merged = defaultdict(dict)
         for theme_name in theme_key:
             for comp, data in self.__themes_config[theme_name].items():
                 merged[comp] |= data
 
-
-        with dpg.theme() as theme_id:
+        with dpg.theme(tag=theme_tag):
             for comp, data in merged.items():
                 if not (dpg_comp := getattr(dpg, comp)):
                     continue
 
-                with dpg.theme_component(dpg_comp):
+                component_tag = f"{theme_tag}_{comp}"
+                with dpg.theme_component(dpg_comp, tag=component_tag):
                     for attr, value in data.items():
                         if not (dpg_attr := getattr(dpg, attr)):
                             continue
-                        category = self.__themes_categories.get(
-                            attr.split("_")[0], dpg.mvThemeCat_Core
-                        )
-                        dpg.add_theme_color(dpg_attr, value, category=category)
 
-        self.__created_themes[theme_key] = theme_id
+                        category = self.__themes_categories.get(
+                            attr.split("_")[0][:6], dpg.mvThemeCat_Core
+                        )
+
+                        element_tag = f"{theme_tag}_{comp}_{attr}"
+                        if attr.split("_")[0].endswith('Col'):
+                            dpg.add_theme_color(dpg_attr, value, tag=element_tag, category=category)
+                        elif isinstance(value, list):
+                            dpg.add_theme_style(dpg_attr, *value, tag=element_tag, category=category)
+                        else:
+                            dpg.add_theme_style(dpg_attr, value, tag=element_tag, category=category)
+
+        set_userdata(theme_tag, value=theme_key)
+        self.__created_themes[theme_key] = theme_tag
 
 
     def __update_item_theme(self, item_id: str | int):
