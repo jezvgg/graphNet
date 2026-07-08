@@ -36,7 +36,7 @@ class ExtensionManager:
         plugin_module = importlib.import_module(f"Extensions.{extension.name}")
             
         if not hasattr(plugin_module, "EXTENSION_CONFIG"):
-            self.logger.warning(f"Расширение '{extension.name}' не содержит EXTENSION_CONFIG")
+            self.logger.error(f"Расширение '{extension.name}' не содержит EXTENSION_CONFIG")
             return
 
         extension_config = getattr(plugin_module, "EXTENSION_CONFIG")
@@ -63,10 +63,10 @@ class ExtensionManager:
             ext = Extension(path)
             self.extensions.append(ext)
 
-            if ext.status == ExtensionStatus.DISCOVERED:
-                self.logger.info(f"Обнаружено расширение: {ext.name}")
-            else:
+            if ext.status != ExtensionStatus.DISCOVERED:
                 self.logger.warning(f"Расширение '{path.name}' не прошло валидацию структуры")
+                continue
+            self.logger.info(f"Обнаружено расширение: {ext.name}")
                 
         self.logger.info(f"Найдено расширений: {len(self.extensions)}")
         return self.extensions
@@ -87,7 +87,7 @@ class ExtensionManager:
 
         if target_dir.exists() and not overwrite:
             self.logger.error(f"Расширение '{target_dir.name}' уже установлено")
-            raise FileExistsError(f"Расширение '{target_dir.name}' уже установлено.")
+            return
         
         shutil.rmtree(target_dir, ignore_errors=True)
 
@@ -102,13 +102,17 @@ class ExtensionManager:
 
         exts = self.discover_extensions()
         for ext in exts:
-            if ext.path == target_dir:
-                if ext.status != ExtensionStatus.DISCOVERED:
-                    shutil.rmtree(target_dir, ignore_errors=True)
-                    self.logger.error(f"Неверная структура расширения: {target_dir.name}")
-                    raise ValueError("Неверная структура расширения. Отсутствуют обязательные файлы.")
-                self.logger.info(f"Расширение '{ext.name}' успешно установлено из архива")
-                return ext
+            if ext.path != target_dir:
+                continue
+                
+            if ext.status != ExtensionStatus.DISCOVERED:
+                shutil.rmtree(target_dir, ignore_errors=True)
+                self.logger.error(f"Неверная структура расширения: {target_dir.name}")
+                return
+                
+            self.logger.info(f"Расширение '{ext.name}' успешно установлено из архива")
+            return ext
 
         shutil.rmtree(target_dir, ignore_errors=True)
-        raise ValueError("Неверная структура расширения. Отсутствуют обязательные файлы.")
+        self.logger.error("Неверная структура расширения. Отсутствуют обязательные файлы.")
+        return
