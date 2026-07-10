@@ -113,7 +113,9 @@ class ProjectManager:
 
             new_node = dpg.get_item_user_data(new_node_id)
 
-            deserialize_node(new_node, node_info)
+            success = deserialize_node(new_node, node_info)
+            if not success:
+                logger.warning(f"Не удалось полностью десериализовать параметры узла: {node_label}")
             id_mapping[node_info["id"]] = new_node_id
             self.start_nodes.append(new_node)
 
@@ -123,6 +125,7 @@ class ProjectManager:
             
             if sender_old_id not in id_mapping or receiver_old_id not in id_mapping:
                 logger.warning("Невозможно восстановить связь")
+                continue
 
             sender_new_id = id_mapping[sender_old_id]
             receiver_new_id = id_mapping[receiver_old_id]
