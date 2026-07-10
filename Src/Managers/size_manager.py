@@ -2,8 +2,8 @@ import dearpygui.dearpygui as dpg
 
 from Src.Utils import lateinit, singleton, get_children, get_userdata, set_userdata
 from Src.Logging import logging
-from Src.Managers.font_manager import FontManager
-from Src.Enums import DPGType
+from Src.Managers import FontManager, ThemeManager
+from Src.Enums import DPGType, Themes
 
 
 
@@ -13,6 +13,7 @@ class SizeManager:
 
     __logger = lateinit(logging(), 'managers')
     __font_manager: FontManager = lateinit(FontManager)
+    __theme_manager: ThemeManager = lateinit(ThemeManager)
 
 
     def __init__(self):
@@ -55,6 +56,24 @@ class SizeManager:
         for item in items:
             height, width = self.get_min_bbox(item)
             self.set_bbox(item, int(height * ratio), int(width * ratio * self.SIZE_RATIO))
+
+            default_elements = self.__theme_manager.config \
+                            .get(Themes.RESIZABLE.value) \
+                            .get(DPGType.NODE.mvName)
+
+            if not (theme_id := dpg.get_item_theme(item)): continue
+            theme = get_userdata(theme_id)
+            if not (component := self.__theme_manager \
+                .get_component(*theme, component=DPGType(item))):
+                    continue
+
+            for element in get_children(component, depth=1):
+                if (element := dpg.get_item_alias(element)).split()[2] not in default_elements: continue
+                value = default_elements.get(element.split()[2])
+                if not isinstance(value, list): value = [value]
+                value = [val * ratio for val in value]
+                # print(value)
+                dpg.set_value(element, value)
 
         return ratio
 

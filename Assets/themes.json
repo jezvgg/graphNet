@@ -105,6 +105,21 @@
       "mvThemeCol_ButtonActive": [0, 119, 208, 153]
     }
   },
+  "resizable": {
+    "mvNode": {
+      "mvStyleVar_ItemSpacing": [1.0, 1.0],
+      "mvStyleVar_ItemInnerSpacing": [1.0, 1.0],
+      "mvStyleVar_IndentSpacing": 1.0,
+      "mvNodeStyleVar_NodeCornerRounding": 3.0,
+      "mvNodeStyleVar_NodePadding": [3.0, 3.0],
+      "mvNodeStyleVar_NodeBorderThickness": 1.0,
+      "mvNodeStyleVar_LinkThickness": 1.0,
+      "mvNodeStyleVar_PinCircleRadius": 1.0,
+      "mvNodeStyleVar_PinOffset": 1.0,
+      "mvNodeStyleVar_PinQuadSideLength": 1.0,
+      "mvNodeStyleVar_PinTriangleSideLength": 1.0
+    }
+  },
   "error": {
     "mvNode": {
       "mvNodeCol_NodeOutline": [239, 83, 80, 255]

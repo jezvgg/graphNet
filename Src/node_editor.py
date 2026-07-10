@@ -6,8 +6,8 @@ from Src.Logging import logging, Logger
 from Src.Config.node_list import node_list, NodeAnnotation
 from Src.Config.Annotations import ANode
 from Src.Utils import lateinit, get_userdata, set_userdata
-from Src.Managers import EventManager
-from Src.Enums import EventType
+from Src.Managers import EventManager, ThemeManager
+from Src.Enums import EventType, Themes
 
 
 
@@ -23,6 +23,7 @@ class NodeEditor:
     __logger: Logger = lateinit(logging(), 'main')
     builder: NodeBuilder
     events: EventManager = lateinit(EventManager)
+    themes: ThemeManager = lateinit(ThemeManager)
     __stage_tag: str | int
     __group_tag: str | int
     __start_nodes: list[AbstractNode]
@@ -78,6 +79,7 @@ class NodeEditor:
                     dpg.add_button(label="Запустить",
                                    callback = lambda: self.builder.compile_graph(self.__start_nodes))
 
+        self.themes.apply("node_editor", Themes.DEFAULT)
         self.on_viewport_resize_callback()
 
 

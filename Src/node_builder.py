@@ -143,7 +143,7 @@ class NodeBuilder:
                 node_data.input.build(label="INPUT", parent=node_id)
 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
-                dpg.add_spacer(width=Annotation.BASE_WIDTH)
+                # dpg.add_spacer(width=Annotation.BASE_WIDTH)
                 with dpg.tree_node(label="Docs"):
                     dpg.add_text(node.docs)
 
@@ -160,6 +160,8 @@ class NodeBuilder:
 
         set_userdata(node_id, value=node)
 
+        self.theme_manager.apply(delete, Themes.DEFAULT)
+        node.default_theme()
 
         #
         # Переписать на новую методику
@@ -168,9 +170,6 @@ class NodeBuilder:
         default_font = self.font_manager.get(node_id)
         self.font_manager.set(node_id, font.name, font.size)
         self.size_manager.transform(node_id, font.size / default_font.size, True)
-
-        self.theme_manager.apply(delete, Themes.DEFAULT)
-        node.default_theme()
 
         return node_id
 

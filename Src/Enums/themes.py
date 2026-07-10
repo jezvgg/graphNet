@@ -7,6 +7,7 @@ class Themes(StrEnum):
     # Node editor
     DEFAULT = "default"
     ERROR = "error"
+    RESIZABLE = "resizable"
 
     # Nodes
     ABSTRACT = "abstract"

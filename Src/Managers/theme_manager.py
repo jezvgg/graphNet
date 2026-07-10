@@ -2,13 +2,15 @@ import json
 from collections import defaultdict
 from typing import Any
 from pathlib import Path
+from copy import deepcopy
+from functools import singledispatchmethod
 
 import dearpygui.dearpygui as dpg
 
 from Src.Enums import Themes, DPGType
 from Src.Enums.theme_elements import ThemeElement
-from Src.Utils import singleton, set_userdata
-
+from Src.Utils import singleton, set_userdata, get_userdata, lateinit
+from Src.Logging import logging
 
 
 
@@ -18,6 +20,7 @@ class ThemeManager:
     Менеджер тем для графического редактора.
     Работает с енум классом "Themes".
     """
+    __logger = lateinit(logging(), 'themes')
     __themes_config: dict[str, dict[str, dict[str, Any]]] = {}
     __created_themes: dict[tuple[Themes], int | str] = {}
     __item_themes: dict[int | str, set[Themes]] = {}
@@ -27,6 +30,11 @@ class ThemeManager:
         "mvThem": dpg.mvThemeCat_Core,
         "mvStyl": dpg.mvThemeCat_Core
     }
+
+
+    @property
+    def config(self):
+        return deepcopy(self.__themes_config)
 
 
     def __init__(self, theme_path: Path):
@@ -73,7 +81,13 @@ class ThemeManager:
         self.__update_item_theme(item_id)
 
 
-    def get(self, *theme_names: Themes) -> int:
+    @singledispatchmethod
+    def get(self, *args, **kwargs):
+        return self.__logger.error("Неверно использован метод get у темового менеджера!")
+
+
+    @get.register
+    def get_by_themes(self, *theme_names: Themes) -> int:
         """
         Возвращает id искомой темы.
         args:
@@ -87,18 +101,36 @@ class ThemeManager:
         return self.__created_themes[theme_key]
 
 
-    def get_component(self, *theme_names: Themes, component: DPGType) -> str:
+    @get.register
+    def get_by_id(self, id: int | str) -> int:
+        """
+        Возвращает темы элемента или создаёт её.
+        args:
+            *theme_names: Themes - темы для поиска
+        """
+        dpg.get_item_theme(id)
+
         theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
-        theme_tag = "-".join(theme_key)
-        component_tag = f"{theme_tag}_{component.mvName}"
-        return component_tag
+
+        if theme_key not in self.__created_themes:
+            self.__create_theme(*theme_names)
+
+        return self.__created_themes[theme_key]
 
 
-    def get_element(self, *theme_names: Themes, component: DPGType, element: ThemeElement) -> str:
+    def get_component(self, *theme_names: Themes, component: DPGType) -> str | None:
         theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
         theme_tag = "-".join(theme_key)
-        element_tag = f"{theme_tag}_{component.mvName}_{element.name}"
-        return element_tag
+        component_tag = f"{theme_tag} {component.mvName}"
+        return component_tag if dpg.does_item_exist(component_tag) else None
+
+
+    def get_element(self, *theme_names: Themes, component: DPGType, element: ThemeElement) -> str | None:
+        theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
+        theme_tag = "-".join(theme_key)
+        element_tag = f"{theme_tag} {component.mvName} {element.name}"
+        return element_tag if dpg.does_item_exist(element_tag) else None
+
 
     def __create_theme(self, *theme_names: Themes):
         """
@@ -120,7 +152,7 @@ class ThemeManager:
                 if not (dpg_comp := getattr(dpg, comp)):
                     continue
 
-                component_tag = f"{theme_tag}_{comp}"
+                component_tag = f"{theme_tag} {comp}"
                 with dpg.theme_component(dpg_comp, tag=component_tag):
                     for attr, value in data.items():
                         if not (dpg_attr := getattr(dpg, attr)):
@@ -130,9 +162,10 @@ class ThemeManager:
                             attr.split("_")[0][:6], dpg.mvThemeCat_Core
                         )
 
-                        element_tag = f"{theme_tag}_{comp}_{attr}"
+                        element_tag = f"{theme_tag} {comp} {attr}"
+
                         if attr.split("_")[0].endswith('Col'):
-                            dpg.add_theme_color(dpg_attr, value, tag=element_tag, category=category)
+                            smth = dpg.add_theme_color(dpg_attr, value, tag=element_tag, category=category)
                         elif isinstance(value, list):
                             dpg.add_theme_style(dpg_attr, *value, tag=element_tag, category=category)
                         else:
