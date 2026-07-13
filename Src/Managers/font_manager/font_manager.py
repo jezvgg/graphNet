@@ -29,6 +29,7 @@ class FontManager:
         self.default = None
         for font_name, font_config in config.items():
 
+            font_config['sizes'].sort()
             font_ids = [dpg.generate_uuid() for _ in font_config['sizes']]
 
             font = FontUnit(font_config['path'], font_config['hints'],
@@ -56,17 +57,19 @@ class FontManager:
     def __set(self, id: str | int, font: FontUnit, children: bool = True):
         items = {id}
         if children: items|= get_children(id)
+        min_font = next(iter(self.fonts[font.name].values()))
 
         for item in items:
             dpg.bind_item_font(item, font.id)
             if get_userdata(item, 'min_font_size'): continue
-            set_userdata(item, 'min_font_size', min(self.fonts[font.name].items(), key=lambda x: x[0])[1])
+            set_userdata(item, 'min_font_size', min_font)
 
 
     def get(self, item: str | int) -> FontUnit:
         font = get_userdata(dpg.get_item_font(item) or self.default.id)
         if not get_userdata(item, 'min_font_size'):
-            set_userdata(item, 'min_font_size', min(self.fonts[font.name].items(), key=lambda x: x[0])[1])
+            min_font = next(iter(self.fonts[font.name].values()))
+            set_userdata(item, 'min_font_size', min_font)
         return font
 
 

@@ -102,22 +102,20 @@
     "mvButton": {
       "mvThemeCol_Button": [51, 51, 55, 255],
       "mvThemeCol_ButtonHovered": [29, 151, 236, 163],
-      "mvThemeCol_ButtonActive": [0, 119, 208, 153]
+      "mvThemeCol_ButtonActive": [0, 119, 208, 153],
+      "mvStyleVar_FrameRounding": 0.0,
+      "mvStyleVar_ButtonTextAlign": [0.01, 0.5],
+      "mvStyleVar_FramePadding": [0.0, 0.0],
+      "mvStyleVar_FrameBorderSize": 0.0
     }
   },
   "resizable": {
     "mvNode": {
       "mvStyleVar_ItemSpacing": [1.0, 1.0],
-      "mvStyleVar_ItemInnerSpacing": [1.0, 1.0],
-      "mvStyleVar_IndentSpacing": 1.0,
       "mvNodeStyleVar_NodeCornerRounding": 3.0,
       "mvNodeStyleVar_NodePadding": [3.0, 3.0],
       "mvNodeStyleVar_NodeBorderThickness": 1.0,
-      "mvNodeStyleVar_LinkThickness": 1.0,
-      "mvNodeStyleVar_PinCircleRadius": 1.0,
-      "mvNodeStyleVar_PinOffset": 1.0,
-      "mvNodeStyleVar_PinQuadSideLength": 1.0,
-      "mvNodeStyleVar_PinTriangleSideLength": 1.0
+      "mvNodeStyleVar_LinkThickness": 1.0
     }
   },
   "error": {
@@ -344,16 +342,19 @@
   },
   "card": {
     "mvChildWindow": {
-      "mvStyleVar_WindowPadding": [0, 0],
-      "mvStyleVar_ChildRounding": 8,
-      "mvStyleVar_ChildBorderSize": 1,
+      "mvStyleVar_WindowPadding": [3.0, 3.0],
+      "mvStyleVar_ChildRounding": 8.0,
+      "mvStyleVar_ChildBorderSize": 1.0,
+      "mvStyleVar_ItemSpacing": [1.0, 1.0],
+      "mvStyleVar_ItemInnerSpacing": [1.0, 1.0],
+      "mvStyleVar_IndentSpacing": 1.0,
       "mvThemeCol_ChildBg": [50, 50, 50, 255],
       "mvThemeCol_Border": [100, 100, 100, 255]
     },
     "mvButton": {
       "mvStyleVar_FrameRounding": 5,
       "mvStyleVar_ButtonTextAlign": [0.01, 0.5],
-      "mvStyleVar_FramePadding": [4, 8],
+      "mvStyleVar_FramePadding": [4, 4],
       "mvStyleVar_FrameBorderSize": 0
     },
     "mvGroup": {

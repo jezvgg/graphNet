@@ -1,20 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
 from keras import layers
 import keras
-import numpy as np
-from keras import layers
 
 from Src.Config.Annotations import *
 from Src.Config.node_annotation import NodeAnnotation
 from Src.Config.parameter import Parameter
 from Src.Enums import *
 from Src.Nodes import *
-from Src.Config.node_annotation import NodeAnnotation
-from Src.Config.Annotations import *
-from Src.Config.Annotations.anot_figure import AFigure
-from Src.Nodes.plot_node import PlotNode
 
 
 # TODO Сделать сериализацию в JSON?
@@ -190,6 +183,16 @@ node_list = {
                     "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
                 },
                 input=LayerNode,
+            ),
+            NodeAnnotation(
+                label="Input",
+                node_type=InputLayerNode,
+                logic = InputLayerNode.create_input,
+                annotations = {
+                        "shape": Parameter(AttrType.INPUT, ANode[Single[object]]),
+                    },
+                input=False,
+                output=LayerNode
             ),
             NodeAnnotation(
                 label="Dropout",

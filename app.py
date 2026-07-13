@@ -1,4 +1,4 @@
-import json
+from time import time
 from pathlib import Path
 
 import dearpygui.dearpygui as dpg
@@ -22,6 +22,7 @@ class App:
     theme_manager: ThemeManager
     event_manager: EventManager
     size_manager: SizeManager
+    __last_zoom_time: float
 
 
     def __init__(
@@ -48,13 +49,13 @@ class App:
         self.font_manager = FontManager(Path(font_path))
         self.theme_manager = ThemeManager(Path(themes_path))
         self.event_manager = EventManager()
+        self.__last_zoom_time = 0.0
 
         dpg.setup_dearpygui()
 
         self._create_ui()
 
         self.size_manager = SizeManager()
-        self.theme_manager.get_component(Themes.DEFAULT, component=DPGType.NODE)
 
 
     def _setup_logging(self):
@@ -94,6 +95,10 @@ class App:
 
 
     def __size_increase(self, sender, app_data: int):
+        now = time()
+        if now - self.__last_zoom_time < 1 / 60: return
+        self.__last_zoom_time = now
+
         sizing_method = self.size_manager.increase if app_data > 0 else self.size_manager.reduce
         height, width = self.size_manager.get_bbox("node_editor")
         if dpg.is_key_down(dpg.mvKey_LControl) or dpg.is_key_down(dpg.mvKey_RControl):

@@ -5,11 +5,11 @@ import traceback
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import logging, Logger
-from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
-from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single, Annotation
-from Src.Utils import lateinit, set_userdata
+from Src.Nodes import AbstractNode, InputLayerNode
+from Src.Config.node_list import NodeAnnotation, Annotation
+from Src.Utils import lateinit, set_userdata, get_userdata, clear_userdata
 from Src.Managers import SizeManager, FontManager, ThemeManager
-from Src.Enums import Themes, AttrType
+from Src.Enums import Themes
 
 
 
@@ -81,16 +81,14 @@ class NodeBuilder:
         items_count = len(params)
         if node_data.input: items_count += 1
         if node_data.output: items_count += 1
-        calc_height = 80 + (items_count * 26)
 
         with dpg.child_window(
             tag=card_id,
             parent=parent,
-            width=self.card_width,
-            height=calc_height,
+            auto_resize_y=True,
+            auto_resize_x=True,
             no_scrollbar=True,
-            border=True,
-            user_data={'self': node_data} # Костыль, нужно заменить с использованием set_userdata
+            border=True # Костыль, нужно заменить с использованием set_userdata
         ) as card:
 
             with dpg.group() as drag_group:
@@ -117,9 +115,12 @@ class NodeBuilder:
 
                     if node_data.output: dpg.add_text("OUTPUT")
 
+        set_userdata(card_id, value=node_data)
+
         self.theme_manager.apply(card, Themes.CARD)
         self.theme_manager.apply(body_group, Themes.CARD)
-        self.theme_manager.apply(header_button, node_data.node_type.theme_name)
+        self.theme_manager.apply(delete_button, Themes.DEFAULT)
+        self.theme_manager.apply(header_button, node_data.node_type.theme_name, Themes.CARD)
         dpg.add_spacer(height=10)
         return card_id
 
@@ -139,11 +140,11 @@ class NodeBuilder:
         node: AbstractNode = node_data.node_type(node_id, **node_data.kwargs)
 
         with dpg.node(label=node_data.label, parent=parent, tag=node_id):
+            set_userdata(node_id, value=node)
             if node_data.input:
                 node_data.input.build(label="INPUT", parent=node_id)
 
             with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
-                # dpg.add_spacer(width=Annotation.BASE_WIDTH)
                 with dpg.tree_node(label="Docs"):
                     dpg.add_text(node.docs)
 
@@ -158,18 +159,13 @@ class NodeBuilder:
             if node_data.output:
                 node_data.output.build(label="OUTPUT", parent=node_id)
 
-        set_userdata(node_id, value=node)
-
         self.theme_manager.apply(delete, Themes.DEFAULT)
         node.default_theme()
 
-        #
-        # Переписать на новую методику
-        #
         font = self.font_manager.get("node_editor")
-        default_font = self.font_manager.get(node_id)
+        min_font = get_userdata("node_editor", 'min_font_size')
         self.font_manager.set(node_id, font.name, font.size)
-        self.size_manager.transform(node_id, font.size / default_font.size, True)
+        self.size_manager.transform(node_id, font.size / min_font.size, True)
 
         return node_id
 
@@ -185,17 +181,13 @@ class NodeBuilder:
         Returns:
             str | int - индетификатор новой ноды
         '''
-        # TODO: Сделать типизированную передачу у shape TableDataNode
-        layer = NodeAnnotation(
-            label="Input",
-            node_type=InputLayerNode,
-            logic = InputLayerNode.create_input,
-            annotations = {
-                    "shape": Parameter(AttrType.INPUT, ANode[Single[object]]),
-                },
-            input=False,
-            output=LayerNode
-            )
+        layer = None
+        for group in self.node_list.values():
+            for group2 in group.values():
+                for node in group2:
+                    if node.node_type is not InputLayerNode: continue
+                    layer = node
+                    break
 
         node_id = self.build_node(layer, parent=parent)
 

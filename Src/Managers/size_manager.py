@@ -9,8 +9,6 @@ from Src.Enums import DPGType, Themes
 
 @singleton
 class SizeManager:
-    SIZE_RATIO = 1 # Костыль, который появился из-за отсутствия изменения спейсинга и падинга
-
     __logger = lateinit(logging(), 'managers')
     __font_manager: FontManager = lateinit(FontManager)
     __theme_manager: ThemeManager = lateinit(ThemeManager)
@@ -32,13 +30,15 @@ class SizeManager:
 
 
     def get_min_bbox(self, item: int | str):
+        if (height := get_userdata(item, 'min_height')) is not None and \
+            (width := get_userdata(item, 'min_width')) is not None:
+            return height, width
+
         current_font_size: int = self.__font_manager.get(item).size
         min_font_size = get_userdata(item, 'min_font_size').size
         font_ratio = min_font_size / current_font_size
-        if not (height := get_userdata(item, 'min_height')):
-            height = set_userdata(item, 'min_height', dpg.get_item_height(item) or 0 * font_ratio)
-        if not (width := get_userdata(item, 'min_width')):
-            width = set_userdata(item, 'min_width', dpg.get_item_width(item) or 0 * font_ratio)
+        height = set_userdata(item, 'min_height', (dpg.get_item_height(item) or 0) * font_ratio)
+        width = set_userdata(item, 'min_width', (dpg.get_item_width(item) or 0) * font_ratio)
         return height, width
 
 
@@ -52,28 +52,36 @@ class SizeManager:
     def transform(self, id: int | str, ratio: float, children: bool = True):
         items = {id}
         if children: items|= get_children(id)
+        processed_themes = set()
 
         for item in items:
             height, width = self.get_min_bbox(item)
-            self.set_bbox(item, int(height * ratio), int(width * ratio * self.SIZE_RATIO))
+            if height or width:
+                self.set_bbox(item, int(height * ratio), int(width * ratio))
+
+            # Кэширование через userdata
+            if not (item_type := get_userdata(item, "type")):
+                item_type = set_userdata(item, "type", DPGType(item))
+            if not (theme := get_userdata(item, "theme")) or \
+                (theme, item_type.mvName) in processed_themes: continue
+            if Themes.RESIZABLE not in theme: continue
+            if not (component := self.__theme_manager \
+                .get_component(*theme, component=item_type)): # Возможно стоит добавить кэширование на методы theme_manager
+                    continue
 
             default_elements = self.__theme_manager.config \
                             .get(Themes.RESIZABLE.value) \
-                            .get(DPGType.NODE.mvName)
-
-            if not (theme_id := dpg.get_item_theme(item)): continue
-            theme = get_userdata(theme_id)
-            if not (component := self.__theme_manager \
-                .get_component(*theme, component=DPGType(item))):
-                    continue
+                            .get(item_type.mvName, {})
 
             for element in get_children(component, depth=1):
                 if (element := dpg.get_item_alias(element)).split()[2] not in default_elements: continue
                 value = default_elements.get(element.split()[2])
                 if not isinstance(value, list): value = [value]
                 value = [val * ratio for val in value]
-                # print(value)
+
                 dpg.set_value(element, value)
+
+            processed_themes.add((theme, item_type.mvName))
 
         return ratio
 

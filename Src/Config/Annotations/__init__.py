@@ -11,3 +11,4 @@ from Src.Config.Annotations.anot_sequence import ASequence
 from Src.Config.Annotations.anot_enum import AEnum
 
 from Src.Config.Annotations.single import Single
+from Src.Config.Annotations.anot_figure import AFigure

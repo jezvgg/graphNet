@@ -2,7 +2,11 @@ from typing import Any, TypeVar
 
 import dearpygui.dearpygui as dpg
 
+from Src.Utils.children import get_children
+
+
 T = TypeVar("T")
+__cache: dict[int | str, dict[str, Any]] = {}
 
 
 def get_userdata(id: int | str, key: str = "self") -> Any:
@@ -24,7 +28,21 @@ def set_userdata(id: int | str, key: str = "self", value: T = None) -> T:
     Если ключ не передан, то значение вставляет как объект характеризующий граф. элемент.
     !Important Создан как костыль, для поддержки совместимости кастомных полей граф. объектов и объектов характеризующих их.
     """
-    obj: dict = dpg.get_item_user_data(id) or {}
+    obj: dict = __cache.get(id, {})
     obj[key] = value
     dpg.set_item_user_data(id, obj)
+    __cache[id] = obj
+    if isinstance(id, str): __cache[dpg.get_alias_id(id)] = obj
     return value
+
+
+def clear_userdata(id: int | str, children: bool = True):
+    '''
+    Очищает кэш userdata
+    '''
+    items = {id}
+    if children: items |= get_children(id)
+
+    for item in items:
+        __cache.pop(item, None)
+        if isinstance(item, str): __cache.pop(dpg.get_alias_id(item), None)

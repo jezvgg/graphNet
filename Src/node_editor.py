@@ -5,7 +5,7 @@ from Src.node_builder import NodeBuilder
 from Src.Logging import logging, Logger
 from Src.Config.node_list import node_list, NodeAnnotation
 from Src.Config.Annotations import ANode
-from Src.Utils import lateinit, get_userdata, set_userdata
+from Src.Utils import lateinit, get_userdata, set_userdata, clear_userdata
 from Src.Managers import EventManager, ThemeManager
 from Src.Enums import EventType, Themes
 
@@ -142,19 +142,21 @@ class NodeEditor:
 
         self.__logger.debug(f"Node_out - {dpg.get_item_label(dpg.get_item_parent(app_data[0]))}")
 
-        link_id = dpg.add_node_link(app_data[0], app_data[1], parent=sender, user_data=node_link(app_data[0], app_data[1]))
+        link_id = dpg.add_node_link(app_data[0], app_data[1], parent=sender)
+        set_userdata(link_id, value=node_link(app_data[0], app_data[1]))
 
         self.__logger.debug(f"Связи до: {node_out} {node_in}")
 
         data_in: list | None = get_userdata(app_data[1])
         if not data_in: data_in = []
         data_in.append(app_data[0])
-        set_userdata(app_data[1], data_in)
+
+        set_userdata(app_data[1], value=data_in)
 
         data_out: list | None = get_userdata(app_data[0])
         if not data_out: data_out = []
         data_out.append(app_data[1])
-        set_userdata(app_data[0], data_out)
+        set_userdata(app_data[0], value=data_out)
 
         node_out.outgoing[app_data[0]] = data_out
         node_in.incoming[app_data[1]] = data_in
@@ -191,8 +193,8 @@ class NodeEditor:
         node_out.outgoing[attr_outgoing].remove(attr_incoming)
         node_in.incoming[attr_incoming].remove(attr_outgoing)
 
-        set_userdata(attr_outgoing, node_out.outgoing[attr_outgoing])
-        set_userdata(attr_incoming, node_in.incoming[attr_incoming])
+        set_userdata(attr_outgoing, value=node_out.outgoing[attr_outgoing])
+        set_userdata(attr_incoming, value=node_in.incoming[attr_incoming])
 
         if not node_out.outgoing[attr_outgoing]: del node_out.outgoing[attr_outgoing]
         if not node_in.incoming[attr_incoming]: del node_in.incoming[attr_incoming]
@@ -231,6 +233,8 @@ class NodeEditor:
                 self.delink(attr_out, attr_in)
 
         if node in self.__start_nodes: self.__start_nodes.remove(node)
+
+        clear_userdata(node_id)
 
         del node
         dpg.delete_item(node_id)

@@ -2,14 +2,13 @@ import json
 from collections import defaultdict
 from typing import Any
 from pathlib import Path
-from copy import deepcopy
-from functools import singledispatchmethod
+from types import MappingProxyType
 
 import dearpygui.dearpygui as dpg
 
 from Src.Enums import Themes, DPGType
 from Src.Enums.theme_elements import ThemeElement
-from Src.Utils import singleton, set_userdata, get_userdata, lateinit
+from Src.Utils import singleton, set_userdata, lateinit
 from Src.Logging import logging
 
 
@@ -21,7 +20,6 @@ class ThemeManager:
     Работает с енум классом "Themes".
     """
     __logger = lateinit(logging(), 'themes')
-    __themes_config: dict[str, dict[str, dict[str, Any]]] = {}
     __created_themes: dict[tuple[Themes], int | str] = {}
     __item_themes: dict[int | str, set[Themes]] = {}
     __themes_categories = {
@@ -30,11 +28,7 @@ class ThemeManager:
         "mvThem": dpg.mvThemeCat_Core,
         "mvStyl": dpg.mvThemeCat_Core
     }
-
-
-    @property
-    def config(self):
-        return deepcopy(self.__themes_config)
+    config: MappingProxyType[str, MappingProxyType[str, MappingProxyType[str, Any]]] = {}
 
 
     def __init__(self, theme_path: Path):
@@ -44,7 +38,7 @@ class ThemeManager:
             theme_path: str - Путь до файла конфига
         """
         with open(theme_path, "r") as f:
-            self.__themes_config = json.load(f)
+            self.config = json.load(f, object_hook=MappingProxyType)
 
 
     def apply(self, item_id: str | int, *theme_names: Themes):
@@ -81,35 +75,12 @@ class ThemeManager:
         self.__update_item_theme(item_id)
 
 
-    @singledispatchmethod
-    def get(self, *args, **kwargs):
-        return self.__logger.error("Неверно использован метод get у темового менеджера!")
-
-
-    @get.register
-    def get_by_themes(self, *theme_names: Themes) -> int:
+    def get(self, *theme_names: Themes) -> int:
         """
         Возвращает id искомой темы.
         args:
             *theme_names: Themes - темы для поиска
         """
-        theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
-
-        if theme_key not in self.__created_themes:
-            self.__create_theme(*theme_names)
-
-        return self.__created_themes[theme_key]
-
-
-    @get.register
-    def get_by_id(self, id: int | str) -> int:
-        """
-        Возвращает темы элемента или создаёт её.
-        args:
-            *theme_names: Themes - темы для поиска
-        """
-        dpg.get_item_theme(id)
-
         theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
 
         if theme_key not in self.__created_themes:
@@ -144,7 +115,7 @@ class ThemeManager:
 
         merged = defaultdict(dict)
         for theme_name in theme_key:
-            for comp, data in self.__themes_config[theme_name].items():
+            for comp, data in self.config[theme_name].items():
                 merged[comp] |= data
 
         with dpg.theme(tag=theme_tag):
@@ -165,7 +136,7 @@ class ThemeManager:
                         element_tag = f"{theme_tag} {comp} {attr}"
 
                         if attr.split("_")[0].endswith('Col'):
-                            smth = dpg.add_theme_color(dpg_attr, value, tag=element_tag, category=category)
+                            dpg.add_theme_color(dpg_attr, value, tag=element_tag, category=category)
                         elif isinstance(value, list):
                             dpg.add_theme_style(dpg_attr, *value, tag=element_tag, category=category)
                         else:
@@ -187,3 +158,4 @@ class ThemeManager:
             return
 
         dpg.bind_item_theme(item_id, self.get(*theme_names))
+        set_userdata(item_id, "theme", tuple(sorted(theme_names, key=lambda x: x.name)))
