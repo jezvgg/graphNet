@@ -4,7 +4,7 @@ import dearpygui.dearpygui as dpg
 from Src.Config.node_list import node_list
 from Src.Config.Annotations import *
 from Src.Enums import *
-from Src.Utils import get_userdata
+from Src.Utils import get_userdata, set_userdata
 
 def test_simple_compilation(node_editor):
     node_editor.builder.compile_graph(node_editor._NodeEditor__start_nodes)
@@ -25,7 +25,9 @@ def test_compilation(node_editor):
                                             if dpg.get_item_label(field) == attr_name][0]
     with dpg.window():
         for node in nodes_in_mock.keys():
-            nodes_in_mock[node] = dpg.add_button(label=node, user_data=nodes_in_mock[node])
+            userdata = nodes_in_mock[node]
+            nodes_in_mock[node] = dpg.add_button(label=node)
+            set_userdata(nodes_in_mock[node], value=userdata)
 
     input_node = dpg.get_item_children("node_editor", slot=1)[0]
     dataX = node_editor.drop_callback("node_editor", nodes_in_mock["Table data"])

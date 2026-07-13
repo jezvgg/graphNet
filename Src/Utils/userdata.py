@@ -17,7 +17,7 @@ def get_userdata(id: int | str, key: str = "self") -> Any:
     Например если получить объект у узла, то получете AbstractNode, а если у обычного граф. элемента - то словарь userdata.
     !Important Создан как костыль, для поддержки совместимости кастомных полей граф. объектов и объектов характеризующих их.
     """
-    obj: dict = dpg.get_item_user_data(id) or {}
+    obj: dict = __cache.get(id, {})
     return obj.get(key)
 
 

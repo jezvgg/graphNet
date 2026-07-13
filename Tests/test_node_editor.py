@@ -5,7 +5,7 @@ from Src.Config import NodeAnnotation, Parameter
 from Src.Config.Annotations import ANode
 from Src.Nodes import AbstractNode
 from Src.Enums.attr_type import AttrType
-from Src.Utils import get_userdata
+from Src.Utils import get_userdata, set_userdata
 
 
 def test_initialize(node_editor):
@@ -21,7 +21,8 @@ def test_drop_callback(node_editor):
                 )
 
     with dpg.window():
-        btn = dpg.add_button(label=node.label, user_data=node)
+        btn = dpg.add_button(label=node.label)
+        set_userdata(btn, value=node)
 
     nodes_count = len(dpg.get_item_children("node_editor", slot=1))
 
@@ -223,7 +224,8 @@ def test_drop_callback_returns_node_id(node_editor):
     )
 
     with dpg.window():
-        btn = dpg.add_button(label=node.label, user_data=node)
+        btn = dpg.add_button(label=node.label)
+        set_userdata(btn, value=node)
 
     node_id = node_editor.drop_callback("node_editor", btn)
 

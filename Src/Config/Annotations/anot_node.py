@@ -44,7 +44,7 @@ class ANode(AParam):
         if DPGType(parent) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent of item {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
-        user_data = get_userdata(parent)
+        user_data = get_userdata(parent) or []
 
         node_in: list[tuple[str, AbstractNode]] = [(dpg.get_item_label(attribute),
                                                     get_userdata(dpg.get_item_parent(attribute)))
