@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from Src.Config.Annotations import AParam
-from Src.Utils import instancelessmethod, get_userdata
+from Src.Utils import instancelessmethod, get_userdata, set_userdata
 
 
 @dataclass
@@ -33,8 +33,11 @@ class AFigure(AParam):
             parent="figure_texture_registry",
         )
 
-        dpg.add_text(kwargs.get("label") or "Figure", show=not self.display)
-        return dpg.add_image(tex_id, user_data=tex_id, show=self.display)
+        parent = kwargs.get("parent", 0)
+        dpg.add_text(kwargs.get("label") or "Figure", show=not self.display, parent=parent)
+        image_id = dpg.add_image(tex_id, show=self.display, parent=parent)
+        set_userdata(image_id, value=tex_id)
+        return image_id
 
 
     @staticmethod

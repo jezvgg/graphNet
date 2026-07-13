@@ -1,7 +1,8 @@
 import dearpygui.dearpygui as dpg
 
 from Src.Managers.theme_manager import ThemeManager
-from Src.Enums import Themes
+from Src.Enums import Themes, DPGType
+from Src.Enums.theme_elements import NodeColors
 
 def test_load_themes(env):
     """
@@ -120,3 +121,57 @@ def test_get_theme_returns_valid_dpg_item(env):
     theme_id = manager.get(Themes.DEFAULT)
 
     assert dpg.does_item_exist(theme_id)
+
+
+def test_get_component(env):
+    """
+    Проверяет получение тега компонента темы по её параметрам.
+    """
+    manager = ThemeManager()
+    manager.get(Themes.DEFAULT)
+
+    # mvNode компонент настроен в default теме
+    component_tag = manager.get_component(Themes.DEFAULT, component=DPGType.NODE)
+    assert component_tag == "default mvNode"
+    assert dpg.does_item_exist(component_tag)
+
+    # mvButton компонент НЕ настроен в default теме
+    assert manager.get_component(Themes.DEFAULT, component=DPGType.BUTTON) is None
+
+
+def test_get_element(env):
+    """
+    Проверяет получение тега конкретного стиля/цвета темы по её параметрам.
+    """
+    manager = ThemeManager()
+    manager.get(Themes.DEFAULT)
+
+    # mvNodeCol_TitleBar настроен в default теме
+    element_tag = manager.get_element(Themes.DEFAULT, component=DPGType.NODE, element=NodeColors.TITLE_BAR)
+    assert element_tag == "default mvNode mvNodeCol_TitleBar"
+    assert dpg.does_item_exist(element_tag)
+
+    # mvNodeCol_NodeBackground НЕ настроен в default теме
+    assert manager.get_element(Themes.DEFAULT, component=DPGType.NODE, element=NodeColors.NODE_BACKGROUND) is None
+
+
+def test_combined_theme_component_and_element(env):
+    """
+    Проверяет получение компонентов и элементов для комбинированных тем.
+    """
+    manager = ThemeManager()
+    manager.get(Themes.DEFAULT, Themes.ERROR)
+
+    # Компонент mvNode существует в комбинированной теме default-error
+    comp_tag = manager.get_component(Themes.DEFAULT, Themes.ERROR, component=DPGType.NODE)
+    assert comp_tag == "default-error mvNode"
+    assert dpg.does_item_exist(comp_tag)
+
+    # Элемент mvNodeCol_TitleBar (из default) и mvNodeCol_NodeOutline (из error) оба существуют в default-error
+    element_tag_title = manager.get_element(Themes.DEFAULT, Themes.ERROR, component=DPGType.NODE, element=NodeColors.TITLE_BAR)
+    assert element_tag_title == "default-error mvNode mvNodeCol_TitleBar"
+    assert dpg.does_item_exist(element_tag_title)
+
+    element_tag_outline = manager.get_element(Themes.DEFAULT, Themes.ERROR, component=DPGType.NODE, element=NodeColors.NODE_OUTLINE)
+    assert element_tag_outline == "default-error mvNode mvNodeCol_NodeOutline"
+    assert dpg.does_item_exist(element_tag_outline)

@@ -114,3 +114,22 @@ def test_AInteger_negative_value(env):
     input_id = AInteger.build(parent=env)
     assert AInteger.set(input_id, -10) is True
     assert AInteger.get(input_id) == -10
+
+def test_AFigure(env):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    
+    fig_id = AFigure.build(parent=env)
+    assert dpg.does_item_exist(fig_id)
+    assert dpg.get_item_type(fig_id) == "mvAppItemType::mvImage"
+
+    # Create and set a valid matplotlib Figure
+    fig, ax = plt.subplots(figsize=(4, 3))
+    ax.plot([0, 1], [0, 1])
+    
+    # This shouldn't raise any errors or Item Not Found because textures are tracked
+    assert AFigure.set(fig_id, fig) is True
+    
+    # Test fallback get with no external parent structure
+    assert AFigure.get(fig_id) is None

@@ -42,7 +42,7 @@ class FontManager:
                 next_font = FontUnit(Path(font_config['path']).resolve(), font_config['hints'],
                                      font_name, size, next_id, prev = font)
                 font.next = next_font
-                self.fonts[font_name][size] = font
+                self.fonts[font_name][size] = next_font
 
             if not font_config.get('default'): continue
             if self.default:

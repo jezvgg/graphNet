@@ -99,7 +99,7 @@ class ThemeManager:
     def get_element(self, *theme_names: Themes, component: DPGType, element: ThemeElement) -> str | None:
         theme_key = tuple(sorted(theme_names, key=lambda x: x.name))
         theme_tag = "-".join(theme_key)
-        element_tag = f"{theme_tag} {component.mvName} {element.name}"
+        element_tag = f"{theme_tag} {component.mvName} {element.value}"
         return element_tag if dpg.does_item_exist(element_tag) else None
 
 
