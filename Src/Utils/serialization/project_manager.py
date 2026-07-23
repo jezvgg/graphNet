@@ -1,15 +1,13 @@
 import json
-import logging
 from pathlib import Path
 import dearpygui.dearpygui as dpg
 
 from Src.Utils.serialization.serializers import serialize_project
 from Src.Utils.serialization.deserializers import deserialize_node
+from Src.Logging.logger_factory import Logger_factory
 
 
-
-
-logger = logging.getLogger(__name__)
+logger = Logger_factory.get_logger(__name__)
 
 class ProjectManager:
     def __init__(self, node_editor_tag: str, builder, start_nodes: list, link_callback=None):
@@ -23,22 +21,19 @@ class ProjectManager:
         """
         Собирает текущее состояние графа и сохраняет его в JSON.
         """
-        try:
-            all_nodes = []
-            children = dpg.get_item_children(self.node_editor_tag, slot=1)
-            if children:
-                for item in children:
-                    if dpg.get_item_type(item) == "mvAppItemType::mvNode":
-                        node = dpg.get_item_user_data(item)
-                        if node:
-                            all_nodes.append(node)
+        all_nodes = []
+        children = dpg.get_item_children(self.node_editor_tag, slot=1)
+        if children:
+            for item in children:
+                if dpg.get_item_type(item) == "mvAppItemType::mvNode":
+                    node = dpg.get_item_user_data(item)
+                    if node:
+                        all_nodes.append(node)
 
-            project_data = serialize_project(all_nodes)
-            with open(filepath, 'w', encoding="utf-8") as f:
-                json.dump(project_data, f)
-            logger.info(f"Проект сохранен в {filepath}")
-        except Exception as e:
-            logger.error(f"Ошибка при сохранении проекта {e}")
+        project_data = serialize_project(all_nodes)
+        with open(filepath, 'w', encoding="utf-8") as f:
+            json.dump(project_data, f)
+        logger.info(f"Проект сохранен в {filepath}")
 
 
     def clear_board(self, recreate_input: bool = False):
@@ -76,12 +71,8 @@ class ProjectManager:
         """
         Очищает текущий граф, читает JSON и воссоздает узлы и связи.
         """
-        try:
-            with open(filepath, 'r', encoding="utf-8") as f:
-                project_data = json.load(f)
-        except Exception as e:
-            logger.error(f"Ошибка при чтении файла {e}")
-            return
+        with open(filepath, 'r', encoding="utf-8") as f:
+            project_data = json.load(f)
         
         self.clear_board(recreate_input=False)
         id_mapping = {}
