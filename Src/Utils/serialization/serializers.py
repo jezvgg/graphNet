@@ -91,6 +91,17 @@ class ProjectEncoder(json.JSONEncoder):
             return self.serialize(obj)
         except TypeError:
             return super().default(obj)
+        
+
+class GraphNetEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, 'to_dict'):
+            return obj.to_dict()
+        
+        if isinstance(obj, AbstractNode): 
+            return {"id": obj.id, "tag": obj.node_tag}
+
+        return super().default(obj)
     
 
 def serialize_project(nodes: list[AbstractNode]) -> dict:

@@ -73,6 +73,6 @@ def deserialize_node(node: AbstractNode, data: dict) -> bool:
 
         res = parameter.set_value(argument, python_val)
         if not res:
-            False
+            return False
 
     return True

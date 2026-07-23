@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TypedDict, List, Any
 import dearpygui.dearpygui as dpg
 
-from Src.Utils.serialization.serializers import serialize_project
+from Src.Utils.serialization.serializers import serialize_project, GraphNetEncoder
 from Src.Utils.serialization.deserializers import deserialize_node
 from Src.Enums.dpg_types import DPGType
 from Src.node_builder import NodeBuilder
@@ -34,23 +34,14 @@ class ProjectManager:
         self.link_callback = link_callback
 
 
-    def save_project(self, filepath: Path | str):
-        """
-        Собирает текущее состояние графа и сохраняет его в JSON.
-        """
-        children = dpg.get_item_children(self.node_editor_tag, slot=1) or []
+    def save_project(self, filepath: str, all_nodes: list, all_links: list):
+        data = {
+            "nodes": all_nodes, 
+            "links": all_links
+        }
         
-        # Собираем все узлы через генератор, игнорируя пустые userdata
-        all_nodes = [
-            dpg.get_item_user_data(child) 
-            for child in children 
-            if dpg.get_item_user_data(child)
-        ]
-
-        project_data = serialize_project(all_nodes)
         with open(filepath, 'w', encoding="utf-8") as f:
-            json.dump(project_data, f)
-        logger.info(f"Проект сохранен в {filepath}")
+            json.dump(data, f, cls=GraphNetEncoder, indent=4)
 
 
     def clear_board(self, recreate_input: bool = False):
@@ -76,12 +67,13 @@ class ProjectManager:
 
     def _find_attribute_by_label(self, node_id: int | str, pin_label: str):
         """Ищет ID атрибута (пина) внутри узла по его имени."""
-        children = dpg.get_item_children(node_id, slot=1)
-        if children:
-            for attr in children:
-                if dpg.get_item_type(attr) == "mvAppItemType::mvNodeAttribute":
-                    if dpg.get_item_label(attr) == pin_label:
-                        return attr
+        if not (children := dpg.get_item_children(node_id, slot=1)):
+            return None
+            
+        for attr in children:
+            if DPGType(dpg.get_item_type(attr)) == DPGType.NodeAttribute:
+                if dpg.get_item_label(attr) == pin_label:
+                    return attr
         return None
 
 
