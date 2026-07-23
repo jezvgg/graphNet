@@ -48,7 +48,6 @@ class ProjectManager:
         """
         Очищает холст редактора узлов перед загрузкой нового проекта.
         """
-        children = dpg.get_item_children(self.node_editor_tag)
         if not (children := dpg.get_item_children(self.node_editor_tag, slot=1)):
             return
         for slot in children.values():
