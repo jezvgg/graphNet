@@ -5,6 +5,7 @@ import dearpygui.dearpygui as dpg
 
 from Src.Utils.serialization.serializers import serialize_project
 from Src.Utils.serialization.deserializers import deserialize_node
+from Src.Enums.dpg_types import DPGType
 from Src.node_builder import NodeBuilder
 from Src.Logging.logger_factory import Logger_factory
 
@@ -37,14 +38,14 @@ class ProjectManager:
         """
         Собирает текущее состояние графа и сохраняет его в JSON.
         """
-        all_nodes = []
-        children = dpg.get_item_children(self.node_editor_tag, slot=1)
-        if children:
-            for item in children:
-                if dpg.get_item_type(item) == "mvAppItemType::mvNode":
-                    node = dpg.get_item_user_data(item)
-                    if node:
-                        all_nodes.append(node)
+        children = dpg.get_item_children(self.node_editor_tag, slot=1) or []
+        
+        # Собираем все узлы через генератор, игнорируя пустые userdata
+        all_nodes = [
+            dpg.get_item_user_data(child) 
+            for child in children 
+            if dpg.get_item_user_data(child)
+        ]
 
         project_data = serialize_project(all_nodes)
         with open(filepath, 'w', encoding="utf-8") as f:
@@ -57,11 +58,12 @@ class ProjectManager:
         Очищает холст редактора узлов перед загрузкой нового проекта.
         """
         children = dpg.get_item_children(self.node_editor_tag)
-        if children:
-            for slot in children.values():
-                for item in slot:
-                    if dpg.does_item_exist(item):
-                        dpg.delete_item(item)
+        if not (children := dpg.get_item_children(self.node_editor_tag, slot=1)):
+            return
+        for slot in children.values():
+            for item in slot:
+                if dpg.does_item_exist(item):
+                    dpg.delete_item(item)
         
         # Очищаем внутренний список узлов
         self.start_nodes.clear()
