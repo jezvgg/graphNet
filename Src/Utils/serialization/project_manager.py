@@ -104,20 +104,10 @@ class ProjectManager:
             if node_label == "Input":
                 new_node_id = self.builder.build_input(parent=self.node_editor_tag)
             else:
-                node_data = None
-                for category in self.builder.node_list.values():
-                    for subcategory in category.values():
-                        for node in subcategory:
-                            if node.label == node_label:
-                                node_data = node
-                                break
-                        if node_data: break
-                    if node_data: break
-                
+                node_data = node_info.get("node_data")
                 if not node_data:
-                    logger.error(f"Неизвестный тип узла: {node_label}")
+                    logger.error(f"Неизвестный тип узла или нет данных: {node_label}")
                     continue
-                
                 new_node_id = self.builder.build_node(node_data, parent=self.node_editor_tag)
 
             new_node = dpg.get_item_user_data(new_node_id)

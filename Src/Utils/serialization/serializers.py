@@ -78,7 +78,8 @@ class ProjectEncoder(json.JSONEncoder):
         return {
             "label": dpg.get_item_label(node.node_tag),
             "position": pos,
-            "parameters": param_values
+            "parameters": param_values,
+            "node_data": node.node_data
         }
 
 
