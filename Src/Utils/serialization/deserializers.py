@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any 
+from functools import singledispatch
 
 import dearpygui.dearpygui as dpg
 
@@ -9,12 +10,24 @@ from Src.Config.Annotations import AFile, AEnum, ASequence
 
 
 
-# Словарь-диспетчер: Класс аннотации -> Функция десериализации
-DESERIALIZE_REGISTRY = {
-    AFile: lambda hint, val: [Path(p) for p in val],
-    AEnum: lambda hint, val: next((m for m in hint.source if m.value == val), None),
-    ASequence: lambda hint, val: tuple(val)
-}
+@singledispatch
+def deserialize_value(hint, val):
+    return val
+
+
+@deserialize_value.register
+def _(hint: AFile, val):
+    return [Path(p) for p in val]
+
+
+@deserialize_value.register
+def _(hint: AEnum, val):
+    return next((m for m in hint.source if m.value == val), None)
+
+
+@deserialize_value.register
+def _(hint: ASequence, val):
+    return tuple(val)
 
 
 def deserialize_parameter_value(hint: Any, value: Any) -> Any:
@@ -27,7 +40,7 @@ def deserialize_parameter_value(hint: Any, value: Any) -> Any:
     
     hint_cls = hint if isinstance(hint, type) else type(hint)
 
-    handler = DESERIALIZE_REGISTRY.get(hint_cls)
+    handler = deserialize_value.get(hint_cls)
     if handler:
         return handler(hint, value)
     
