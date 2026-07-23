@@ -1,16 +1,32 @@
 import json
 from pathlib import Path
+from typing import TypedDict, List, Any
 import dearpygui.dearpygui as dpg
 
 from Src.Utils.serialization.serializers import serialize_project
 from Src.Utils.serialization.deserializers import deserialize_node
+from Src.node_builder import NodeBuilder
 from Src.Logging.logger_factory import Logger_factory
+
+
 
 
 logger = Logger_factory.get_logger(__name__)
 
+class LinkData(TypedDict):
+    sender_node_id: int
+    sender_pin: str
+    receiver_node_id: int
+    receiver_pin: str
+
+
+class ProjectData(TypedDict):
+    nodes: List[Any]
+    links: List[LinkData]
+
+
 class ProjectManager:
-    def __init__(self, node_editor_tag: str, builder, start_nodes: list, link_callback=None):
+    def __init__(self, node_editor_tag: str, builder: NodeBuilder, start_nodes: list, link_callback=None):
         self.node_editor_tag = node_editor_tag
         self.builder = builder
         self.start_nodes = start_nodes
