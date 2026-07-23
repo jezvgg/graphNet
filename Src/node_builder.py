@@ -172,6 +172,8 @@ class NodeBuilder:
         node_id = dpg.generate_uuid()
         node: AbstractNode = node_data.node_type(node_id, **node_data.kwargs)
 
+        node.node_data = node_data
+
         with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
             if node_data.input:
                 node_data.input.build(label="INPUT", parent=node_id)
