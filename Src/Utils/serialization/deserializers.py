@@ -40,7 +40,7 @@ def deserialize_parameter_value(hint: Any, value: Any) -> Any:
     
     hint_cls = hint if isinstance(hint, type) else type(hint)
 
-    handler = deserialize_value.get(hint_cls)
+    handler = deserialize_value.registry.get(hint_cls)
     if handler:
         return handler(hint, value)
     
