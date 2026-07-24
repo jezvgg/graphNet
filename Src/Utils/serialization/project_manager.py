@@ -12,7 +12,7 @@ from Src.Logging.logger_factory import Logger_factory
 
 
 
-logger = Logger_factory.get_logger(__name__)
+logger = Logger_factory()(__name__)
 
 class LinkData(TypedDict):
     sender_node_id: int
