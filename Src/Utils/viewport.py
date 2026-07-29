@@ -8,8 +8,7 @@ def on_viewport_resize_callback(**kwargs):
         dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
 
     modal_windows = [
-        "error_window",
-        "fit_window",
+        "compile_window",
         ]
 
     for window in modal_windows:
