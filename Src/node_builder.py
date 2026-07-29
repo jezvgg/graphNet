@@ -10,7 +10,7 @@ from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
 from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
 from Src.Utils.viewport import on_viewport_resize_callback
-
+from Src.Utils.compile_window import CompileWindow
 class NodeBuilder:
     '''
     Класс реализующий логику связывания Keras и Нодов.
@@ -134,9 +134,9 @@ class NodeBuilder:
         '''
         Компиляция графа, от его концов. Работает через обход в ширину. Вызывает метод compile у нода, если все ноды, пришедшие к нему уже скомпилированы. Начинает с нодов, у которых нет входов.
         '''
-        with dpg.window(label="Компиляция графа", modal=True, no_title_bar=True, no_resize=True, no_move=True, show=False, tag="compile_window") as complie_window:
-            pass
-        on_viewport_resize_callback()
+        compile = CompileWindow()
+        compile.create_window()
+
         visited = set()
         queue = start_nodes[:]
         self.logger.info("Началась сборка графа.")
@@ -173,14 +173,7 @@ class NodeBuilder:
     
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
-        with dpg.window(label="Непревиденная ошибка", modal=True, no_title_bar=True, \
-                        no_resize=True, no_move=True, show=False, tag="error_window") as error_window:
-            dpg.add_text("Произошла непредвиденная ошибка, сообщите пожалуйста разработчикам.")
-            dpg.add_text(f"{error_message_type}:")
-            dpg.add_text(error_message)
-            dpg.add_text(traceback.format_exc())
-            dpg.add_button(label="Close", callback=lambda: dpg.configure_item(error_window, show=False))
-        on_viewport_resize_callback()
+        
         """
         # TODO: Прикрепить модальное окно на середину при изменении размера
         dpg.set_item_pos(error_window, [
