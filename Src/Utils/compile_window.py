@@ -8,8 +8,8 @@ class CompileWindow():
         self.max_lines = max_lines #максимальная вместимость в окне
         self.log_text_item = None
     def create_window(self): #создание окна
-        with dpg.window(label="Компиляция графа", modal=True, no_resize=True, no_move=True, no_scrollbar=True, tag="compile_window") as window:
-            self.log_text_item= dpg.add_text("")
+        with dpg.window(label="Компиляция графа", modal=True, no_resize=True, no_move=True, no_scrollbar=True,width=500,height=115, tag="compile_window") as window:
+            self.log_text_item= dpg.add_text("", wrap=460)
             dpg.add_button(label="Close", callback=lambda: dpg.configure_item(window, show=False))
 
         on_viewport_resize_callback()
