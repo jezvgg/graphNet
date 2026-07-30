@@ -23,3 +23,15 @@ dev = [
     "coverage>=7.14.2",
     "pytest>=9.1.1",
 ]
+
+[tool.coverage.run]
+source = ["Src"]
+omit = ["*/__pycache__/*"]
+
+[tool.coverage.report]
+fail_under = 80
+exclude_also = [
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

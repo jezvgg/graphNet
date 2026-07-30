@@ -1,4 +1,4 @@
-name: Tests
+name: Tests & Coverage
 
 on:
   pull_request:
@@ -14,7 +14,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y xvfb libgl1 libglib2.0-0 libglx-mesa0
+          sudo apt-get install -y xvfb libgl1 libglib2.0-0 libglx-mesa0 libsndfile1
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -25,7 +25,10 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --dev
 
-      - name: Run tests
-        run: xvfb-run -a uv run --with pytest pytest
+      - name: Run tests with coverage
+        run: xvfb-run -a uv run coverage run --source=Src -m pytest Tests/ -v
+
+      - name: Coverage report
+        run: uv run coverage report -m --fail-under=80
