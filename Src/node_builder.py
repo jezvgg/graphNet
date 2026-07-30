@@ -170,7 +170,10 @@ class NodeBuilder:
                         queue.append(neightbor)
 
                 visited.add(current_node)
-
+        if status:
+            compile.push("Компиляция прошла успешно!")
+        else:
+            compile.push("Компиляция прервана из-за ошибки")
         return visited
     
 
@@ -184,5 +187,4 @@ class NodeBuilder:
         ])
         """
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
-        
 
