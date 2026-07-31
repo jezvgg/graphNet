@@ -101,10 +101,10 @@ class App:
 
         sizing_method = self.size_manager.increase if app_data > 0 else self.size_manager.reduce
         height, width = self.size_manager.get_bbox("node_editor")
-        if dpg.is_key_down(dpg.mvKey_LControl) or dpg.is_key_down(dpg.mvKey_RControl):
-            sizing_method("Prime")
+        # if dpg.is_key_down(dpg.mvKey_LControl) or dpg.is_key_down(dpg.mvKey_RControl):
+        #     sizing_method("Prime")
 
-        elif dpg.is_item_hovered("node_editor"):
+        if dpg.is_item_hovered("node_editor"):
             # Приближение увеличивает узлы, у которых размер рассчитывается абсолютно
             # для избежания накопления ошибки плавающей точки
             # С изменением позиции для имитации зума так не получиться, поэтому

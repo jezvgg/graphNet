@@ -43,7 +43,7 @@ class SizeManager:
 
 
     def set_bbox(self, item: int | str, height: int, width: int):
-        if DPGType(dpg.get_item_type(item)) is DPGType.TEXT: return # У текста бл*ть есть ширина, которую нельзя изменять, великолепно нахуй
+        if DPGType(dpg.get_item_type(item)) is DPGType.TEXT: return # Text have width, but doesn't have height
         height_, width_ = self.get_bbox(item)
         if height_ != 0: dpg.set_item_height(item, height)
         if width_ != 0: dpg.set_item_width(item, width)

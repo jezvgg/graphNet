@@ -70,8 +70,8 @@ class NodeEditor:
                 with dpg.group(tag="editor_group", drop_callback=self.drop_callback):
 
                     # Используем редактор нодов из DearPyGUI
-                    with dpg.node_editor(tag="node_editor", callback=self.link_callback, \
-                                        delink_callback=self.delink_callback, *args, **kwargs):
+                    with dpg.node_editor(*args, tag="node_editor", callback=self.link_callback, \
+                                        delink_callback=self.delink_callback, **kwargs):
 
                         input_id = self.builder.build_input("node_editor")
                         self.__start_nodes.append(get_userdata(input_id))

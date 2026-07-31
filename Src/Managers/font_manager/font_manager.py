@@ -21,7 +21,7 @@ class FontManager:
 
     def __init__(self, path_config: Path):
         if not path_config.exists():
-            self.__logger.error(f"Не существует конфигационного файла {font_config}")
+            self.__logger.error(f"Не существует конфигационного файла {path_config}")
             return
 
         config = json.load(path_config.open())

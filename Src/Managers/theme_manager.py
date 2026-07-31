@@ -21,14 +21,14 @@ class ThemeManager:
     """
     __logger = lateinit(logging(), 'themes')
     __created_themes: dict[tuple[Themes], int | str] = {}
-    __item_themes: dict[int | str, set[Themes]] = {}
+    __item_themes: dict[int | str, set[Themes]] = defaultdict(set)
     __themes_categories = {
         "mvNode": dpg.mvThemeCat_Nodes,
         "mvPlot": dpg.mvThemeCat_Plots,
         "mvThem": dpg.mvThemeCat_Core,
         "mvStyl": dpg.mvThemeCat_Core
     }
-    config: MappingProxyType[str, MappingProxyType[str, MappingProxyType[str, Any]]] = {}
+    config: MappingProxyType[str, MappingProxyType[str, MappingProxyType[str, Any]]]
 
 
     def __init__(self, theme_path: Path):

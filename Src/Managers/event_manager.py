@@ -58,14 +58,15 @@ class EventManager:
 
 
     @add.register(ITEM_EVENTS)
-    def add_item_handler(self, event_type: EventType, 
+    def add_item_handler(self, event_type: EventType,
             item_id: str | int = None,
-            handler: Callable = None, 
+            handler: Callable = None,
             user_data = None):
         '''Регестрирует обработчик события объекта.'''
         if not (item_id and dpg.does_item_exist(item_id)):
             self.__logger.error(f"Неккоректный индитификатор ({item_id}) для наложения события.")
-        
+            return
+
         registry_id = self.__get_item_registry(item_id)
         self.__items_calls[item_id][event_type].append(handler)
         callback = self.__get_callback(self.__items_calls[item_id][event_type])
@@ -87,7 +88,7 @@ class EventManager:
 
     @add.register(GLOBAL_EVENTS)
     def add_global_event(self, event_type: EventType,
-            handler: Callable = None, 
+            handler: Callable = None,
             user_data = None):
         '''Регестрирует глобальные обработчики.'''
         global_registry = self.__get_global_registry()
@@ -102,7 +103,7 @@ class EventManager:
     def clear(self, item_id: str | int):
         """Удаляет все обработчики, привязанные к элементу."""
         if not dpg.does_item_exist(item_id):
-            self.__logger.warn(f"Попытка удаления обработчиков с ({item_id}), которого не существует")
+            self.__logger.warning(f"Попытка удаления обработчиков с ({item_id}), которого не существует")
             return
 
         dpg.configure_item(item_id, callback=None, user_data=None)
