@@ -182,6 +182,7 @@ class NodeEditor:
         self.delink(link.outgoing, link.incoming)
 
         dpg.delete_item(app_data)
+        clear_userdata(app_data)
 
 
     def delink(self, attr_outgoing: str | int, attr_incoming: str | int):
