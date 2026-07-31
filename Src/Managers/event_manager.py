@@ -61,7 +61,8 @@ class EventManager:
     def add_item_handler(self, event_type: EventType,
             item_id: str | int = None,
             handler: Callable = None,
-            user_data = None):
+            user_data = None,
+            **kwargs):
         '''Регестрирует обработчик события объекта.'''
         if not (item_id and dpg.does_item_exist(item_id)):
             self.__logger.error(f"Неккоректный индитификатор ({item_id}) для наложения события.")
@@ -70,7 +71,7 @@ class EventManager:
         registry_id = self.__get_item_registry(item_id)
         self.__items_calls[item_id][event_type].append(handler)
         callback = self.__get_callback(self.__items_calls[item_id][event_type])
-        event_type(parent=registry_id, callback=callback, user_data=user_data)
+        event_type(**kwargs, parent=registry_id, callback=callback, user_data=user_data)
 
         self.__logger.info(f"Обработчик '{event_type}' добавлен к элементу {item_id}")
         self.__logger.debug(f"Нынешние обработчики: {self.__items_calls[item_id][event_type]}")
@@ -89,12 +90,13 @@ class EventManager:
     @add.register(GLOBAL_EVENTS)
     def add_global_event(self, event_type: EventType,
             handler: Callable = None,
-            user_data = None):
+            user_data = None,
+            **kwargs):
         '''Регестрирует глобальные обработчики.'''
         global_registry = self.__get_global_registry()
         self.__global_calls[event_type].append(handler)
         callback = self.__get_callback(self.__global_calls[event_type])
-        event_type(parent=global_registry, callback=callback, user_data=user_data)
+        event_type(**kwargs, parent=global_registry, callback=callback, user_data=user_data)
 
         self.__logger.info(f"Глобальный обработчик '{event_type}' добавлен")
         self.__logger.debug(f"Нынешние обработчики: {self.__global_calls[event_type]}")
