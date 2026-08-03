@@ -70,9 +70,9 @@ class ProjectManager:
             return None
             
         for attr in children:
-            if DPGType(dpg.get_item_type(attr)) == DPGType.NodeAttribute:
-                if dpg.get_item_label(attr) == pin_label:
-                    return attr
+            if DPGType(dpg.get_item_type(attr)) == DPGType.NodeAttribute \
+                    and dpg.get_item_label(attr) == pin_label:
+                return attr
         return None
 
 
