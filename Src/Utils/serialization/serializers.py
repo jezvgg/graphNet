@@ -61,12 +61,15 @@ class ProjectEncoder(json.JSONEncoder):
     def default(self, obj: any) -> any:
         """
         Переопределенный стандартный метод JSON-энкодера.
+        Вызывается только для типов, которые стандартный энкодер не умеет обработать.
+        Использует LBYL (Look Before You Leap): явная проверка типа перед вызовом serialize.
+        Для нераспознанных типов вызывает super().default(), чтобы получить
+        правильное исключение вместо бесконечной рекурсии.
         """
-        try:
+        if isinstance(obj, AbstractNode):
             return self.serialize(obj)
-        except TypeError:
-            return super().default(obj)
-        
+        return super().default(obj)
+
 
 class GraphNetEncoder(json.JSONEncoder):
     def default(self, obj):
