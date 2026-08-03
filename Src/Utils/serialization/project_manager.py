@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TypedDict, List, Any
 import dearpygui.dearpygui as dpg
 
-from Src.Utils.serialization.serializers import serialize_project, GraphNetEncoder
+from Src.Utils.serialization.serializers import ProjectEncoder
 from Src.Utils.serialization.deserializers import deserialize_node
 from Src.Enums.dpg_types import DPGType
 from Src.node_builder import NodeBuilder
@@ -41,7 +41,7 @@ class ProjectManager:
         }
         
         with open(filepath, 'w', encoding="utf-8") as f:
-            json.dump(data, f, cls=GraphNetEncoder, indent=4)
+            json.dump(data, f, cls=ProjectEncoder, indent=4)
 
 
     def clear_board(self, recreate_input: bool = False):

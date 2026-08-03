@@ -36,12 +36,6 @@ def test_project_encoder_serialize_tuple():
     encoder = ProjectEncoder()
     assert encoder.serialize((1, "2", DummyEnum.B)) == [1, "2", "B"]
 
-def test_graph_net_encoder_to_dict():
-    class DummyObj:
-        def to_dict(self):
-            return {"key": "val"}
-    encoder = GraphNetEncoder()
-    assert encoder.default(DummyObj()) == {"key": "val"}
 
 def test_deserialize_value_afile():
     val = ["/path1", "/path2"]
