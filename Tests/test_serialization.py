@@ -4,8 +4,8 @@ import enum
 import json
 import dearpygui.dearpygui as dpg
 
-from Src.Utils.serialization.serializers import ProjectEncoder, GraphNetEncoder, serialize_project
-from Src.Utils.serialization.deserializers import deserialize_value, deserialize_parameter_value, deserialize_node
+from Src.Utils.serialization.serializers import ProjectEncoder
+from Src.Utils.serialization.deserializers import deserialize_parameter_value, deserialize_node
 from Src.Utils.serialization.project_manager import ProjectManager
 from Src.Nodes.abstract_node import AbstractNode
 from Src.Config.parameter import Parameter, AttrType
