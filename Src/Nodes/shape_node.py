@@ -4,11 +4,13 @@ from abc import abstractmethod
 import numpy as np
 import keras
 import librosa
+import time
 
 from Src.Enums import Themes, TextOutputMode, SplitMode
 from Src.Utils import Backfield
 from Src.Nodes import DataNode
-
+from Src.Utils.compile_window import CompileWindow
+import dearpygui.dearpygui as dpg
 
 class ShapeNode(DataNode):
     '''
@@ -20,9 +22,15 @@ class ShapeNode(DataNode):
     EXTENSIONS = {'.wav', '.mp3', '.flac', '.ogg', '.m4a'}
 
     def compile(self):
+        CompileWindow().push(f"Загрузка данных: {self.__class__.__name__}")
+        dpg.split_frame()
+        time.sleep(1)
         status = super().compile()
         if not status or len(self.OUTPUT.shape) < 2: return False
         self.shape = self.OUTPUT.shape[1:]
+        CompileWindow().push(f"Данные загружены, форма: {self.OUTPUT.shape}")
+        dpg.split_frame()
+        time.sleep(1)
         return status
 
 

@@ -3,7 +3,7 @@ from abc import ABC
 from typing import Callable
 import inspect
 import traceback
-
+import time
 import dearpygui.dearpygui as dpg
 
 from Src.Logging import logging, Logger
@@ -11,7 +11,7 @@ from Src.Config.parameter import Parameter, AttrType
 from Src.Enums import Themes
 from Src.Managers import ThemeManager
 from Src.Exceptions import NetworkException
-
+from Src.Utils.compile_window import CompileWindow
 
 
 
@@ -134,10 +134,10 @@ class AbstractNode(ABC):
             dpg.add_text(error_message)
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
+        CompileWindow().push(f"Поймана ошибка ({error_message_type}): {error_message}")
+        dpg.split_frame()
+        time.sleep(1)
         self.logger.info(traceback.format_exc())
-
-        if dpg.does_item_exist("fit_window"):
-                dpg.delete_item("fit_window")
 
     def default_theme(self):
         ThemeManager.apply_theme(self.node_tag,self.theme_name)

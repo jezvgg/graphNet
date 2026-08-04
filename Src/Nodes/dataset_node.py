@@ -3,13 +3,15 @@ import socket
 
 import keras.datasets
 import numpy as np
+import time
+import dearpygui.dearpygui as dpg
 
 from Src.Enums import Themes
 from Src.Nodes import ShapeNode
 from Src.Utils import Backfield
 from Src.Exceptions import NetworkException
 from Src.Logging import logging
-
+from Src.Utils.compile_window import CompileWindow
 
 @dataclass(init=True)
 class Dataset:
@@ -46,8 +48,14 @@ class DatasetNode(ShapeNode):
 
         dataset = getattr(keras.datasets, dataset)
         DatasetNode.logger.info(f"Датасет {dataset} начинает загрузку")
+        CompileWindow().push(f"Датасет {dataset} начинает загрузку")
+        dpg.split_frame()
+        time.sleep(1)
         (X_train, y_train), (X_test, y_test) = dataset.load_data()
         DatasetNode.logger.info(f"Датасет загрузился - ({X_train.shape}, {y_train.shape}), ({X_test.shape}, {y_test.shape})")
+        CompileWindow().push(f"Датасет загрузился - ({X_train.shape}, {y_train.shape}), ({X_test.shape}, {y_test.shape})")
+        dpg.split_frame()
+        time.sleep(1)
         return Dataset(X_train, y_train, X_test, y_test, X_train.shape)
 
 
