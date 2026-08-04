@@ -5,6 +5,8 @@ import traceback
 import dearpygui.dearpygui as dpg
 from keras import layers
 
+import time
+
 from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
@@ -141,18 +143,26 @@ class NodeBuilder:
         queue = start_nodes[:]
         self.logger.info("Началась сборка графа.")
         compile.push("Началась сборка графа.")
+        dpg.split_frame()
+        time.sleep(1)
         status = True
         
         while queue:
             self.logger.debug(f"Текущая очередь - {queue}")
             compile.push(f"Текущая очередь - {queue}")
+            dpg.split_frame()
+            time.sleep(1)
             current_node = queue.pop(0)
             self.logger.debug(f"Текущая нода - {current_node}")
             compile.push(f"Текущая нода - {current_node}")
+            dpg.split_frame()
+            time.sleep(1)
             if all([dpg.get_item_user_data(dpg.get_item_parent(value)) in visited \
                 for value in chain(*current_node.incoming.values())]):
                 self.logger.debug("Нода подошла.")
                 compile.push("Нода подошла.")
+                dpg.split_frame()
+                time.sleep(1)
                 try:
                     status = current_node.compile()
 
@@ -163,7 +173,6 @@ class NodeBuilder:
                 if not status: break
                 
                 self.logger.debug(f"resulted OUTPUT - {current_node.OUTPUT}")
-                compile.push(f"resulted OUTPUT - {current_node.OUTPUT}")
                 for attr_id in chain(*current_node.outgoing.values()):
                     neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
                     if neightbor not in queue:
@@ -187,4 +196,8 @@ class NodeBuilder:
         ])
         """
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
+        CompileWindow().push(f"Поймана ошибка ({error_message_type}): {error_message}")
+        dpg.split_frame()
+        time.sleep(1)
+
 
