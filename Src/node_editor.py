@@ -25,6 +25,7 @@ class NodeEditor:
     __stage_tag: str | int
     __group_tag: str | int
     __start_nodes: list[AbstractNode]
+    __selected_nodes: list[str | int]
 
 
     def __init__(self, *args, **kwargs):
@@ -39,6 +40,7 @@ class NodeEditor:
         self.__stage_tag = dpg.generate_uuid()
         self.__group_tag = dpg.generate_uuid()
         self.__start_nodes = []
+        self.__selected_nodes = []
 
         dpg.set_viewport_resize_callback(callback=self.on_viewport_resize_callback)
 
@@ -60,7 +62,17 @@ class NodeEditor:
 
                     dpg.add_button(label="Собрать модель", 
                                    callback = lambda: self.builder.compile_graph(self.__start_nodes))
-        
+
+        with dpg.handler_registry():
+            dpg.add_mouse_click_handler(
+                button=dpg.mvMouseButton_Left,
+                callback=self._sync_node_input_order,
+            )
+            dpg.add_mouse_release_handler(
+                button=dpg.mvMouseButton_Left,
+                callback=self._sync_node_input_order,
+            )
+
         self.on_viewport_resize_callback()
 
 
@@ -70,6 +82,48 @@ class NodeEditor:
         '''
         if dpg.does_item_exist('node_editor'):
             dpg.configure_item('node_editor',height=dpg.get_viewport_height()*0.9)
+
+
+    def __promote_node_for_input(self, node_id: str | int):
+        nodes = dpg.get_item_children("node_editor", slot=1) or []
+        new_order = [node_id] + [node for node in nodes if node != node_id]
+
+        if new_order != nodes:
+            dpg.reorder_items("node_editor", 1, new_order)
+
+
+    def _sync_node_input_order(self, sender=None, app_data=None):
+        if not dpg.does_item_exist("node_editor"):
+            return
+
+        if not dpg.is_item_hovered("node_editor"):
+            return
+
+        nodes = dpg.get_item_children("node_editor", slot=1) or []
+        selected = dpg.get_selected_nodes("node_editor")
+        added = [
+            node for node in selected
+            if node not in self.__selected_nodes
+        ]
+
+        if len(added) == 1:
+            front = added
+        elif len(added) > 1:
+            selected_set = set(selected)
+            front = [node for node in nodes if node in selected_set]
+        else:
+            self.__selected_nodes = selected
+            return
+
+        front_set = set(front)
+        new_order = front + [
+            node for node in nodes if node not in front_set
+        ]
+
+        if new_order != nodes:
+            dpg.reorder_items("node_editor", 1, new_order)
+
+        self.__selected_nodes = selected
 
 
     def drop_callback(self, sender: str | int, app_data: str | int) -> str | int:
@@ -100,6 +154,7 @@ class NodeEditor:
         node_data: NodeAnnotation = dpg.get_item_user_data(app_data)
         node_id = self.builder.build_node(node_data, parent="node_editor")
         dpg.set_item_pos(node_id, pos)
+        self.__promote_node_for_input(node_id)
 
         # Мы только создали узел и у него ещё нет связей
         self.__start_nodes.append(dpg.get_item_user_data(node_id))
