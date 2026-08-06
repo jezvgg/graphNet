@@ -32,17 +32,6 @@ class CompileWindow():
         if len(self.log_items) > self.max_lines:
             dpg.delete_item(self.log_items.pop(0))
 
-"""
-    def push_error(self, text):
-        children = dpg.get_item_children(self.log_group, slot=1)
-        first_child = children[0] if children else None
-        item = dpg.add_text(text, wrap=460, parent=self.log_group,
-                            color=[239, 83, 80, 255])
-        if first_child:
-            dpg.move_item(item, parent=self.log_group, before=first_child)
-        self.log_items.append(item)
-        self.pop()
-"""
 
 
 
