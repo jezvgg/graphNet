@@ -22,13 +22,13 @@ class ShapeNode(DataNode):
     EXTENSIONS = {'.wav', '.mp3', '.flac', '.ogg', '.m4a'}
 
     def compile(self):
-        CompileWindow().push(f"Загрузка данных: {self.__class__.__name__}")
+        CompileWindow().push(f"Загрузка данных")
         dpg.split_frame()
         time.sleep(1)
         status = super().compile()
         if not status or len(self.OUTPUT.shape) < 2: return False
         self.shape = self.OUTPUT.shape[1:]
-        CompileWindow().push(f"Данные загружены, форма: {self.OUTPUT.shape}")
+        CompileWindow().push(f"Данные загружены: {self.OUTPUT.shape[0]} строк, {self.OUTPUT.shape[1]} столбцов.")
         dpg.split_frame()
         time.sleep(1)
         return status

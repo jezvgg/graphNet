@@ -142,19 +142,20 @@ class NodeBuilder:
         visited = set()
         queue = start_nodes[:]
         self.logger.info("Началась сборка графа.")
-        compile.push("Началась сборка графа.")
+        compile.push("Началась сборка модели.")
         dpg.split_frame()
         time.sleep(1)
         status = True
         
         while queue:
             self.logger.debug(f"Текущая очередь - {queue}")
-            compile.push(f"Текущая очередь - {queue}")
+            names = [node.__class__.__name__ for node in queue]
+            compile.push(f"Ждут своей очереди: {', '.join(names)}")
             dpg.split_frame()
             time.sleep(1)
             current_node = queue.pop(0)
             self.logger.debug(f"Текущая нода - {current_node}")
-            compile.push(f"Текущая нода - {current_node}")
+            compile.push(f"Собирается нода: {current_node.__class__.__name__}.")
             dpg.split_frame()
             time.sleep(1)
             if all([dpg.get_item_user_data(dpg.get_item_parent(value)) in visited \
@@ -180,9 +181,9 @@ class NodeBuilder:
 
                 visited.add(current_node)
         if status:
-            compile.push("Компиляция прошла успешно!")
+            compile.push("Модель собралась успешно.")
         else:
-            compile.push("Компиляция прервана из-за ошибки")
+            compile.push("При сборке возникла ошибка.")
         return visited
     
 
@@ -196,7 +197,7 @@ class NodeBuilder:
         ])
         """
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
-        CompileWindow().push(f"Поймана ошибка ({error_message_type}): {error_message}")
+        CompileWindow().push(f"Ошибка: {error_message}.", False)
         dpg.split_frame()
         time.sleep(1)
 

@@ -134,7 +134,7 @@ class AbstractNode(ABC):
             dpg.add_text(error_message)
 
         self.logger.warning(f"Поймана ошибка ({error_message_type}): {error_message}")
-        CompileWindow().push(f"Поймана ошибка ({error_message_type}): {error_message}")
+        CompileWindow().push(f"Ошибка: {error_message}", False)
         dpg.split_frame()
         time.sleep(1)
         self.logger.info(traceback.format_exc())
