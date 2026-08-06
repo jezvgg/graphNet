@@ -8,7 +8,7 @@ from keras import layers
 from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
-from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
+from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single, AFigure
 from Src.Config.Annotations.annotation import Annotation
 from Src.Managers import ThemeManager
 from Src.Enums import Themes
@@ -78,16 +78,12 @@ class NodeBuilder:
 
         params = [(label, param) for label, param in node_data.annotations.items() if label != 'INPUT']
 
-        items_count = len(params)
-        if node_data.input: items_count += 1
-        if node_data.output: items_count += 1
-        calc_height = 80 + (items_count * 26)
-
         with dpg.child_window(
             tag=card_id,
             parent=parent,
             width=self.card_width,
-            height=calc_height,
+            auto_resize_y=True,
+            always_auto_resize=True,
             no_scrollbar=True,
             border=True,
             user_data=node_data
@@ -145,9 +141,13 @@ class NodeBuilder:
                         dpg.add_text(node_data.docs, wrap=self.card_width - 30)
 
                     for label, param in params:
-                        parameter = param.hint.build(label=label, parent=body_group, width=Annotation.BASE_WIDTH, enabled=False)
-                        if parameter:
-                            ThemeManager.apply_theme(parameter, Themes.DEFAULT)
+                        hint = param.hint
+                        if isinstance(hint, AFigure):
+                            dpg.add_text(f"[figure] {label}")
+                        else:
+                            parameter = hint.build(label=label, parent=body_group, width=Annotation.BASE_WIDTH, enabled=False)
+                            if parameter:
+                                ThemeManager.apply_theme(parameter, Themes.DEFAULT)
 
                     delete_button = dpg.add_button(label="Delete")
                     ThemeManager.apply_theme(delete_button, Themes.DEFAULT)
