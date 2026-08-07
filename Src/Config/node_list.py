@@ -23,7 +23,7 @@ node_list = {
                 node_type = ShapeNode,
                 logic = ShapeNode.open_table_data,
                 annotations = {
-                        "files": Parameter(AttrType.INPUT, AString),
+                        "files": Parameter(AttrType.INPUT, AFile),
                         "delimiter": Parameter(AttrType.INPUT, AEnum[Delimiters]),
                         "skip_header": Parameter(AttrType.INPUT, ABoolean),
                         "skip_footer": Parameter(AttrType.INPUT, ABoolean),
@@ -39,7 +39,7 @@ node_list = {
                 node_type= ShapeNode,
                 logic = ShapeNode.open_image_data,
                 annotations = {
-                        "files": Parameter(AttrType.INPUT, AString),
+                        "files": Parameter(AttrType.INPUT, AFile),
                         "color_mode": Parameter(AttrType.INPUT, AEnum[ColorMode]),
                         "shape": Parameter(AttrType.OUTPUT, ASequence[AInteger, AInteger, AInteger])
                         },
