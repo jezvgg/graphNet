@@ -27,17 +27,20 @@ class ShapeNode(DataNode):
 
 
     @staticmethod
-    def open_table_data(files: str, *args, **kwargs):
-        if not files: 
+    def open_table_data(files, *args, **kwargs):
+        if not files:
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
-        
+        if isinstance(files, list):
+            files = str(files[0])
         return np.genfromtxt(files, *args, **kwargs, ndmin=2)
 
     
     @staticmethod
-    def open_image_data(files: str, *args, **kwargs):
-        if not files: 
+    def open_image_data(files, *args, **kwargs):
+        if not files:
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
+        if isinstance(files, list):
+            files = str(files[0])
 
         images = []
         for image_path in sorted(Path(files).iterdir()):
@@ -49,9 +52,11 @@ class ShapeNode(DataNode):
     
     
     @staticmethod
-    def open_audio_data(files: str, NFFT: int = 1024, noverlap: int = 512, max_duration_sec: float = 5.0,sr: int = None, mono: bool = True):
+    def open_audio_data(files, NFFT: int = 1024, noverlap: int = 512, max_duration_sec: float = 5.0,sr: int = None, mono: bool = True):
         if not files:
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
+        if isinstance(files, list):
+            files = str(files[0])
         
         audios = []
         
@@ -77,9 +82,11 @@ class ShapeNode(DataNode):
     
 
     @staticmethod
-    def open_text_data(files: str, output_mode: TextOutputMode = TextOutputMode.INT, max_tokens: int = 20000,split: SplitMode = SplitMode.WHITESPACE):
-        if not files: 
+    def open_text_data(files, output_mode: TextOutputMode = TextOutputMode.INT, max_tokens: int = 20000,split: SplitMode = SplitMode.WHITESPACE):
+        if not files:
             raise AttributeError("Вы не выбрали данные, которые нужно открыть!")
+        if isinstance(files, list):
+            files = str(files[0])
         
         texts = []
         for text_path in sorted(Path(files).iterdir()):
