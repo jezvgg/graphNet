@@ -12,10 +12,11 @@ class AFile(Annotation):
 
     @staticmethod
     def build(*args, **kwargs):
+        label = kwargs.pop('label', None)
         kwargs = Annotation.check_kwargs(dpg.node_attribute, kwargs)
         group_id = dpg.generate_uuid()
 
-        with dpg.group(*args, **kwargs, tag=group_id, user_data=None) as item:
+        with dpg.group(*args, **kwargs, label=label, tag=group_id, user_data=None) as item:
             dpg.add_button(
                 label="Choose file...",
                 callback=lambda: open_file_dialog(

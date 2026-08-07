@@ -50,8 +50,8 @@ def test_compilation(node_editor):
     node_editor.link_callback("node_editor", (get_attr("OUTPUT", dataX), get_attr("x", predict)))
     node_editor.link_callback("node_editor", (get_attr("OUTPUT", predict), get_attr("X", save)))
 
-    assert AString.set(dpg.get_item_children(get_attr("files", dataX), slot=1)[0], "./Tests/X.txt")
-    assert AString.set(dpg.get_item_children(get_attr("files", dataY), slot=1)[0], "./Tests/y.txt")
+    assert AFile.set(dpg.get_item_children(get_attr("files", dataX), slot=1)[0], [Path("./Tests/X.txt")])
+    assert AFile.set(dpg.get_item_children(get_attr("files", dataY), slot=1)[0], [Path("./Tests/y.txt")])
     assert AInteger.set(dpg.get_item_children(get_attr("num_classes", categorical), slot=1)[0], 2)
     assert AInteger.set(dpg.get_item_children(get_attr("units", dense), slot=1)[0], 2)
     assert AEnum[Activations].set(dpg.get_item_children(get_attr("activation", dense), slot=1)[0], Activations.SOFTMAX)
