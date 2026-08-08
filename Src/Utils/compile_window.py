@@ -9,7 +9,8 @@ class CompileWindow():
         self.log_group = None
 
     def create_window(self): #создание окна
-        with dpg.window(label="Компиляция графа", modal=True, no_resize=True, no_move=True, no_scrollbar=True,width=500,height=300, tag="compile_window") as window:
+        with dpg.window(label="Компиляция графа", modal=True, no_resize=True, no_move=True, no_scrollbar=True,width=500,height=350, tag="compile_window") as window:
+            self.progress = dpg.add_progress_bar(width=480, default_value=0)
             with dpg.group() as self.log_group:
                 pass
             dpg.add_button(label="Закрыть", callback=lambda: dpg.configure_item(window, show=False))

@@ -3,9 +3,10 @@ from dataclasses import dataclass
 import keras
 import dearpygui.dearpygui as dpg
 import numpy as np
-
+from keras.callbacks import LambdaCallback
 from Src.Enums import Themes
 from Src.Nodes import DataNode
+from Src.Utils.compile_window import CompileWindow
 
 class FitNode(DataNode):
     theme_name: Themes = Themes.FIT
@@ -33,9 +34,14 @@ class FitNode(DataNode):
         if kwargs['y'].dtype == np.object_ or np.isnan(kwargs['y']).any():
             raise AttributeError('Данные содержат неверный формат Y!')
 
-        history = model.fit(**kwargs, verbose=False)
+        epochs = kwargs['epochs']
+        window = CompileWindow()
+        window.push("Идет процесс обучения.")
+        def on_epoch_end(epoch, logs):
+            dpg.set_value(window.progress, (epoch + 1) / epochs)
+            dpg.split_frame()
+        history = model.fit(**kwargs, verbose=False,callbacks=[LambdaCallback(on_epoch_end=on_epoch_end)])
 
         return model
-    
 
 
