@@ -22,8 +22,7 @@ PYINSTALLER_OPTS = \
 # ; - разделитель
 # . - означает корень собранного приложения
 ADD_DATA = \
-	--add-data "notomono-regular.ttf;." \
-	--add-data "Src/Logging/logger_config.json;Src/Logging"
+	--add-data "Assets;Assets"
 
 # Команда по умолчанию, выполняется при вызове "make" без аргументов
 all: build
