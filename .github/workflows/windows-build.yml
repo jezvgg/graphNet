@@ -1,0 +1,92 @@
+name: Windows application
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened, closed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.action != 'closed' ||
+      (github.event.pull_request.merged == true &&
+       github.event.pull_request.base.ref == 'main' &&
+       github.event.pull_request.head.ref == 'develop' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v4
+      - name: Install locked dependencies
+        run: uv sync --frozen --group build
+      - name: Run regression tests
+        run: uv run --frozen pytest Tests/ -v
+      - name: Build application
+        run: uv run --frozen --group build python scripts/build_exe.py
+      - name: Smoke test executable outside checkout
+        shell: pwsh
+        env:
+          GRAPHNET_LOG_DIR: ${{ runner.temp }}/graphnet-logs
+        run: |
+          $executable = (Resolve-Path 'dist/GraphNet/GraphNet.exe').Path
+          $smokeDirectory = Join-Path $env:RUNNER_TEMP 'GraphNet smoke Кириллица'
+          New-Item -ItemType Directory -Force $smokeDirectory | Out-Null
+          $process = Start-Process -FilePath $executable -ArgumentList '--smoke-test' -WorkingDirectory $smokeDirectory -PassThru
+          if (-not $process.WaitForExit(120000)) {
+            $process.Kill()
+            throw 'GraphNet smoke test timed out'
+          }
+          if ($process.ExitCode -ne 0) { throw "GraphNet exited with $($process.ExitCode)" }
+          if (-not (Test-Path "$env:GRAPHNET_LOG_DIR/*.log")) { throw 'GraphNet did not create its log' }
+      - name: Zip application and dependencies
+        shell: pwsh
+        run: Compress-Archive -Path dist/GraphNet -DestinationPath dist/GraphNet-Windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GraphNet-Windows-x64
+          path: dist/GraphNet-Windows-x64.zip
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.ref == 'develop' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: GraphNet-Windows-x64
+          path: release
+      - name: Publish release for the merged revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        shell: bash
+        run: |
+          tag="build-${RELEASE_SHA}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" release/GraphNet-Windows-x64.zip --clobber
+          else
+            gh release create "$tag" release/GraphNet-Windows-x64.zip \
+              --target "$RELEASE_SHA" --title "GraphNet Windows ${RELEASE_SHA:0:7}" \
+              --notes "Automated Windows build after merging develop into main. Extract the complete archive and run GraphNet/GraphNet.exe."
+          fi

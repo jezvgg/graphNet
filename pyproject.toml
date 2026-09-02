@@ -19,6 +19,7 @@ pythonpath = ["."]
 testpaths = ["Tests"]
 
 [dependency-groups]
+build = ["pyinstaller>=6.20,<7"]
 dev = [
     "coverage>=7.14.2",
     "pytest>=9.1.1",
@@ -59,4 +60,4 @@ packages = ["Src"]
 "Assets/logger_stream.json" = "Src/Assets/logger_stream.json"
 
 [tool.hatch.build.targets.sdist]
-include = ["/Src", "/Assets/*.json", "/Assets/*.ttf", "/Tests", "/main.py", "/README.md", "/pyproject.toml", "/uv.lock", "/LICENSE*"]
+include = ["/scripts", "/Src", "/Assets/*.json", "/Assets/*.ttf", "/Tests", "/main.py", "/README.md", "/pyproject.toml", "/uv.lock", "/LICENSE*"]

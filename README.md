@@ -138,10 +138,10 @@ We are actively looking for passionate developers to join the **graphNet** core 
 
 ## 🛠️ Building from Source (.EXE compilation)
 
-If you want to compile your own `.exe` file after making changes to the source code, you can use the configured Makefile:
+If you want to compile your own `.exe` file after making changes to the source code, run this command on Windows with Python 3.12:
 
 ```bash
-make build
+uv run --frozen --group build python scripts/build_exe.py
 ```
 *The compiled executable will be placed in the `dist/` directory with all assets and configs embedded.*
 
@@ -278,9 +278,24 @@ uv run coverage report
 
 ## 🛠️ Сборка исполняемого файла (.EXE из исходников)
 
-Если вы внесли изменения в код и хотите собрать собственный `.exe` файл, воспользуйтесь настроенным `Makefile`:
+Если вы внесли изменения в код и хотите собрать собственный `.exe` файл, выполните на Windows с Python 3.12:
 
 ```bash
-make build
+uv run --frozen --group build python scripts/build_exe.py
 ```
 *Собранное приложение со всеми ресурсами и конфигурациями логгера будет сохранено в папку `dist/`.*
+
+## Windows build artifacts / Сборки Windows
+
+The **Windows application** workflow checks PRs and builds after a same-repository
+`develop` → `main` merge. Only that merge publishes a release; manual runs and PR
+checks upload an artifact. Linux tests and the coverage gate remain enabled.
+Download `GraphNet-Windows-x64.zip`, extract the **whole** archive and start
+`GraphNet/GraphNet.exe`. Keep `_internal` beside the executable. Building on macOS
+or Linux produces a native application, not a Windows EXE.
+
+Workflow **Windows application** проверяет PR и собирает приложение после слияния
+`develop` → `main` в этом репозитории. Только это слияние публикует релиз;
+ручной запуск и проверки PR сохраняют artifact. Linux-тесты и порог покрытия сохранены.
+Распакуйте **весь** архив `GraphNet-Windows-x64.zip`, запустите
+`GraphNet/GraphNet.exe` и оставьте `_internal` рядом с ним. Для EXE сборка нужна на Windows.
