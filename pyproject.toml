@@ -1,7 +1,7 @@
 [project]
-name = "graphnet"
+name = "graphnet-constructor"
 version = "0.1.0"
-description = "Add your description here"
+description = "Visual neural network constructor built with Dear PyGui and Keras"
 readme = "README.md"
 requires-python = "~=3.12.0"
 dependencies = [
@@ -35,3 +35,28 @@ exclude_also = [
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
 ]
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+graphnet = "Src.application:main"
+
+[project.urls]
+Homepage = "https://github.com/graphicalAI/graphNet"
+Issues = "https://github.com/graphicalAI/graphNet/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["Src"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"Assets/notomono-regular.ttf" = "Src/Assets/notomono-regular.ttf"
+"Assets/themes.json" = "Src/Assets/themes.json"
+"Assets/logger_config.json" = "Src/Assets/logger_config.json"
+"Assets/logger_debug.json" = "Src/Assets/logger_debug.json"
+"Assets/logger_group.json" = "Src/Assets/logger_group.json"
+"Assets/logger_stream.json" = "Src/Assets/logger_stream.json"
+
+[tool.hatch.build.targets.sdist]
+include = ["/Src", "/Assets/*.json", "/Assets/*.ttf", "/Tests", "/main.py", "/README.md", "/pyproject.toml", "/uv.lock", "/LICENSE*"]

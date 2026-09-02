@@ -77,6 +77,30 @@ uv run main.py
 
 ---
 
+## Install with pip (Python 3.12)
+
+Install a local checkout:
+
+```bash
+python -m pip install .
+graphnet
+```
+
+Once this change is merged into `develop`, install directly from GitHub:
+
+```bash
+python -m pip install "git+https://github.com/graphicalAI/graphNet.git@develop"
+graphnet
+```
+
+Git is required for installation from GitHub. A built wheel can also be installed
+with `python -m pip install path/to/graphnet_constructor-0.1.0-py3-none-any.whl`.
+The command works outside the source directory. Fonts, themes and logging
+configuration are included in the wheel. Logs are written to `~/.graphnet/logs`;
+set `GRAPHNET_LOG_DIR` to choose another directory. A graphical desktop is required.
+`graphnet --smoke-test` starts the editor and exits after three rendered frames.
+Build distributable archives with `uv build`.
+
 ## 🧪 Testing & Coverage
 
 The project uses **pytest** for automated testing. Thanks to the configuration in `pyproject.toml`, you do not need to manually configure `PYTHONPATH` or test directories.
@@ -192,6 +216,30 @@ uv run main.py
 *`uv` автоматически создаст виртуальное окружение, загрузит необходимую версию Python (>=3.12.0), установит зависимости (Dear PyGui, NumPy, Pillow, PyDot, TensorFlow) и запустит проект.*
 
 ---
+
+## Установка через pip (Python 3.12)
+
+Установите локальный checkout:
+
+```bash
+python -m pip install .
+graphnet
+```
+
+После слияния этого изменения в `develop` доступна установка прямо из GitHub:
+
+```bash
+python -m pip install "git+https://github.com/graphicalAI/graphNet.git@develop"
+graphnet
+```
+
+Для установки из GitHub нужен Git. Готовый wheel можно установить командой
+`python -m pip install path/to/graphnet_constructor-0.1.0-py3-none-any.whl`.
+Запуск не зависит от текущей папки. Шрифты, темы и конфигурация логгера входят
+в wheel. Логи сохраняются в `~/.graphnet/logs`; переменная `GRAPHNET_LOG_DIR`
+позволяет выбрать другую папку. Нужен графический рабочий стол.
+`graphnet --smoke-test` запускает редактор и завершает его после трёх кадров.
+Архивы собираются командой `uv build`.
 
 ## 🧪 Тестирование и покрытие (Coverage)
 

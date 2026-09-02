@@ -222,9 +222,9 @@ wheels = [
 ]
 
 [[package]]
-name = "graphnet"
+name = "graphnet-constructor"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "dearpygui" },
     { name = "librosa" },
