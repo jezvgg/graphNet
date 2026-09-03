@@ -77,6 +77,30 @@ uv run main.py
 
 ---
 
+## Install with pip (Python 3.12)
+
+Install a local checkout:
+
+```bash
+python -m pip install .
+graphnet
+```
+
+Once this change is merged into `develop`, install directly from GitHub:
+
+```bash
+python -m pip install "git+https://github.com/graphicalAI/graphNet.git@develop"
+graphnet
+```
+
+Git is required for installation from GitHub. A built wheel can also be installed
+with `python -m pip install path/to/graphnet_constructor-0.1.0-py3-none-any.whl`.
+The command works outside the source directory. Fonts, themes and logging
+configuration are included in the wheel. Logs are written to `~/.graphnet/logs`;
+set `GRAPHNET_LOG_DIR` to choose another directory. A graphical desktop is required.
+`graphnet --smoke-test` starts the editor and exits after three rendered frames.
+Build distributable archives with `uv build`.
+
 ## 🧪 Testing & Coverage
 
 The project uses **pytest** for automated testing. Thanks to the configuration in `pyproject.toml`, you do not need to manually configure `PYTHONPATH` or test directories.
@@ -114,10 +138,10 @@ We are actively looking for passionate developers to join the **graphNet** core 
 
 ## 🛠️ Building from Source (.EXE compilation)
 
-If you want to compile your own `.exe` file after making changes to the source code, you can use the configured Makefile:
+If you want to compile your own `.exe` file after making changes to the source code, run this command on Windows with Python 3.12:
 
 ```bash
-make build
+uv run --frozen --group build python scripts/build_exe.py
 ```
 *The compiled executable will be placed in the `dist/` directory with all assets and configs embedded.*
 
@@ -193,6 +217,30 @@ uv run main.py
 
 ---
 
+## Установка через pip (Python 3.12)
+
+Установите локальный checkout:
+
+```bash
+python -m pip install .
+graphnet
+```
+
+После слияния этого изменения в `develop` доступна установка прямо из GitHub:
+
+```bash
+python -m pip install "git+https://github.com/graphicalAI/graphNet.git@develop"
+graphnet
+```
+
+Для установки из GitHub нужен Git. Готовый wheel можно установить командой
+`python -m pip install path/to/graphnet_constructor-0.1.0-py3-none-any.whl`.
+Запуск не зависит от текущей папки. Шрифты, темы и конфигурация логгера входят
+в wheel. Логи сохраняются в `~/.graphnet/logs`; переменная `GRAPHNET_LOG_DIR`
+позволяет выбрать другую папку. Нужен графический рабочий стол.
+`graphnet --smoke-test` запускает редактор и завершает его после трёх кадров.
+Архивы собираются командой `uv build`.
+
 ## 🧪 Тестирование и покрытие (Coverage)
 
 Для автоматического тестирования в проекте используется фреймворк **pytest**. Благодаря встроенной конфигурации в `pyproject.toml`, вам больше не нужно вручную настраивать переменную `PYTHONPATH` и пути к тестам перед запуском.
@@ -230,9 +278,24 @@ uv run coverage report
 
 ## 🛠️ Сборка исполняемого файла (.EXE из исходников)
 
-Если вы внесли изменения в код и хотите собрать собственный `.exe` файл, воспользуйтесь настроенным `Makefile`:
+Если вы внесли изменения в код и хотите собрать собственный `.exe` файл, выполните на Windows с Python 3.12:
 
 ```bash
-make build
+uv run --frozen --group build python scripts/build_exe.py
 ```
 *Собранное приложение со всеми ресурсами и конфигурациями логгера будет сохранено в папку `dist/`.*
+
+## Windows build artifacts / Сборки Windows
+
+The **Windows application** workflow checks PRs and builds after a same-repository
+`develop` → `main` merge. Only that merge publishes a release; manual runs and PR
+checks upload an artifact. Linux tests and the coverage gate remain enabled.
+Download `GraphNet-Windows-x64.zip`, extract the **whole** archive and start
+`GraphNet/GraphNet.exe`. Keep `_internal` beside the executable. Building on macOS
+or Linux produces a native application, not a Windows EXE.
+
+Workflow **Windows application** проверяет PR и собирает приложение после слияния
+`develop` → `main` в этом репозитории. Только это слияние публикует релиз;
+ручной запуск и проверки PR сохраняют artifact. Linux-тесты и порог покрытия сохранены.
+Распакуйте **весь** архив `GraphNet-Windows-x64.zip`, запустите
+`GraphNet/GraphNet.exe` и оставьте `_internal` рядом с ним. Для EXE сборка нужна на Windows.
