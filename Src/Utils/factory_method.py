@@ -1,7 +1,6 @@
 from functools import wraps, update_wrapper, partial
-from typing import Callable, Hashable, Iterable, get_args
+from typing import Callable, Hashable, Iterable
 from collections import defaultdict
-from functools import singledispatchmethod
 
 
 
@@ -22,7 +21,7 @@ class factorymethod:
     def __call__(self, *args, **kwargs):
         return self.registry[args[1]](*args, **kwargs)
 
-    
+
     def __get__(self, instance, owner):
         if instance is None: return self
 
@@ -34,7 +33,7 @@ class factorymethod:
 
     def register(self, arguments: Iterable[Hashable] | Hashable):
         if not isinstance(arguments, Iterable): arguments = [arguments]
-        
+
         def decorator(func: Callable):
 
             for argument in arguments:

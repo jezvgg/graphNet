@@ -40,8 +40,10 @@ def clear_userdata(id: int | str, children: bool = True):
     '''
     Очищает кэш userdata
     '''
+
     items = {id}
-    if children: items |= get_children(id)
+    if children and dpg.does_item_exist(id):
+        items |= get_children(id)
 
     for item in items:
         __cache.pop(item, None)
