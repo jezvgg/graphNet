@@ -233,12 +233,11 @@ python -m pip install "git+https://github.com/graphicalAI/graphNet.git@develop"
 graphnet
 ```
 
-Для установки из GitHub нужен Git. Готовый wheel можно установить командой
+Готовый wheel можно установить командой
 `python -m pip install path/to/graphnet_constructor-0.1.0-py3-none-any.whl`.
-Запуск не зависит от текущей папки. Шрифты, темы и конфигурация логгера входят
-в wheel. Логи сохраняются в `~/.graphnet/logs`; переменная `GRAPHNET_LOG_DIR`
-позволяет выбрать другую папку. Нужен графический рабочий стол.
-`graphnet --smoke-test` запускает редактор и завершает его после трёх кадров.
+Логи сохраняются в `~/.graphnet/logs`; переменная `GRAPHNET_LOG_DIR`
+позволяет выбрать другую папку.
+`graphnet --smoke-test` для smoke-тестов.
 Архивы собираются командой `uv build`.
 
 ## 🧪 Тестирование и покрытие (Coverage)
