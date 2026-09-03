@@ -32,3 +32,18 @@ jobs:
 
       - name: Coverage report
         run: uv run coverage report -m --fail-under=80
+
+      - name: Build wheel and source distribution
+        run: uv build
+
+      - name: Install wheel in a clean environment
+        run: |
+          uv venv "$RUNNER_TEMP/graphnet-wheel" --python 3.12
+          uv pip install --python "$RUNNER_TEMP/graphnet-wheel/bin/python" dist/*.whl
+
+      - name: Smoke test installed application outside checkout
+        env:
+          GRAPHNET_LOG_DIR: ${{ runner.temp }}/graphnet-logs
+        run: |
+          cd "$RUNNER_TEMP"
+          xvfb-run -a "$RUNNER_TEMP/graphnet-wheel/bin/graphnet" --smoke-test

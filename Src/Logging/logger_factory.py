@@ -31,7 +31,8 @@ class Logger_factory:
         path = Logger_factory.BASE_PATH / path
         config = {}
         if path.exists():
-            config = json.load(path.open())
+            with path.open(encoding="utf-8") as config_file:
+                config = json.load(config_file)
         elif not exist_ok: 
             raise FileExistsError(f"Обязательный конфигурационный файл отсутствует: {path}")
 
