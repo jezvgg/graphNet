@@ -5,8 +5,6 @@ import sys
 from pathlib import Path
 import json
 
-import dearpygui.dearpygui as dpg
-
 from Src.Utils import singleton
 
 
@@ -32,7 +30,7 @@ class Logger_factory:
         config = {}
         if path.exists():
             config = json.load(path.open())
-        elif not exist_ok: 
+        elif not exist_ok:
             raise FileExistsError(f"Обязательный конфигурационный файл отсутствует: {path}")
 
         return config
@@ -45,7 +43,7 @@ class Logger_factory:
         Args:
             config: dict - конфигурация для создания логгеров.
         '''
-        if 'filename' in config: 
+        if 'filename' in config:
             config['filename'] = config['filename'].format(curdata=datetime.now().strftime(config['datefmt']))
 
         Path(config['filename']).parent.mkdir(exist_ok=True)
@@ -65,7 +63,7 @@ class Logger_factory:
         Returns:
             Logger - экземпляр логировщика
         '''
-        if logger_name not in Logger_factory._loggers: 
+        if logger_name not in Logger_factory._loggers:
             logger = logging.Logger(logger_name)
             Logger_factory._loggers[logger_name] = logger
 
@@ -74,12 +72,12 @@ class Logger_factory:
         if not config: return logger
 
         config = self.config | config
-            
+
         logger.propagate = False
         handler = None
         if 'filename' in config and config['filename'] == 'stream':
             handler = logging.StreamHandler(sys.stdout)
-        elif 'filename' in config: 
+        elif 'filename' in config:
             handler = logging.FileHandler(config['filename'].format(curdata=f"{logger_name}_{datetime.now().strftime(config['datefmt'])}"))
 
         if 'format' in config and handler:
@@ -87,7 +85,7 @@ class Logger_factory:
 
         if handler: logger.addHandler(handler)
 
-        if 'level' in config: 
+        if 'level' in config:
             logger.setLevel(config['level'])
-            
-        return logger        
+
+        return logger

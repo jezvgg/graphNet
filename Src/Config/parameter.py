@@ -4,7 +4,7 @@ import dearpygui.dearpygui as dpg
 
 from Src.Enums import AttrType, DPGType
 from Src.Config.Annotations import Annotation, ANode
-from Src.Utils import Backfield
+from Src.Utils import Backfield, get_userdata
 
 
 
@@ -30,27 +30,26 @@ class Parameter:
             kwargs['width'] = Annotation.BASE_WIDTH
 
             if (isinstance(self.hint, ANode) or self.hint is ANode) and \
-                attribute_type == dpg.mvNode_Attr_Output: 
+                attribute_type == dpg.mvNode_Attr_Output:
                 kwargs['attribute_type'] = dpg.mvNode_Attr_Output
             if self.attr_type != AttrType.INPUT: kwargs['enabled'] = False
 
             input_id = self.hint.build(*args, **kwargs)
 
-        if isinstance(self.backfield, Backfield): 
-            self.backfield.bind(dpg.get_item_user_data(parent), lambda x: self.hint.set(input_id, x)) 
+        if isinstance(self.backfield, Backfield):
+            self.backfield.bind(get_userdata(parent), lambda x: self.hint.set(input_id, x))
 
         if self.default: self.set_value(attr, self.default)
 
         return attr
-    
+
 
     def get_value(self, argument: int | str):
         field = dpg.get_item_children(argument, slot=1)[0]
         value = self.hint.get(field)
         return value
-    
+
 
     def set_value(self, argument: int | str, value) -> bool:
         field = dpg.get_item_children(argument, slot=1)[0]
         return self.hint.set(field, value)
-    

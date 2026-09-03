@@ -32,8 +32,11 @@ def env(dpg_session):
     '''
     Настройка и очистка окружения
     '''
+    from Src.Managers.font_manager.font_manager import FontManager
+    from pathlib import Path
+    FontManager(Path("Assets/fonts_config.json"))
+    manager = ThemeManager("Tests/themes.json")
     window = dpg.add_window(tag="Tests")
-    ThemeManager.load_themes("Tests/themes.json")
 
     yield window
 
@@ -44,8 +47,8 @@ def env(dpg_session):
     for alias in list(dpg.get_aliases()):
         dpg.remove_alias(alias)
 
-    ThemeManager._created_themes = {}
-    ThemeManager._item_themes = {}
+    manager._ThemeManager__created_themes.clear()
+    manager._ThemeManager__item_themes.clear()
 
 
 @pytest.fixture()

@@ -1,4 +1,4 @@
-from .callbacks import CallbackInfo, CallbackType
-
-from .event_manager import Event_manager
+from .event_manager import EventManager
 from .theme_manager import ThemeManager
+from .font_manager import FontManager
+from .size_manager import SizeManager
