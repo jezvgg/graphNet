@@ -307,19 +307,19 @@ node_list = {
                 input=LayerNode,
             ),
             NodeAnnotation(
-                label="SeparableConv2D",
-                node_type=LayerNode,
-                logic=LayerNode.layer(layers.SeparableConv2D),
-                annotations={
-                    "filters": Parameter(AttrType.INPUT, AInteger, default=1),
-                    "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
-                    "strides": Parameter(AttrType.INPUT, AInteger, default=1),
-                    "depth_multiplier": Parameter(AttrType.INPUT, AInteger, default=1),
-                    "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
-                    "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
-                    "use_bias": Parameter(AttrType.INPUT, ABoolean),
-                },
-                input=LayerNode,
+                label= "SeparableConv2D",
+                node_type= LayerNode,
+                logic = LayerNode.layer(layers.SeparableConv2D),
+                annotations = {
+                        "filters": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "kernel_size": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "strides": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "depth_multiplier": Parameter(AttrType.INPUT, AInteger, default=1),
+                        "padding": Parameter(AttrType.INPUT, AEnum[Padding]),
+                        "activation": Parameter(AttrType.INPUT, AEnum[Activations]),
+                        "use_bias": Parameter(AttrType.INPUT, ABoolean),
+                    },
+                input=LayerNode
             ),
             NodeAnnotation(
                 label="MaxPooling1D",
