@@ -4,6 +4,7 @@ import dearpygui.dearpygui as dpg
 from Src.Config.node_list import node_list
 from Src.Config.Annotations import *
 from Src.Enums import *
+from Src.Utils import get_userdata, set_userdata
 
 def test_simple_compilation(node_editor):
     node_editor.builder.compile_graph(node_editor._NodeEditor__start_nodes)
@@ -24,7 +25,9 @@ def test_compilation(node_editor):
                                             if dpg.get_item_label(field) == attr_name][0]
     with dpg.window():
         for node in nodes_in_mock.keys():
-            nodes_in_mock[node] = dpg.add_button(label=node, user_data=nodes_in_mock[node])
+            userdata = nodes_in_mock[node]
+            nodes_in_mock[node] = dpg.add_button(label=node)
+            set_userdata(nodes_in_mock[node], value=userdata)
 
     input_node = dpg.get_item_children("node_editor", slot=1)[0]
     dataX = node_editor.drop_callback("node_editor", nodes_in_mock["Table data"])
@@ -59,11 +62,12 @@ def test_compilation(node_editor):
     assert AInteger.set(dpg.get_item_children(get_attr("epochs", fit), slot=1)[0], 10)
 
     visited = node_editor.builder.compile_graph(node_editor._NodeEditor__start_nodes)
-    assert all([dpg.get_item_user_data(node) in visited for node in nodes])
+    assert all([get_userdata(node) in visited for node in nodes])
 
     filepath: Path = Path(AString.get(dpg.get_item_children(get_attr("fname", save), slot=1)[0]))
     assert filepath.exists()
     filepath.unlink(missing_ok=True)
+
 
 def test_simple_compilation_returns_set(node_editor):
     result = node_editor.builder.compile_graph(node_editor._NodeEditor__start_nodes)

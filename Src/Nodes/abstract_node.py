@@ -11,13 +11,14 @@ from Src.Config.parameter import Parameter, AttrType
 from Src.Enums import Themes
 from Src.Managers import ThemeManager
 from Src.Exceptions import NetworkException
+from Src.Utils import lateinit
 
 
 
 
 class AbstractNode(ABC):
     '''
-    Нода (узел графа), класс который используется для сохранения связей в графе, а также информации о ноде. 
+    Нода (узел графа), класс который используется для сохранения связей в графе, а также информации о ноде.
 
     Attributes:
         node_tag: str | int - индетификатор ноды (dpg.node)
@@ -25,6 +26,7 @@ class AbstractNode(ABC):
         outgoing: list[Node] - связи с нодами, к которым подключенна эта нода. (Уходящие)
     '''
     __error_message: str = None
+    __themes: ThemeManager = lateinit(ThemeManager)
     _error_id: int | str = None
 
     node_tag: str | int
@@ -41,7 +43,7 @@ class AbstractNode(ABC):
     def __init__(self, node_tag: int | str, annotations: dict[str: type], \
                  logic: Callable, docs: str = None):
         '''
-        Нода (узел графа), класс который используется для сохранения связей в графе, а также информации о ноде. 
+        Нода (узел графа), класс который используется для сохранения связей в графе, а также информации о ноде.
 
         Args:
             layer: keras.layers.Layer - слой, логику которого нода хранит.
@@ -68,7 +70,7 @@ class AbstractNode(ABC):
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__} {self.node_tag} {dict(incoming=self.incoming, outgoing=self.outgoing)}"
-    
+
 
     def __hash__(self):
         return self.node_tag
@@ -104,7 +106,7 @@ class AbstractNode(ABC):
             self.logger.debug(kwargs)
             self.logger.debug(args)
 
-        try: 
+        try:
             self.OUTPUT = self.logic(*args, **kwargs)
             self.default_theme()
 
@@ -115,21 +117,21 @@ class AbstractNode(ABC):
         except NetworkException as ex:
             self.raise_error(ex, "Сетевая ошибка")
             return False
-        
+
         except Exception as ex:
             self.raise_error(ex)
             return False
-            
+
         return True
-    
+
 
     def raise_error(self, error_message: str, error_message_type: str = "Неизвестная ошибка"):
-        ThemeManager.add_theme(self.node_tag,Themes.ERROR)
+        self.__themes.add(self.node_tag, Themes.ERROR)
 
         self._error_id = dpg.generate_uuid()
         with dpg.node_attribute(parent=self.node_tag, attribute_type=dpg.mvNode_Attr_Static):
             dpg.add_text("ОШИБКА!", tag=self._error_id)
-            
+
         with dpg.tooltip(parent=self._error_id):
             dpg.add_text(f"{error_message_type}:")
             dpg.add_text(error_message)
@@ -140,10 +142,11 @@ class AbstractNode(ABC):
         if dpg.does_item_exist("fit_window"):
                 dpg.delete_item("fit_window")
 
-    def default_theme(self):
-        ThemeManager.apply_theme(self.node_tag,self.theme_name)
 
-        if self._error_id and dpg.does_item_exist(self._error_id): 
+    def default_theme(self):
+        self.__themes.apply(self.node_tag, self.theme_name, Themes.RESIZABLE)
+
+        if self._error_id and dpg.does_item_exist(self._error_id):
             dpg.delete_item(dpg.get_item_parent(self._error_id))
         self.__error_message = None
 

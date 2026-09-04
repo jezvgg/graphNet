@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from typing import Any
-from typing import Any
 
 import dearpygui.dearpygui as dpg
 import matplotlib
@@ -11,8 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from Src.Config.Annotations import AParam
-from Src.Enums import DPGType
-from Src.Utils import instancelessmethod
+from Src.Utils import instancelessmethod, get_userdata, set_userdata
 
 
 @dataclass
@@ -35,14 +33,17 @@ class AFigure(AParam):
             parent="figure_texture_registry",
         )
 
-        dpg.add_text(kwargs.get("label") or "Figure", show=not self.display)
-        return dpg.add_image(tex_id, user_data=tex_id, show=self.display)
+        parent = kwargs.get("parent", 0)
+        dpg.add_text(kwargs.get("label") or "Figure", show=not self.display, parent=parent)
+        image_id = dpg.add_image(tex_id, show=self.display, parent=parent)
+        set_userdata(image_id, value=tex_id)
+        return image_id
 
 
     @staticmethod
     def get(input_id: int | str) -> Any:
         parent: int | str = dpg.get_item_parent(input_id)
-        user_data: list[int | str] | None = dpg.get_item_user_data(parent)
+        user_data: list[int | str] | None = get_userdata(parent)
 
         if not user_data:
             return None
@@ -50,7 +51,7 @@ class AFigure(AParam):
         results: list[Any] = []
         for attribute in user_data:
             label: str = dpg.get_item_label(attribute)
-            node: Any = dpg.get_item_user_data(dpg.get_item_parent(attribute))
+            node: Any = get_userdata(dpg.get_item_parent(attribute))
             results.append(getattr(node, label))
 
         return results[0] if results else None
@@ -70,7 +71,7 @@ class AFigure(AParam):
             / 255.0
         )
 
-        tex_id: int | str = dpg.get_item_user_data(input_id)
+        tex_id: int | str = get_userdata(input_id)
 
         dpg.configure_item(tex_id, width=w, height=h)
         dpg.set_value(tex_id, tex_data)

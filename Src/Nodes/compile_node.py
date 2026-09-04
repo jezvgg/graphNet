@@ -9,7 +9,7 @@ class CompileNode(AbstractNode):
     logic: keras.models.Model.compile
     theme_name: Themes = Themes.COMPILE
 
-    # TODO: Настроить правильные аннотации от logic
+    # TODO: Настроить правильные аннотации от logic через wraps
     @staticmethod
     def compile_model(*args: LayerResult, **kwargs):
         inputs = tuple(set().union(*[arg.inputs for arg in args]))

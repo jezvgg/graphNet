@@ -5,6 +5,8 @@ from Src.Config import NodeAnnotation, Parameter
 from Src.Config.Annotations import ANode
 from Src.Nodes import AbstractNode
 from Src.Enums.attr_type import AttrType
+from Src.Utils import get_userdata, set_userdata
+
 
 def test_initialize(node_editor):
     assert isinstance(node_editor, NodeEditor)
@@ -19,7 +21,8 @@ def test_drop_callback(node_editor):
                 )
 
     with dpg.window():
-        btn = dpg.add_button(label=node.label, user_data=node)
+        btn = dpg.add_button(label=node.label)
+        set_userdata(btn, value=node)
 
     nodes_count = len(dpg.get_item_children("node_editor", slot=1))
 
@@ -59,9 +62,9 @@ def test_link_callback(node_editor):
     node_id2 = node_editor.builder.build_node(anode2, "node_editor")
     node_id3 = node_editor.builder.build_node(anode3, "node_editor")
 
-    node1: AbstractNode = dpg.get_item_user_data(node_id1)
-    node2: AbstractNode = dpg.get_item_user_data(node_id2)
-    node3: AbstractNode = dpg.get_item_user_data(node_id3)
+    node1: AbstractNode = get_userdata(node_id1)
+    node2: AbstractNode = get_userdata(node_id2)
+    node3: AbstractNode = get_userdata(node_id3)
     node_editor._NodeEditor__start_nodes += [node1, node2, node3]
 
     node_attr1 = None
@@ -120,11 +123,11 @@ def test_delink_callback(node_editor):
                     "x": Parameter(AttrType.INPUT, ANode[object])
                     }
                 )
-    
+
     node_id1 = node_editor.builder.build_node(anode1, "node_editor")
     node_id2 = node_editor.builder.build_node(anode2, "node_editor")
-    node1: AbstractNode = dpg.get_item_user_data(node_id1)
-    node2: AbstractNode = dpg.get_item_user_data(node_id2)
+    node1: AbstractNode = get_userdata(node_id1)
+    node2: AbstractNode = get_userdata(node_id2)
     node_editor._NodeEditor__start_nodes += [node1, node2]
     node_attr1 = None
     node_attr2 = None
@@ -143,8 +146,8 @@ def test_delink_callback(node_editor):
 
     node_editor.link_callback("node_editor", (node_attr1, node_attr2))
 
-    assert dpg.get_item_user_data(node_attr1) == [node_attr2]
-    assert dpg.get_item_user_data(node_attr2) == [node_attr1]
+    assert get_userdata(node_attr1) == [node_attr2]
+    assert get_userdata(node_attr2) == [node_attr1]
 
     link_id = dpg.get_item_children("node_editor", slot=0)[-1]
 
@@ -153,8 +156,8 @@ def test_delink_callback(node_editor):
     assert node_attr1 not in node1.outgoing
     assert node_attr2 not in node2.incoming
 
-    assert dpg.get_item_user_data(node_attr1) == []
-    assert dpg.get_item_user_data(node_attr2) == []
+    assert get_userdata(node_attr1) == []
+    assert get_userdata(node_attr2) == []
 
 
 def test_delete_node(node_editor):
@@ -174,11 +177,11 @@ def test_delete_node(node_editor):
                     "x": Parameter(AttrType.INPUT, ANode[object])
                     }
                 )
-    
+
     node_id1 = node_editor.builder.build_node(anode1, "node_editor")
     node_id2 = node_editor.builder.build_node(anode2, "node_editor")
-    node1: AbstractNode = dpg.get_item_user_data(node_id1)
-    node2: AbstractNode = dpg.get_item_user_data(node_id2)
+    node1: AbstractNode = get_userdata(node_id1)
+    node2: AbstractNode = get_userdata(node_id2)
     node_editor._NodeEditor__start_nodes += [node1, node2]
     node_attr1 = None
     node_attr2 = None
@@ -221,7 +224,8 @@ def test_drop_callback_returns_node_id(node_editor):
     )
 
     with dpg.window():
-        btn = dpg.add_button(label=node.label, user_data=node)
+        btn = dpg.add_button(label=node.label)
+        set_userdata(btn, value=node)
 
     node_id = node_editor.drop_callback("node_editor", btn)
 
