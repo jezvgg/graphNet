@@ -3,14 +3,12 @@ from itertools import chain
 import traceback
 
 import dearpygui.dearpygui as dpg
-from keras import layers
 
-from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
-from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
-from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
-from Src.Config.Annotations.annotation import Annotation
-from Src.Managers import ThemeManager
+from Src.Nodes import AbstractNode, InputLayerNode
+from Src.Config.node_list import NodeAnnotation, Annotation
+from Src.Utils import lateinit, set_userdata, get_userdata, clear_userdata
+from Src.Managers import SizeManager, FontManager, ThemeManager
 from Src.Enums import Themes
 
 
@@ -27,7 +25,10 @@ class NodeBuilder:
     card_width: int = Annotation.BASE_WIDTH + 115
     node_list: dict[str, dict[str, list[NodeAnnotation]]]
     delete_callback: Callable
-    logger: Logger
+    logger: Logger = lateinit(logging(), "nodes")
+    theme_manager: ThemeManager = lateinit(ThemeManager)
+    font_manager: FontManager = lateinit(FontManager)
+    size_manager: SizeManager = lateinit(SizeManager)
 
 
     def __init__(self,
@@ -37,7 +38,6 @@ class NodeBuilder:
         Args:
             layers_list: dict[str: AbstractNode] - список слоёв с параметрами, которые использовать в конструкторе
         '''
-        self.logger = logging()("nodes")
         self.delete_callback = delete_callback
         self.node_list = node_list
 
@@ -81,61 +81,25 @@ class NodeBuilder:
         items_count = len(params)
         if node_data.input: items_count += 1
         if node_data.output: items_count += 1
-        calc_height = 80 + (items_count * 26)
 
         with dpg.child_window(
             tag=card_id,
             parent=parent,
-            width=self.card_width,
-            height=calc_height,
+            auto_resize_y=True,
+            auto_resize_x=True,
             no_scrollbar=True,
-            border=True,
-            user_data=node_data
+            border=True # Костыль, нужно заменить с использованием set_userdata
         ) as card:
-
-            with dpg.theme() as card_theme:
-                with dpg.theme_component(dpg.mvChildWindow):
-                    dpg.add_theme_style(dpg.mvStyleVar_WindowPadding, 0, 0)
-                    dpg.add_theme_style(dpg.mvStyleVar_ChildRounding, 8)
-                    dpg.add_theme_style(dpg.mvStyleVar_ChildBorderSize, 1)
-                    dpg.add_theme_color(dpg.mvThemeCol_ChildBg, [50, 50, 50, 255])
-                    dpg.add_theme_color(dpg.mvThemeCol_Border, [100, 100, 100, 255])
-            dpg.bind_item_theme(card, card_theme)
 
             with dpg.group() as drag_group:
                 with dpg.drag_payload(parent=drag_group, drag_data=card_id):
                     dpg.add_text(node_data.label)
 
-                theme_name = node_data.node_type.theme_name
-                node_colors = ThemeManager._themes_config.get(theme_name, {}).get("mvNode", {})
-                title_color = node_colors.get("mvNodeCol_TitleBar", [50, 50, 50, 255])
-
-                with dpg.theme() as header_theme:
-                    with dpg.theme_component(dpg.mvButton):
-                        dpg.add_theme_color(dpg.mvThemeCol_Button, title_color)
-                        dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, title_color)
-                        dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, title_color)
-                        dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5)
-                        dpg.add_theme_style(dpg.mvStyleVar_ButtonTextAlign, 0.01, 0.5)
-                        dpg.add_theme_style(dpg.mvStyleVar_FramePadding, 4, 8)
-                        dpg.add_theme_style(dpg.mvStyleVar_FrameBorderSize, 0)
-
-                with dpg.group() as header_group:
-                    with dpg.theme() as group_theme:
-                        with dpg.theme_component(dpg.mvGroup):
-                            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 0)
-                    dpg.bind_item_theme(header_group, group_theme)
-
-                    header_button = dpg.add_button(label=node_data.label, width=-1)
-                    dpg.bind_item_theme(header_button, header_theme)
+                header_button = dpg.add_button(label=node_data.label, width=-1)
 
                 dpg.add_spacer(height=2)
 
                 with dpg.group(indent=8) as body_group:
-                    with dpg.theme() as body_theme:
-                        with dpg.theme_component(dpg.mvGroup):
-                            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 2, 0)
-                    dpg.bind_item_theme(body_group, body_theme)
                     if node_data.input:
                         dpg.add_text("INPUT")
 
@@ -146,17 +110,20 @@ class NodeBuilder:
 
                     for label, param in params:
                         parameter = param.hint.build(label=label, parent=body_group, width=Annotation.BASE_WIDTH, enabled=False)
-                        if parameter:
-                            ThemeManager.apply_theme(parameter, Themes.DEFAULT)
 
                     delete_button = dpg.add_button(label="Delete")
-                    ThemeManager.apply_theme(delete_button, Themes.DEFAULT)
 
-                    if node_data.output:
-                        dpg.add_text("OUTPUT")
+                    if node_data.output: dpg.add_text("OUTPUT")
 
+        set_userdata(card_id, value=node_data)
+
+        self.theme_manager.apply(card, Themes.CARD)
+        self.theme_manager.apply(body_group, Themes.CARD)
+        self.theme_manager.apply(delete_button, Themes.DEFAULT)
+        self.theme_manager.apply(header_button, node_data.node_type.theme_name, Themes.CARD)
         dpg.add_spacer(height=10)
         return card_id
+
 
     def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
         '''
@@ -174,7 +141,8 @@ class NodeBuilder:
 
         node.node_data = node_data
 
-        with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
+        with dpg.node(label=node_data.label, parent=parent, tag=node_id):
+            set_userdata(node_id, value=node)
             if node_data.input:
                 node_data.input.build(label="INPUT", parent=node_id)
 
@@ -188,12 +156,18 @@ class NodeBuilder:
                 attr = attribute.build(label=label, parent=node_id)
 
             with dpg.node_attribute(label="Delete", attribute_type=dpg.mvNode_Attr_Static):
-                dpg.add_button(label="Delete", callback=lambda: self.delete_callback(node_id))
+                delete = dpg.add_button(label="Delete", callback=lambda: self.delete_callback(node_id))
 
             if node_data.output:
                 node_data.output.build(label="OUTPUT", parent=node_id)
 
+        self.theme_manager.apply(delete, Themes.DEFAULT)
         node.default_theme()
+
+        font = self.font_manager.get("node_editor")
+        min_font = get_userdata("node_editor", 'min_font_size')
+        self.font_manager.set(node_id, font.name, font.size)
+        self.size_manager.transform(node_id, font.size / min_font.size, True)
 
         return node_id
 
@@ -209,17 +183,13 @@ class NodeBuilder:
         Returns:
             str | int - индетификатор новой ноды
         '''
-        # TODO: Сделать типизированную передачу у shape TableDataNode
-        layer = NodeAnnotation(
-            label="Input",
-            node_type=InputLayerNode,
-            logic = InputLayerNode.create_input,
-            annotations = {
-                    "shape": Parameter(AttrType.INPUT, ANode[Single[object]]),
-                },
-            input=False,
-            output=LayerNode
-            )
+        layer = None
+        for group in self.node_list.values():
+            for group2 in group.values():
+                for node in group2:
+                    if node.node_type is not InputLayerNode: continue
+                    layer = node
+                    break
 
         node_id = self.build_node(layer, parent=parent)
 
@@ -241,7 +211,7 @@ class NodeBuilder:
             current_node = queue.pop(0)
             self.logger.debug(f"Текущая нода - {current_node}")
 
-            if all([dpg.get_item_user_data(dpg.get_item_parent(value)) in visited \
+            if all([get_userdata(dpg.get_item_parent(value)) in visited \
                 for value in chain(*current_node.incoming.values())]):
                 self.logger.debug("Нода подошла.")
 
@@ -257,7 +227,7 @@ class NodeBuilder:
                 self.logger.debug(f"resulted OUTPUT - {current_node.OUTPUT}")
 
                 for attr_id in chain(*current_node.outgoing.values()):
-                    neightbor: AbstractNode = dpg.get_item_user_data(dpg.get_item_parent(attr_id))
+                    neightbor: AbstractNode = get_userdata(dpg.get_item_parent(attr_id))
                     if neightbor not in queue:
                         queue.append(neightbor)
 

@@ -11,6 +11,7 @@ from Src.Nodes.predict_node import PredictNode
 from Src.Nodes.shape_node import ShapeNode
 from Src.Nodes.metric_node import MetricNode
 from Src.Nodes.utils_node import UtilsNode
+from Src.Config.node_list import node_list
 
 #  LayerNode 
 
@@ -34,6 +35,30 @@ def test_create_input_returns_layer_result():
 
     assert isinstance(result, LayerResult)
     assert len(result.inputs) == 1
+
+
+def test_separable_conv2d_node_accepts_2d_input():
+    annotation = next(
+        node
+        for category in node_list.values()
+        for group in category.values()
+        for node in group
+        if node.label == "SeparableConv2D"
+    )
+    input_result = LayerResult(keras.Input(shape=(8, 8, 3)), set())
+
+    result = annotation.logic(
+        input_result,
+        filters=2,
+        kernel_size=3,
+        strides=1,
+        depth_multiplier=1,
+        padding="valid",
+        activation=None,
+        use_bias=True,
+    )
+
+    assert result.layer.shape == (None, 6, 6, 2)
 
 #  CompileNode 
 

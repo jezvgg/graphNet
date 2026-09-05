@@ -7,14 +7,20 @@ from Src.Config.Annotations import AParam
 from Src.Config.Annotations.single import Single
 from Src.Enums import DPGType
 from Src.Managers import ThemeManager
-
+from Src.Utils import lateinit, get_userdata
 
 
 
 @dataclass
 class ANode(AParam):
+    __themes = lateinit(ThemeManager)
     node_type: type = object
     single: bool = False
+
+
+    def __init__(self, node_type: type = object, single: bool = False):
+        self.node_type = node_type
+        self.single = single
 
 
     def __class_getitem__(cls, item):
@@ -25,7 +31,7 @@ class ANode(AParam):
     @instancelessmethod
     def _build(self, *args, **kwargs) -> str | int:
         if hasattr(self.node_type, 'theme_name'):
-            ThemeManager.apply_theme(kwargs['parent'], self.node_type.theme_name)
+            self.__themes.apply(kwargs['parent'], self.node_type.theme_name)
 
         return dpg.add_text(kwargs.get('label'), label=kwargs.get('label'))
 
@@ -38,10 +44,10 @@ class ANode(AParam):
         if DPGType(parent) != DPGType.NODE_ATTRIBUTE:
             raise Exception(f"Incompatable parent of item {dpg.get_item_type(parent)} must be mvAppItemType::mvNodeAttribute")
 
-        user_data = dpg.get_item_user_data(parent)
+        user_data = get_userdata(parent) or []
 
         node_in: list[tuple[str, AbstractNode]] = [(dpg.get_item_label(attribute),
-                                                    dpg.get_item_user_data(dpg.get_item_parent(attribute)))
+                                                    get_userdata(dpg.get_item_parent(attribute)))
                                                    for attribute in user_data]
 
         results = []

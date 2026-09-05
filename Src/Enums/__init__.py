@@ -1,3 +1,4 @@
+from Src.Enums.eventtypes import EventType
 from Src.Enums.activations import Activations
 from Src.Enums.padding import Padding
 from Src.Enums.colormode import ColorMode

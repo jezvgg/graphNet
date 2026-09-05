@@ -13,7 +13,11 @@ class DPGType(Enum):
     @classmethod
     def _missing_(cls, value: str | int):
         return cls(dpg.get_item_type(value))
-    
+
+    @property
+    def mvName(self) -> str:
+        return self.value.split("::")[1]
+
     # Основные виджеты
     BUTTON = 'mvAppItemType::mvButton'
     CHECKBOX = 'mvAppItemType::mvCheckbox'

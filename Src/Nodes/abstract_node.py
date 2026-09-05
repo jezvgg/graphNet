@@ -12,6 +12,7 @@ from Src.Config.Annotations import ANode
 from Src.Enums import Themes
 from Src.Managers import ThemeManager
 from Src.Exceptions import NetworkException
+from Src.Utils import lateinit
 
 
 class AbstractNode(ABC):
@@ -25,6 +26,7 @@ class AbstractNode(ABC):
     """
 
     __error_message: str = None
+    __themes: ThemeManager = lateinit(ThemeManager)
     _error_id: int | str = None
 
     node_tag: str | int
@@ -130,7 +132,7 @@ class AbstractNode(ABC):
     def raise_error(
         self, error_message: str, error_message_type: str = "Неизвестная ошибка"
     ):
-        ThemeManager.add_theme(self.node_tag, Themes.ERROR)
+        self.__themes.add(self.node_tag, Themes.ERROR)
 
         self._error_id = dpg.generate_uuid()
         with dpg.node_attribute(
@@ -149,7 +151,7 @@ class AbstractNode(ABC):
             dpg.delete_item("fit_window")
 
     def default_theme(self):
-        ThemeManager.apply_theme(self.node_tag, self.theme_name)
+        self.__themes.apply(self.node_tag, self.theme_name, Themes.RESIZABLE)
 
         if self._error_id and dpg.does_item_exist(self._error_id):
             dpg.delete_item(dpg.get_item_parent(self._error_id))
@@ -163,7 +165,7 @@ class AbstractNode(ABC):
             serialize_value: функция-конвертер для отдельных значений параметров.
 
         Returns:
-            JSON-совместимый словарь с полями label, position, parameters, node_data.
+            JSON-совместимый словарь с полями label, position, parameters.
         """
         pos = dpg.get_item_pos(self.node_tag)
         arguments = dpg.get_item_children(self.node_tag, slot=1)
@@ -186,7 +188,6 @@ class AbstractNode(ABC):
             "label": dpg.get_item_label(self.node_tag),
             "position": pos,
             "parameters": param_values,
-            "node_data": self.node_data,
         }
 
 
@@ -198,4 +199,3 @@ class node_link:
 
     outgoing: str | int
     incoming: str | int
-

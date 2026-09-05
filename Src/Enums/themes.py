@@ -7,6 +7,7 @@ class Themes(StrEnum):
     # Node editor
     DEFAULT = "default"
     ERROR = "error"
+    RESIZABLE = "resizable"
 
     # Nodes
     ABSTRACT = "abstract"
@@ -24,3 +25,4 @@ class Themes(StrEnum):
     SIDEBAR = 'sidebar'
     NODE_CARD = 'node_card'
     PLOT = 'plot'
+    CARD = 'card'
