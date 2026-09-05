@@ -93,27 +93,21 @@ class NodeEditor:
 
 
     @classmethod
-    def get_mouse_pos(cls) -> list[float]:
-        '''
-        Вычисляет координаты для размещения нового узла на доске.
-        '''
+    def get_mouse_pos(self):
         # Реализовать создание нода, через обычные координаты мыши не получится
         # потому что координаты в node_editor отличаются от координат мыши
         # поэтому координаты размещения нового нода рассчитываются относительно уже стоящего нода (input_node)
         pos = dpg.get_mouse_pos(local=False)
         nodes_on_board = dpg.get_item_children("node_editor", slot=1)
         if nodes_on_board:
-            ref_node = nodes_on_board[0]
+            ref_node = dpg.get_item_children("node_editor", slot=1)[0]
             ref_screen_pos = dpg.get_item_rect_min(ref_node)
             ref_grid_pos = dpg.get_item_pos(ref_node)
 
             NODE_PADDING = (8, 8)
 
-            pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
-            pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
-        else:
-            pos = [50, 50]
-
+        pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
+        pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
         return pos
 
 
