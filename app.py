@@ -7,7 +7,7 @@ from Src.Enums import Themes
 from Src.Enums.dpg_types import DPGType
 from Src.Logging import logging
 from Src.node_editor import NodeEditor
-from Src.Managers import EventManager, ThemeManager, FontManager, SizeManager
+from Src.Managers import EventManager, ThemeManager, FontManager, SizeManager, ExtensionManager
 from Src.Enums import EventType
 
 
@@ -22,6 +22,7 @@ class App:
     theme_manager: ThemeManager
     event_manager: EventManager
     size_manager: SizeManager
+    extension_manager: ExtensionManager
     __last_zoom_time: float
 
 
@@ -51,6 +52,8 @@ class App:
         self.event_manager = EventManager()
         self.__last_zoom_time = 0.0
 
+        self._setup_extensions()
+
         dpg.setup_dearpygui()
 
         self._create_ui()
@@ -71,8 +74,17 @@ class App:
         logging()('functions', group_config | debug_config)
         logging()('events', group_config | debug_config)
         logging()('managers', group_config | debug_config)
+        logging()('extensions', group_config | debug_config)
 
         self.logger.info("Система логирования инициализирована.")
+
+
+    def _setup_extensions(self):
+        """Инициализация и загрузка расширений."""
+        self.extension_manager = ExtensionManager()
+        self.extension_manager.discover_extensions()
+        self.extension_manager.load_active_extensions()
+        self.logger.info("Расширения загружены.")
 
 
     def _create_ui(self):
