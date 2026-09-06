@@ -24,7 +24,12 @@ class GraphNetSDK:
             return
 
         target_dir.mkdir(parents=True)
-        (target_dir / "__init__.py").write_text(INIT_PY_TEMPLATE, encoding="utf-8")
+        class_name: str = ext_name.replace("-", "_").replace(" ", "_").title().replace("_", "") + "Node"
+        init_content: str = INIT_PY_TEMPLATE.format(
+            class_name=class_name,
+            ext_name=ext_name,
+        )
+        (target_dir / "__init__.py").write_text(init_content, encoding="utf-8")
 
         class_name: str = ext_name.replace("-", "_").replace(" ", "_").title().replace("_", "") + "Node"
         config_content: str = EXTENSION_CONFIG_TEMPLATE.format(
