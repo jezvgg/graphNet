@@ -8,23 +8,34 @@ class GraphNetSDK:
 
     PROJECT_ROOT: Path = Path(__file__).resolve().parent
 
-    INIT_PY_TEMPLATE: str = ""
+    INIT_PY_TEMPLATE: str = '''from Src.Config.node_annotation import NodeAnnotation
+from .extension_config import {class_name}
 
-    EXTENSION_CONFIG_TEMPLATE: str = (
-        "from Src.Nodes import AbstractNode\n\n\n"
-        "class {class_name}(AbstractNode):\n"
-        "    @classmethod\n"
-        "    def get_category(cls) -> str:\n"
-        "        return \"{ext_name}\"\n\n"
-        "    @classmethod\n"
-        "    def get_name(cls) -> str:\n"
-        "        return \"{class_name}\"\n\n"
-        "    def setup(self):\n"
-        "        pass\n\n"
-        "    def compute(self):\n"
-        "        pass\n\n\n"
-        "ExtensionList = [{class_name}]\n"
-    )
+EXTENSION_NAME = "{ext_name}"
+
+EXTENSION_CONFIG = {{
+    "{ext_name}": [
+        NodeAnnotation(
+            label="{class_name}",
+            node_type={class_name},
+            logic={class_name}.compute,
+            annotations={{}},
+            input=False,
+            output=False
+        )
+    ]
+}}
+'''
+
+    EXTENSION_CONFIG_TEMPLATE: str = '''from Src.Nodes import AbstractNode
+
+class {class_name}(AbstractNode):
+    def setup(self):
+        pass
+
+    def compute(self):
+        pass
+'''
 
     @classmethod
     def init_extension(cls, ext_name: str) -> None:
@@ -34,12 +45,17 @@ class GraphNetSDK:
             sys.exit(1)
 
         target_dir.mkdir(parents=True)
-        (target_dir / "__init__.py").write_text(cls.INIT_PY_TEMPLATE, encoding="utf-8")
-
+        
         class_name: str = ext_name.replace("-", "_").replace(" ", "_").title().replace("_", "") + "Node"
-        config_content: str = cls.EXTENSION_CONFIG_TEMPLATE.format(
+        
+        init_content: str = cls.INIT_PY_TEMPLATE.format(
             class_name=class_name,
             ext_name=ext_name,
+        )
+        (target_dir / "__init__.py").write_text(init_content, encoding="utf-8")
+
+        config_content: str = cls.EXTENSION_CONFIG_TEMPLATE.format(
+            class_name=class_name
         )
         (target_dir / "extension_config.py").write_text(config_content, encoding="utf-8")
 
