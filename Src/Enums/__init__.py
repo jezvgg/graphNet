@@ -12,3 +12,4 @@ from Src.Enums.themes import Themes
 from Src.Enums.datasets import Datasets
 from Src.Enums.text_output_mode import TextOutputMode
 from Src.Enums.split_mode import SplitMode
+from Src.Enums.extension_status import ExtensionStatus
