@@ -14,6 +14,9 @@ from Src.Config.Annotations import AParam
 from Src.Enums import DPGType
 from Src.Utils import instancelessmethod
 
+TEXTURE_WIDTH = 400
+TEXTURE_HEIGHT = 300
+
 
 @dataclass
 class AFigure(AParam):
@@ -26,18 +29,24 @@ class AFigure(AParam):
         if not dpg.does_alias_exist("figure_texture_registry"):
             dpg.add_texture_registry(tag="figure_texture_registry")
 
+        width: int = kwargs.get("width") or TEXTURE_WIDTH
+        height: int = round(width * TEXTURE_HEIGHT / TEXTURE_WIDTH)
+
         tex_id: int | str = dpg.generate_uuid()
         dpg.add_dynamic_texture(
-            width=400,
-            height=300,
-            default_value=np.full((300, 400, 4), 0.5, dtype=np.float32).flatten(),
+            width=TEXTURE_WIDTH,
+            height=TEXTURE_HEIGHT,
+            default_value=np.full(
+                (TEXTURE_HEIGHT, TEXTURE_WIDTH, 4), 0.5, dtype=np.float32
+            ).flatten(),
             tag=tex_id,
             parent="figure_texture_registry",
         )
 
         dpg.add_text(kwargs.get("label") or "Figure", show=not self.display)
-        return dpg.add_image(tex_id, user_data=tex_id, show=self.display)
-
+        return dpg.add_image(
+            tex_id, width=width, height=height, user_data=tex_id, show=self.display
+        )
 
     @staticmethod
     def get(input_id: int | str) -> Any:
@@ -54,7 +63,6 @@ class AFigure(AParam):
             results.append(getattr(node, label))
 
         return results[0] if results else None
-
 
     @instancelessmethod
     def set(self, input_id: int | str, fig: plt.Figure) -> bool:

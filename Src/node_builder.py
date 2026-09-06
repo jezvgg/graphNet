@@ -8,7 +8,7 @@ from keras import layers
 from Src.Enums.attr_type import AttrType
 from Src.Logging import logging, Logger
 from Src.Nodes import AbstractNode, InputLayerNode, LayerNode
-from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single, AFigure
+from Src.Config.node_list import NodeAnnotation, Parameter, ANode, Single
 from Src.Config.Annotations.annotation import Annotation
 from Src.Managers import ThemeManager
 from Src.Enums import Themes
@@ -142,12 +142,9 @@ class NodeBuilder:
 
                     for label, param in params:
                         hint = param.hint
-                        if isinstance(hint, AFigure):
-                            dpg.add_text(f"[figure] {label}")
-                        else:
-                            parameter = hint.build(label=label, parent=body_group, width=Annotation.BASE_WIDTH, enabled=False)
-                            if parameter:
-                                ThemeManager.apply_theme(parameter, Themes.DEFAULT)
+                        parameter = hint.build(label=label, parent=body_group, width=Annotation.BASE_WIDTH, enabled=False)
+                        if parameter:
+                            ThemeManager.apply_theme(parameter, Themes.DEFAULT)
 
                     delete_button = dpg.add_button(label="Delete")
                     ThemeManager.apply_theme(delete_button, Themes.DEFAULT)
@@ -158,21 +155,33 @@ class NodeBuilder:
         dpg.add_spacer(height=10)
         return card_id
 
-    def build_node(self, node_data: NodeAnnotation, parent: str | int) -> str | int:
+    def build_node(self, node_data: NodeAnnotation, parent: str | int, min_width: int | None = None) -> str | int:
         '''
         Построение dpg.node из класса AbstractNode. Используется, для создания новых нодов в редакторе. Ноды берутся из user_data в списке слева.
 
         Args:
             node: AbstractNode - нода из которой создать dpg.node
             parent: str | int - родитель, внутри которого создать ноду. Чаще всего это dpg.node_editor.
+            min_width: int | None - минимальная ширина ноды (чтобы визуально совпадала с карточкой в списке).
+                                     None - использовать self.card_width, 0 - не задавать минимальную ширину.
 
         Returns:
             str | int - индетификатор новой dpg.node.
         '''
+        if min_width is None:
+            min_width = self.card_width
+
         node_id = dpg.generate_uuid()
         node: AbstractNode = node_data.node_type(node_id, **node_data.kwargs)
 
         with dpg.node(label=node_data.label, parent=parent, user_data=node, tag=node_id):
+            if min_width:
+                # Невидимый спейсер, задающий такую же минимальную ширину ноды,
+                # как у карточки в списке слева (min_width), т.к. у dpg.node
+                # нет собственного параметра width - ширина считается по самому широкому контенту.
+                with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static):
+                    dpg.add_spacer(width=min_width)
+
             if node_data.input:
                 node_data.input.build(label="INPUT", parent=node_id)
 
@@ -219,7 +228,7 @@ class NodeBuilder:
             output=LayerNode
             )
 
-        node_id = self.build_node(layer, parent=parent)
+        node_id = self.build_node(layer, parent=parent, min_width=0)
 
         return node_id
 
