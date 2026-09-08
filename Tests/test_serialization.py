@@ -99,8 +99,8 @@ def test_project_manager_save_and_load_roundtrip(node_editor, tmp_path):
 
     with open(filepath) as f:
         saved = json.load(f)
-    assert len(saved["nodes"]) == 2
-    assert len(saved["links"]) == 1
+    assert len(saved) == 2
+    assert sum(len(node["inputs"]) for node in saved) == 1
 
     node_editor.project_manager.load_project(str(filepath))
 

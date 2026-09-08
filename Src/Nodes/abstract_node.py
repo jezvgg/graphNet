@@ -165,7 +165,7 @@ class AbstractNode(ABC):
             serialize_value: функция-конвертер для отдельных значений параметров.
 
         Returns:
-            JSON-совместимый словарь с полями label, position, parameters.
+            JSON-совместимый словарь с полями __type__, label, position, parameters.
         """
         pos = dpg.get_item_pos(self.node_tag)
         arguments = dpg.get_item_children(self.node_tag, slot=1)
@@ -185,6 +185,7 @@ class AbstractNode(ABC):
                 param_values[name] = serialize_value(raw_val)
 
         return {
+            "__type__": "node",
             "label": dpg.get_item_label(self.node_tag),
             "position": pos,
             "parameters": param_values,
