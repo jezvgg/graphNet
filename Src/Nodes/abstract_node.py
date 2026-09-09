@@ -38,6 +38,7 @@ class AbstractNode(ABC):
     docs: str
     logger: Logger
     theme_name: Themes = Themes.ABSTRACT
+    node_data = None
 
     def __init__(
         self,
@@ -159,19 +160,18 @@ class AbstractNode(ABC):
 
     def to_dict(self, serialize_value: Callable[[Any], Any]) -> dict:
         """
-        Собирает словарь с состоянием узла для сериализации.
+        Собирает JSON-совместимый словарь с полным состоянием узла для сериализации:
+        __type__, tag, label, position, parameters и inputs (входящие связи).
+
+        tag узла и отправители его связей пишутся с префиксом ``node_``: это отделяет
+        пространство имён сохранённых узлов от «сырых» dpg-uuid и исключает коллизии
+        при восстановлении графа.
 
         Args:
             serialize_value: функция-конвертер для отдельных значений параметров.
-
-        Returns:
-            JSON-совместимый словарь с полями __type__, label, position, parameters.
         """
-        pos = dpg.get_item_pos(self.node_tag)
-        arguments = dpg.get_item_children(self.node_tag, slot=1)
-
         param_values = {}
-        for argument in arguments:
+        for argument in dpg.get_item_children(self.node_tag, slot=1) or []:
             name = dpg.get_item_label(argument)
             if name not in self.annotations:
                 continue
@@ -181,14 +181,31 @@ class AbstractNode(ABC):
             if parameter.attr_type in (AttrType.INPUT, AttrType.STATIC):
                 if isinstance(parameter.hint, ANode) or parameter.hint is ANode:
                     continue
-                raw_val = parameter.get_value(argument)
-                param_values[name] = serialize_value(raw_val)
+                param_values[name] = serialize_value(parameter.get_value(argument))
+
+        inputs = [
+            {
+                "sender": f"node_{dpg.get_item_parent(sender_attr)}",
+                "sender_pin": dpg.get_item_label(sender_attr),
+                "receiver_pin": dpg.get_item_label(receiver_attr),
+            }
+            for receiver_attr, senders in self.incoming.items()
+            for sender_attr in senders
+        ]
+
+        label = (
+            self.node_data.label
+            if self.node_data
+            else dpg.get_item_label(self.node_tag)
+        )
 
         return {
             "__type__": "node",
-            "label": dpg.get_item_label(self.node_tag),
-            "position": pos,
+            "tag": f"node_{self.node_tag}",
+            "label": label,
+            "position": dpg.get_item_pos(self.node_tag),
             "parameters": param_values,
+            "inputs": inputs,
         }
 
 

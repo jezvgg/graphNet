@@ -1,5 +1,6 @@
 import pytest
 from pathlib import Path
+from itertools import chain
 import enum
 import json
 import dearpygui.dearpygui as dpg
@@ -18,6 +19,16 @@ from Src.Utils import get_userdata
 class DummyEnum(enum.Enum):
     A = "A"
     B = "B"
+
+
+def _pin(node_id, label):
+    """tag пина узла по его label."""
+    return next(x for x in dpg.get_item_children(node_id, slot=1) if dpg.get_item_label(x) == label)
+
+
+def _incoming(node):
+    """Плоский список входящих связей узла."""
+    return list(chain.from_iterable(node.incoming.values()))
 
 def test_project_encoder_basic():
     encoder = ProjectEncoder()
@@ -115,3 +126,53 @@ def test_project_manager_save_and_load_roundtrip(node_editor, tmp_path):
     consumer = get_userdata(labels_after["Consumer"])
     assert list(producer.outgoing.values())
     assert list(consumer.incoming.values())
+
+
+def test_project_manager_roundtrip_shortcut_edge(node_editor, tmp_path):
+    """
+    Граф со «срезающей» связью: A->C и A->B->C. Обход в ширину может поставить C
+    в файл раньше B, поэтому загрузка обязана восстанавливать связи независимо от
+    порядка узлов в файле. После round-trip должны выжить все три связи.
+    """
+    a = NodeAnnotation(
+        label="A", node_type=AbstractNode, logic=lambda: 1,
+        annotations={"out": Parameter(AttrType.OUTPUT, ANode[object])},
+    )
+    b = NodeAnnotation(
+        label="B", node_type=AbstractNode, logic=lambda inp: inp,
+        annotations={
+            "inp": Parameter(AttrType.INPUT, ANode[object]),
+            "out": Parameter(AttrType.OUTPUT, ANode[object]),
+        },
+    )
+    c = NodeAnnotation(
+        label="C", node_type=AbstractNode, logic=lambda inp: inp,
+        annotations={"inp": Parameter(AttrType.INPUT, ANode[object])},
+    )
+    node_editor.builder.node_list = {"T": {"T": [a, b, c]}}
+
+    node_editor.project_manager.clear_board(recreate_input=False)
+
+    id_a = node_editor.builder.build_node(a, "node_editor")
+    id_b = node_editor.builder.build_node(b, "node_editor")
+    id_c = node_editor.builder.build_node(c, "node_editor")
+    node_editor._NodeEditor__start_nodes.append(get_userdata(id_a))
+
+    # порядок создания: сначала «срезающая» A->C, затем A->B и B->C
+    node_editor.link_callback("node_editor", (_pin(id_a, "out"), _pin(id_c, "inp")))
+    node_editor.link_callback("node_editor", (_pin(id_a, "out"), _pin(id_b, "inp")))
+    node_editor.link_callback("node_editor", (_pin(id_b, "out"), _pin(id_c, "inp")))
+
+    filepath = tmp_path / "shortcut.json"
+    node_editor.project_manager.save_project(str(filepath))
+    node_editor.project_manager.load_project(str(filepath))
+
+    by_label = {
+        dpg.get_item_label(n): get_userdata(n)
+        for n in dpg.get_item_children("node_editor", slot=1)
+    }
+    assert set(by_label) == {"A", "B", "C"}
+
+    assert len(_incoming(by_label["A"])) == 0
+    assert len(_incoming(by_label["B"])) == 1   # A -> B
+    assert len(_incoming(by_label["C"])) == 2   # A -> C и B -> C

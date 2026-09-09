@@ -30,6 +30,23 @@ class NodeEditor:
     __start_nodes: list[AbstractNode]
 
 
+    @classmethod
+    def get_mouse_pos(self):
+        # Реализовать создание нода, через обычные координаты мыши не получится
+        # потому что координаты в node_editor отличаются от координат мыши
+        # поэтому координаты размещения нового нода рассчитываются относительно уже стоящего
+        pos = dpg.get_mouse_pos(local=False)
+        ref_node = dpg.get_item_children("node_editor", slot=1)[0]
+        ref_screen_pos = dpg.get_item_rect_min(ref_node)
+        ref_grid_pos = dpg.get_item_pos(ref_node)
+
+        NODE_PADDING = (8, 8)
+
+        pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
+        pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
+        return pos
+
+
     def __init__(self, *args, **kwargs):
         '''
         Вызвать окно, для создания графа.
@@ -90,25 +107,6 @@ class NodeEditor:
         '''
         if dpg.does_item_exist('node_editor'):
             dpg.configure_item('node_editor', height=dpg.get_viewport_height()*0.9)
-
-
-    @classmethod
-    def get_mouse_pos(self):
-        # Реализовать создание нода, через обычные координаты мыши не получится
-        # потому что координаты в node_editor отличаются от координат мыши
-        # поэтому координаты размещения нового нода рассчитываются относительно уже стоящего нода (input_node)
-        pos = dpg.get_mouse_pos(local=False)
-        nodes_on_board = dpg.get_item_children("node_editor", slot=1)
-        if nodes_on_board:
-            ref_node = dpg.get_item_children("node_editor", slot=1)[0]
-            ref_screen_pos = dpg.get_item_rect_min(ref_node)
-            ref_grid_pos = dpg.get_item_pos(ref_node)
-
-            NODE_PADDING = (8, 8)
-
-        pos[0] = pos[0] - (ref_screen_pos[0] - NODE_PADDING[0]) + ref_grid_pos[0]
-        pos[1] = pos[1] - (ref_screen_pos[1] - NODE_PADDING[1]) + ref_grid_pos[1]
-        return pos
 
 
     def drop_callback(self, sender: str | int, app_data: str | int) -> str | int:
